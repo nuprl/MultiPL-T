@@ -41,11 +41,13 @@ if [[ $STAGES == *"generate"* ]]; then
   DATASET_LEN=$(wc -l < ../multipl-t/$LANG-prompts.jsonl)
   ITEMS_PER_GPU=$((DATASET_LEN / NUM_GPUS))
   echo "[TOTAL LEN $DATASET_LEN] Using $NUM_GPUS GPUs, $ITEMS_PER_GPU items per GPU"
+  
+  PIDS=()
 
   for (( i=0; i<$NUM_GPUS; i++ ))
   do
       START_INDEX=$((i * ITEMS_PER_GPU))
-      echo "Starting GPU $i at $START_INDEX... Will stop at $((START_INDEX + ITEMS_PER_GPU))."
+      echo "Starting GPU $i at $START_INDEX... Will stop at $((START_INDEX + ITEMS_PER_GPU - 1))."
       NVIDIA_VISIBLE_DEVICES=$i python3 automodel.py \
           --name /home/arjun/models/starcoderbase \
           --use-local \
@@ -56,7 +58,18 @@ if [[ $STAGES == *"generate"* ]]; then
           --output-dir $OUT \
           --input-start-index $START_INDEX \
           --input-limit $ITEMS_PER_GPU &
+      PIDS+=($!)
   done
-  wait
+
+  function ctrl_c() {
+      echo "Trapped CTRL-C, killing all processes..."
+      for pid in ${PIDS[@]}; do
+          kill $pid
+      done
+  }
+
+  trap ctrl_c INT
+
+  wait # wait for all background processes to finish
   popd
 fi
