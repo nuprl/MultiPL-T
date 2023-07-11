@@ -21,10 +21,11 @@ python3 prepare_prompts_json.py \
     --originals ../../multipl-t/stack-clean-python/
 
 # This actually generates the completions 
+cd ..
 NVIDIA_VISIBLE_DEVICES=1 python3 automodel.py \
-    --name /home/arjun/models/starcoderbase-1b \
+    --name /home/arjun/models/starcoderbase \
     --use-local \
-    --dataset ../../multipl-t/$LANG-prompts.json \
+    --dataset ../multipl-t/$LANG-prompts.json \
     --completion-limit 50 \
     --batch-size 50 \
     --temperature 0.8 \

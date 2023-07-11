@@ -44,7 +44,7 @@ def proc_content(content):
 if __name__ == "__main__":
     ds = datasets.load_dataset(
         "nuprl/stack-dedup-python-testgen-starcoder-filter", split="train")
-    cwd = os.getcwd()
-    up = os.path.dirname(cwd)
+    dir_of_this_script = os.path.dirname(os.path.realpath(__file__))
+    up = os.path.dirname(dir_of_this_script)
     ds.map(write_row_to_file(f"{up}/stack-clean-python"),
            load_from_cache_file=False)
