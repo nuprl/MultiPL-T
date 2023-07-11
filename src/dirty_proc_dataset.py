@@ -3,13 +3,17 @@ import os
 
 CANNONICAL_LINE = "### Canonical solution below ###"
 UNIT_LINE = "### Unit tests below ###"
+
+
 def write_row_to_file(prefix):
     if not os.path.exists(prefix):
         os.mkdir(prefix)
+
     def writer(row):
         entrypoint = row["entrypoint"]
         file = f"{prefix}/HumanEval_{row['id']}_{entrypoint}.py"
-        fixed_tests = "\n\t".join([t.replace(entrypoint, "candidate") for t in row["tests"]])
+        fixed_tests = "\n\t".join(
+            [t.replace(entrypoint, "candidate") for t in row["tests"]])
         fixed_content = proc_content(row['content'])
         test_body = f"def check(candidate):\n\t{fixed_tests}\ndef test_check():\n\tcheck({entrypoint})\n"
         with open(file, "w") as f:
@@ -20,22 +24,27 @@ def write_row_to_file(prefix):
         return row
     return writer
 
+
 def proc_content(content):
     lines = content.split("\n")
-    comment_block = []
-    header = ""
+    before = ""
+    body = ""
+    num_docstring = 0
     for line in lines:
-        if line.startswith("#"):
-            comment_block.append(line.replace("#", ""))
-        elif line.startswith("def"):
-            header = line 
-            break
-    comment_text = "\n    ".join(comment_block)
-    docstring = f'    """{comment_text}"""'
-    body = "\n".join(lines[len(comment_block)+1:])
-    return f"{header}\n{docstring}\n\t{CANNONICAL_LINE}{body}"
+        if num_docstring == 2:
+            body += line + "\n"
+        else:
+            before += line + "\n"
+        if '"""' in line and num_docstring < 2:
+            num_docstring += line.count('"""')
 
-    
+    return before + (" " * 4) + CANNONICAL_LINE + "\n" + body
+
+
 if __name__ == "__main__":
-    ds = datasets.load_dataset("nuprl/stack-dedup-python-testgen-starcoder-format", split="train")
-    ds.map(write_row_to_file("/home/jgouwar/Git/research/multipl-t/stack-clean-python"), load_from_cache_file=False)
+    ds = datasets.load_dataset(
+        "nuprl/stack-dedup-python-testgen-starcoder-filter", split="train")
+    cwd = os.getcwd()
+    up = os.path.dirname(cwd)
+    ds.map(write_row_to_file(f"{up}/stack-clean-python"),
+           load_from_cache_file=False)
