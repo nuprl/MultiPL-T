@@ -40,6 +40,9 @@ if [[ $STAGES == *"generate"* ]]; then
   pushd $ROOT/MultiPL-E/
   DATASET_LEN=$(wc -l < ../multipl-t/$LANG-prompts.jsonl)
   ITEMS_PER_GPU=$((DATASET_LEN / NUM_GPUS))
+  DATASET_LEN_ROUNDED=$((ITEMS_PER_GPU * NUM_GPUS))
+  LEFT_OVER=$((DATASET_LEN - DATASET_LEN_ROUNDED))
+
   echo "[TOTAL LEN $DATASET_LEN] Using $NUM_GPUS GPUs, $ITEMS_PER_GPU items per GPU"
   
   PIDS=()
@@ -47,7 +50,13 @@ if [[ $STAGES == *"generate"* ]]; then
   for (( i=0; i<$NUM_GPUS; i++ ))
   do
       START_INDEX=$((i * ITEMS_PER_GPU))
-      echo "Starting GPU $i at $START_INDEX... Will stop at $((START_INDEX + ITEMS_PER_GPU - 1))."
+      ITEMS=$((ITEMS_PER_GPU))
+      # if there is leftover and this is the last gpu, add it to the items
+      if [ $i -eq $((NUM_GPUS - 1)) ] && [ $LEFT_OVER -gt 0 ]; then
+          echo "Adding $LEFT_OVER leftover items to GPU $i"
+          ITEMS=$((ITEMS_PER_GPU + LEFT_OVER))
+      fi
+      echo "Starting GPU $i at $START_INDEX... Will stop at $((START_INDEX + ITEMS - 1))."
       NVIDIA_VISIBLE_DEVICES=$i python3 automodel.py \
           --name /home/arjun/models/starcoderbase \
           --use-local \
@@ -57,10 +66,13 @@ if [[ $STAGES == *"generate"* ]]; then
           --temperature 0.8 \
           --output-dir $OUT \
           --input-start-index $START_INDEX \
-          --input-limit $ITEMS_PER_GPU &
+          --input-limit $ITEMS &
       PIDS+=($!)
   done
 
+  echo "Waiting for all processes to finish... Pids: ${PIDS[@]}"
+
+  # capture a ctrl-c and kill all processes
   function ctrl_c() {
       echo "Trapped CTRL-C, killing all processes..."
       for pid in ${PIDS[@]}; do
