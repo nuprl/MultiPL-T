@@ -3,6 +3,12 @@
 # ROOT
 #   multipl-t/
 #   MultiPL-E/
+
+if [ $# -ne 3 ]; then
+  echo "Usage: gen_prompts.sh <lang> <root (probably home dir)> <out>"
+    exit 1
+fi
+
 LANG=$1
 ROOT=$2
 OUT=$3
@@ -17,16 +23,28 @@ python3 $ROOT/multipl-t/src/dirty_proc_dataset.py
 cd $ROOT/MultiPL-E/dataset_builder/
 python3 prepare_prompts_json.py \
     --lang humaneval_to_$LANG.py\
-    --output ../../multipl-t/$LANG-prompts.json\
+    --output ../../multipl-t/$LANG-prompts.jsonl \
     --originals ../../multipl-t/stack-clean-python/
 
 # This actually generates the completions 
+
 cd ..
-NVIDIA_VISIBLE_DEVICES=1 python3 automodel.py \
-    --name /home/arjun/models/starcoderbase \
-    --use-local \
-    --dataset ../multipl-t/$LANG-prompts.json \
-    --completion-limit 50 \
-    --batch-size 50 \
-    --temperature 0.8 \
-    --output-dir $OUT \
+DATASET_LEN=$(wc -l < ../multipl-t/$LANG-prompts.jsonl)
+NUM_GPUS=8
+ITEMS_PER_GPU=$((DATASET_LEN / NUM_GPUS))
+
+for (( i=0; i<$NUM_GPUS; i++ ))
+do
+    START_INDEX=$((i * ITEMS_PER_GPU))
+    NVIDIA_VISIBLE_DEVICES=$i python3 automodel.py \
+        --name /home/arjun/models/starcoderbase \
+        --use-local \
+        --dataset ../multipl-t/$LANG-prompts.jsonl \
+        --completion-limit 50 \
+        --batch-size 50 \
+        --temperature 0.8 \
+        --output-dir $OUT \
+        --input-start-index $START_INDEX \
+        --input-limit $ITEMS_PER_GPU &
+done
+wait
