@@ -33,7 +33,7 @@ def proc_content(content):
     comment_text = "\n    ".join(comment_block)
     docstring = f'    """{comment_text}"""'
     body = "\n".join(lines[len(comment_block)+1:])
-    return f"{header}\n{docstring}\n\t{CANNONICAL_LINE}{body}"
+    return f"{header}\n{docstring}\n\t{CANNONICAL_LINE}{body}".encode('utf-8', 'ignore').decode('utf-8')
 
     
 if __name__ == "__main__":
