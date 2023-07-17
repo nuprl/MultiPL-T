@@ -161,3 +161,6 @@ cython_debug/
 
 # Ignore VSCode Workspaces 
 *.code-workspace 
+
+# project speicifc
+stack-clean-python/
