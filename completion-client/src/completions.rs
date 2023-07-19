@@ -54,6 +54,6 @@ async fn make_completion_requests(
             Err(e) => panic!("{}", e),
         }; 
         (*prog).completion = completion;
-        let _ = run_queue.send(prog);
+        let _ = run_queue.send(prog).await;
     }
 }

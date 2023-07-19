@@ -83,6 +83,7 @@ async fn run_racket(
 ) -> () {
     let file_path = create_temp_file("rkt").await;
     let output = run_program_with_timeout("racket", &[&file_path], Duration::from_secs(10)).await;
+    dbg!("{:?}", &output);
     let succ = match output {
         None => false,
         Some(o) => o.status.code().unwrap() == 0 && o.stderr.len() == 0,
@@ -144,9 +145,11 @@ async fn dispatch_result(
     fin_queue: Sender<Box<Program>>,
 ) -> () {
     if succ {
+        dbg!("Success");
         let _ = fin_queue.send(prog).await;
     } else {
         if let Some(()) = (*prog).inc_attempts() {
+            dbg!("Trying again");
             let _ = compl_queue.send(prog).await;
         }
     }
