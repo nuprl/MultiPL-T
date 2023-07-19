@@ -39,18 +39,20 @@ async fn make_completion_requests(
                 Some(p) => p,
             }
         };
-        let msg = serde_json::to_string(&PromptMessage::from(*prog.clone()))
-            .expect("Message should serialize");
-        let completion = match client.post(server_url).body(msg.clone()).send().await {
+        let msg = serde_json::to_string(&PromptMessage::from(*prog.clone())).expect("Message should serialize");
+        let completion = match client.post(server_url).body(msg.clone()).header("Content-Type", "application/json").send().await {
             Ok(resp) => {
                 if resp.status() == 200 {
                     resp.json::<HashMap<String, String>>().await.unwrap()["generated_text"].clone()
                 } else {
-                    panic!()
+                    let _ = dbg!(resp.status());
+                    let _ = dbg!(msg);
+                    let _ = dbg!(resp.json::<HashMap<String, String>>().await.unwrap());
+                    panic!("Did not return a 200 response")
                 }
             }
-            Err(_) => panic!(),
-        };
+            Err(e) => panic!("{}", e),
+        }; 
         (*prog).completion = completion;
         let _ = run_queue.send(prog);
     }
