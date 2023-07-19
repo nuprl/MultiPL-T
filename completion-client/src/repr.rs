@@ -76,8 +76,8 @@ impl From<Program> for PromptMessage {
         let inputs = value.prompt;
         let parameters = InferenceParams {
             best_of: 1,
-            decoder_input_details: true,
-            details: true,
+            decoder_input_details: false,
+            details: false,
             do_sample: false,
             max_new_tokens: 512,
             repetition_penalty: None,
