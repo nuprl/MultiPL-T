@@ -6,8 +6,9 @@ use std::{
 };
 
 use lazy_static::lazy_static;
-use tokio::sync::mpsc::{Receiver, Sender};
+use tokio::{sync::mpsc::{Receiver, Sender}, io::AsyncWriteExt};
 use tokio::task::spawn;
+use tokio::fs::File;
 
 lazy_static! {
     static ref FILE_IDX: AtomicUsize = AtomicUsize::new(0);
@@ -65,7 +66,7 @@ async fn run_program_with_timeout(
     }
 }
 
-async fn create_temp_file(ext: &str) -> String {
+async fn create_temp_file(ext: &str) -> (File, String) {
     let idx = FILE_IDX.fetch_add(1, Ordering::SeqCst);
     // temp dir
     let temp_dir = std::env::temp_dir().join("codeexec");
@@ -73,7 +74,8 @@ async fn create_temp_file(ext: &str) -> String {
         tokio::fs::create_dir_all(&temp_dir).await.unwrap();
     }
     let filename = format!("{}/{idx}.{ext}", temp_dir.to_string_lossy());
-    filename
+    let file = tokio::fs::File::create(&filename).await.expect("File creation failed");
+    (file, filename)
 }
 
 async fn run_racket(
@@ -81,7 +83,9 @@ async fn run_racket(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) -> () {
-    let file_path = create_temp_file("rkt").await;
+    let (mut file, file_path) = create_temp_file("rkt").await;
+    let code = format!("{}\n{}", &prog.prompt, &prog.tests);
+    let _ = file.write_all(code.as_bytes()).await.expect("Write should be successful");
     let output = run_program_with_timeout("racket", &[&file_path], Duration::from_secs(10)).await;
     let succ = match output {
         None => false,
@@ -96,7 +100,7 @@ async fn run_lua(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) -> () {
-    let file_path = create_temp_file("lua").await;
+    let (file, file_path) = create_temp_file("lua").await;
     let output = run_program_with_timeout("lua", &[&file_path], Duration::from_secs(10)).await;
     let succ = match output.map(|o| o.status.code().unwrap_or(1)) {
         Some(0) => true,
@@ -111,7 +115,7 @@ async fn run_ocaml(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) -> () {
-    let file_path = create_temp_file("ml").await;
+    let (file, file_path) = create_temp_file("ml").await;
     let output = run_program_with_timeout("ocaml", &[&file_path], Duration::from_secs(10)).await;
     let succ = match output.map(|o| o.status.code().unwrap_or(1)) {
         Some(0) => true,
