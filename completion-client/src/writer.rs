@@ -19,6 +19,7 @@ pub async fn write_jsonl(out_file: PathBuf, mut fin_queue: Receiver<Box<Program>
         dbg!("Writing output");
         let output = DatasetOutput::from(*prog);
         let output_str = serde_json::to_string(&output).unwrap();
-        let _ = f.write(output_str.as_bytes());
+        let _ = f.write(output_str.as_bytes()).await;
+        let _ = f.flush().await;
     }
 }

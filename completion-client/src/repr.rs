@@ -86,7 +86,7 @@ impl From<Program> for PromptMessage {
             stop: value.stop_tokens,
             temperature: Some(get_temp_from_attempts(value.attempts)),
             truncate: None,
-            top_k: Some(1),
+            top_k: None,
             top_p: Some(0.95),
             typical_p: None,
             watermark: false,

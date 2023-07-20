@@ -84,7 +84,7 @@ async fn run_racket(
     fin_queue: Sender<Box<Program>>,
 ) -> () {
     let (mut file, file_path) = create_temp_file("rkt").await;
-    let code = format!("{}\n{}", &prog.prompt, &prog.tests);
+    let code = format!("{}", &prog.completion);
     let _ = file.write_all(code.as_bytes()).await.expect("Write should be successful");
     let output = run_program_with_timeout("racket", &[&file_path], Duration::from_secs(10)).await;
     dbg!("{:?}", &output);
@@ -92,7 +92,7 @@ async fn run_racket(
         None => false,
         Some(o) => o.status.code().unwrap() == 0 && o.stderr.len() == 0,
     };
-    spawn(async move { tokio::fs::remove_file(file_path).await });
+    //spawn(async move { tokio::fs::remove_file(file_path).await });
     dispatch_result(succ, prog, compl_queue, fin_queue).await;
 }
 
@@ -101,13 +101,15 @@ async fn run_lua(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) -> () {
-    let (file, file_path) = create_temp_file("lua").await;
-    let output = run_program_with_timeout("lua", &[&file_path], Duration::from_secs(10)).await;
+    let (mut file, file_path) = create_temp_file("lua").await;
+    let code = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
+    let _ = file.write_all(code.as_bytes()).await.expect("Write should be successful");
+    let output = dbg!(run_program_with_timeout("lua", &[&file_path], Duration::from_secs(10)).await);
     let succ = match output.map(|o| o.status.code().unwrap_or(1)) {
         Some(0) => true,
         _ => false,
     };
-    spawn(async move { tokio::fs::remove_file(file_path).await });
+    //spawn(async move { tokio::fs::remove_file(file_path).await });
     dispatch_result(succ, prog, compl_queue, fin_queue).await;
 }
 
@@ -149,11 +151,11 @@ async fn dispatch_result(
     fin_queue: Sender<Box<Program>>,
 ) -> () {
     if succ {
-        dbg!("Success");
+        dbg!(format!("Success: {}", &prog.original));
         let _ = fin_queue.send(prog).await;
     } else {
         if let Some(()) = (*prog).inc_attempts() {
-            dbg!("Trying again");
+            dbg!(format!("Trying again: {}", &prog.original));
             let _ = compl_queue.send(prog).await;
         }
     }
