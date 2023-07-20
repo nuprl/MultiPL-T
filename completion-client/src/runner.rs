@@ -84,11 +84,12 @@ async fn run_eval_container(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) -> () {
-    let (mut file, tdir, fname) = create_temp_file(&prog.language).await;
-    let _ = file
-        .write_all(format!("{}\n{}\n{}", prog.prompt, prog.completion, prog.tests).as_bytes())
-        .await;
-    let mount = format!("{}:/tmp", tdir);
+    let full_prog_text = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
+    let temp_dir = std::env::temp_dir().join("codeexec");
+    if !temp_dir.exists() {
+        tokio::fs::create_dir_all(&temp_dir).await.unwrap();
+    }
+    let mount = format!("{}:/tmp", temp_dir.to_string_lossy().to_string());
     let out = run_program_with_timeout(
         "podman",
         &[
@@ -97,8 +98,8 @@ async fn run_eval_container(
             "-v",
             &mount,
             "multipl-e-simple",
-            "--file",
-            &fname,
+            "--prog-text",
+            &full_prog_text,
             "--lang",
             &prog.language,
         ],
@@ -106,7 +107,9 @@ async fn run_eval_container(
     )
     .await
     .unwrap();
-    let succ = match serde_json::from_str::<EvalResult>(std::str::from_utf8(&out.stdout).unwrap())
+    let _ = dbg!(out.clone());
+    let res = dbg!(std::str::from_utf8(&out.stdout).unwrap());
+    let succ = match serde_json::from_str::<EvalResult>(res)
         .unwrap()
         .status
         .to_lowercase()
