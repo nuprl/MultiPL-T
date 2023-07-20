@@ -151,11 +151,9 @@ async fn dispatch_result(
     fin_queue: Sender<Box<Program>>,
 ) -> () {
     if succ {
-        dbg!(format!("Success: {}", &prog.original));
         let _ = fin_queue.send(prog).await;
     } else {
         if let Some(()) = (*prog).inc_attempts() {
-            dbg!(format!("Trying again: {}", &prog.original));
             let _ = compl_queue.send(prog).await;
         }
     }
