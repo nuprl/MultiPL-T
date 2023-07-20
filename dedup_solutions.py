@@ -2,16 +2,61 @@ import numpy as np
 from rouge_score import rouge_scorer
 
 
-def dedup(solutions: list[str], keep_threshold=0.5):
+def strip_comments(code: str, lang: str):
+    comment_prefix = {
+        "lua": "--",
+        "python": "#",
+        "javascript": "//",
+        "racket": ";",
+        "ocaml": "(*",
+    }
+    comment_postfix = {
+        "lua": "",
+        "python": "",
+        "javascript": "",
+        "racket": "",
+        "ocaml": "*)",
+    }
+
+    # Get comment prefix and postfix for given language
+    prefix = comment_prefix.get(lang)
+    postfix = comment_postfix.get(lang)
+
+    if not prefix:
+        raise ValueError(f"Language {lang} not supported")
+
+    # If comment postfix is not empty, handle multi-line comments (like OCaml)
+    if postfix:
+        comment_start = prefix
+        comment_end = postfix
+        while comment_start in code and comment_end in code:
+            start = code.find(comment_start)
+            end = code.find(comment_end, start + len(comment_start))
+            if start != -1 and end != -1:  # Ensure both comment start and end are found
+                code = code[:start] + code[end + len(comment_end):]
+            else:
+                break
+    else:
+        # If comment postfix is empty, handle single-line comments
+        lines = code.split("\n")
+        lines = [line for line in lines if not line.lstrip().startswith(prefix)]
+        code = "\n".join(lines)
+
+    return code
+
+
+def dedup(solutions: list[str], lang="lua", keep_threshold=0.6):
     scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
     keep_mask = np.ones(len(solutions), dtype=bool)
 
     for i in range(len(solutions)):
+        stripped_i = strip_comments(solutions[i], lang)
         for j in range(i+1, len(solutions)):
-            if solutions[i] == solutions[j]:
+            stripped_j = strip_comments(solutions[j], lang)
+            if i == j or not keep_mask[j]:
                 continue
 
-            scores = scorer.score(solutions[i], solutions[j])
+            scores = scorer.score(stripped_i, stripped_j)
             rouge_score = scores['rougeLsum'].fmeasure
 
             if rouge_score > keep_threshold:
@@ -21,56 +66,78 @@ def dedup(solutions: list[str], keep_threshold=0.5):
     return deduped_solutions.tolist()
 
 
-
 if __name__ == "__main__":
     SOLN_0 = """
-    local function sum(list)
-        local sum = 0
-        for _, v in ipairs(list) do
+    -- Define a local function "sum" that takes one argument: "list".
+    local function sum(list) 
+        -- Initialize a local variable "sum" to 0.
+        local sum = 0 
+        -- For each element "v" in "list" (ignoring its index "_")
+        for _, v in ipairs(list) do 
+            -- Add the value of "v" to "sum"
             sum = sum + v
         end
+        -- Return the result, "sum".
         return sum
     end
     """
     SOLN_1 = """
+    -- Define a local function "sum" that takes one argument: "list".
     local function sum(list)
+        -- Define and immediately call an anonymous function.
         return (function(...) 
+            -- Unpack the elements of the list into separate arguments and call "math.modf" to separate the fractional and integral parts.
+            -- The integral part is accumulated into "sum". The fractional part is ignored.
             local _, sum = math.modf(table.unpack({...}))
+            -- Return the sum.
             return sum
-        end)(table.unpack(list))
+        end)(table.unpack(list)) -- Unpack the elements of "list" as arguments to the anonymous function.
     end
     """
     SOLN_2 = """
+    -- Define a local function "sum" that takes one argument: "list".
     local function sum(list)
+        -- Define a local helper function for recursive sum.
         local function helper(list, index)
+            -- If the index is less than 1, return 0. This is the base case for the recursion.
             if index < 1 then
                 return 0
             else
+                -- Otherwise, add the current index's value to the sum of the rest of the list.
                 return list[index] + helper(list, index - 1)
             end
         end
+        -- Call the helper function, starting from the end of the list.
         return helper(list, #list)
     end
     """
 
     SOLN_3 = """
+    -- Define a local function "sum" that takes one argument: "list".
     local function sum(list)
+        -- Initialize a local variable "total" to 0.
         local total = 0
+        -- Continue the loop as long as the list has elements.
         while #list > 0 do
+            -- Remove the last element from "list" and add it to "total".
             total = total + table.remove(list)
         end
+        -- Return the total.
         return total
     end
     """
 
     SOLN_4 = """
+    -- Define a local function "sum" that takes one argument: "list".
     local function sum(list)
+        -- Initialize a local variable "total" to 0.
         local total = 0
-
-
+        -- For each element "v" in "list" (ignoring its index "_")
         for _, v in pairs(list) do
+            -- Add the value of "v" to "total"
             total = total + v
         end
+        -- Return the total.
         return total
     end
     """
@@ -82,7 +149,7 @@ if __name__ == "__main__":
         SOLN_3,
         SOLN_4,
     ]
-    deduped = dedup(SOLUTIONS, keep_threshold=0.5)
+    deduped = dedup(SOLUTIONS, keep_threshold=0.6)
     for soln in deduped:
         print(soln)
         print()
