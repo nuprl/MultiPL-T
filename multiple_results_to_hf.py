@@ -70,4 +70,4 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
 new_ds = datasets.Dataset.from_dict(
     {"content": solutions, "id": list(range(len(solutions)))})
 print(len(new_ds))
-#  new_ds.push_to_hub(args.name)
+new_ds.push_to_hub(args.name)
