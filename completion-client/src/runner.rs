@@ -84,7 +84,7 @@ async fn run_racket(
     fin_queue: Sender<Box<Program>>,
 ) -> () {
     let (mut file, file_path) = create_temp_file("rkt").await;
-    let code = format!("{}", &prog.completion);
+    let code = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
     let _ = file.write_all(code.as_bytes()).await.expect("Write should be successful");
     let output = run_program_with_timeout("racket", &[&file_path], Duration::from_secs(10)).await;
     dbg!("{:?}", &output);
@@ -118,7 +118,9 @@ async fn run_ocaml(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) -> () {
-    let (file, file_path) = create_temp_file("ml").await;
+    let (mut file, file_path) = create_temp_file("ml").await;
+    let code = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
+    let _ = file.write_all(code.as_bytes()).await.expect("Write should be successful");
     let output = run_program_with_timeout("ocaml", &[&file_path], Duration::from_secs(10)).await;
     let succ = match output.map(|o| o.status.code().unwrap_or(1)) {
         Some(0) => true,
