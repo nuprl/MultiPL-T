@@ -1,28 +1,19 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
-pub enum Lang {
-    Python,
-    Lua,
-    Racket,
-    Typescript,
-    OCaml,
-}
-
 #[derive(Deserialize)]
 pub struct Prompt {
     name: String,
     language: String,
     prompt: String,
     original: String,
-    prompt_terminology: String,
     tests: String,
     stop_tokens: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Program {
-    pub lang: Lang,
+    pub name: String,
+    pub language: String,
     pub prompt: String,
     pub tests: String,
     pub completion: String,
@@ -56,10 +47,20 @@ struct InferenceParams {
     watermark: bool,
 }
 
+#[derive(Deserialize, Debug)]
+pub struct EvalResult {
+    program: String,
+    stdout: String,
+    stderr: String,
+    exit_code: i32,
+    pub status: String,
+}
+
 #[derive(Serialize, Debug)]
 pub struct DatasetOutput {
     content: String,
     path: String,
+    attempts: usize,
 }
 
 // TODO: Come up with temperature ratcheting heuristic
@@ -70,7 +71,20 @@ fn get_temp_from_attempts(attempts: usize) -> f64 {
         0.8
     }
 }
-
+impl From<Prompt> for Program {
+    fn from(value: Prompt) -> Self {
+        Program {
+            name: value.name,
+            language: value.language,
+            prompt: value.prompt,
+            tests: value.tests,
+            completion: String::from(""),
+            attempts: 0,
+            stop_tokens: value.stop_tokens,
+            original: value.original,
+        }
+    }
+}
 impl From<Program> for PromptMessage {
     fn from(value: Program) -> Self {
         let inputs = value.prompt;
@@ -94,29 +108,6 @@ impl From<Program> for PromptMessage {
         PromptMessage { inputs, parameters }
     }
 }
-impl From<Prompt> for Program {
-    fn from(value: Prompt) -> Self {
-        let lang = match value.language.as_str() {
-            "ml" => Lang::OCaml,
-            "lua" => Lang::Lua,
-            "rkt" => Lang::Racket,
-            "ts" => Lang::Typescript,
-            "py" => Lang::Python,
-            _ => panic!("Unsupported language"),
-        };
-        let completion = String::from("");
-        let attempts = 0;
-        Program {
-            lang,
-            prompt: value.prompt,
-            tests: value.tests,
-            completion,
-            attempts,
-            stop_tokens: value.stop_tokens,
-            original: value.original,
-        }
-    }
-}
 
 impl From<Program> for DatasetOutput {
     fn from(value: Program) -> Self {
@@ -124,12 +115,14 @@ impl From<Program> for DatasetOutput {
             original,
             prompt,
             completion,
+            attempts,
             ..
         } = value;
         let content = format!("{prompt}\n{completion}");
         DatasetOutput {
             content,
             path: original,
+            attempts,
         }
     }
 }

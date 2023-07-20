@@ -1,4 +1,6 @@
-use super::repr::{Lang, Program};
+use crate::repr::EvalResult;
+
+use super::repr::Program;
 use std::{
     process::Output,
     sync::atomic::{AtomicUsize, Ordering},
@@ -6,9 +8,12 @@ use std::{
 };
 
 use lazy_static::lazy_static;
-use tokio::{sync::mpsc::{Receiver, Sender}, io::AsyncWriteExt};
-use tokio::task::spawn;
 use tokio::fs::File;
+use tokio::task::spawn;
+use tokio::{
+    io::AsyncWriteExt,
+    sync::mpsc::{Receiver, Sender},
+};
 
 lazy_static! {
     static ref FILE_IDX: AtomicUsize = AtomicUsize::new(0);
@@ -18,16 +23,10 @@ pub async fn prog_runner(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) {
-    while let Some(prompt) = run_queue.recv().await {
+    while let Some(prog) = run_queue.recv().await {
         let cq = compl_queue.clone();
         let fq = fin_queue.clone();
-        match prompt.lang {
-            Lang::Python => spawn(async move { run_python(prompt, cq, fq).await }),
-            Lang::Racket => spawn(async move { run_racket(prompt, cq, fq).await }),
-            Lang::Typescript => spawn(async move { run_typescript(prompt, cq, fq).await }),
-            Lang::OCaml => spawn(async move { run_ocaml(prompt, cq, fq).await }),
-            Lang::Lua => spawn(async move { run_lua(prompt, cq, fq).await }),
-        };
+        spawn(async move { run_eval_container(prog, cq, fq).await });
     }
 }
 
@@ -66,86 +65,59 @@ async fn run_program_with_timeout(
     }
 }
 
-async fn create_temp_file(ext: &str) -> (File, String) {
+async fn create_temp_file(ext: &str) -> (File, String, String) {
     let idx = FILE_IDX.fetch_add(1, Ordering::SeqCst);
     // temp dir
     let temp_dir = std::env::temp_dir().join("codeexec");
     if !temp_dir.exists() {
         tokio::fs::create_dir_all(&temp_dir).await.unwrap();
     }
-    let filename = format!("{}/{idx}.{ext}", temp_dir.to_string_lossy());
-    let file = tokio::fs::File::create(&filename).await.expect("File creation failed");
-    (file, filename)
+    let filename = format!("{idx}.{ext}");
+    let file = tokio::fs::File::create(&filename)
+        .await
+        .expect("File creation failed");
+    (file, temp_dir.to_string_lossy().to_string(), filename)
 }
 
-async fn run_racket(
+async fn run_eval_container(
     prog: Box<Program>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) -> () {
-    let (mut file, file_path) = create_temp_file("rkt").await;
-    let code = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
-    let _ = file.write_all(code.as_bytes()).await.expect("Write should be successful");
-    let output = run_program_with_timeout("racket", &[&file_path], Duration::from_secs(10)).await;
-    dbg!("{:?}", &output);
-    let succ = match output {
-        None => false,
-        Some(o) => o.status.code().unwrap() == 0 && o.stderr.len() == 0,
-    };
-    //spawn(async move { tokio::fs::remove_file(file_path).await });
-    dispatch_result(succ, prog, compl_queue, fin_queue).await;
-}
-
-async fn run_lua(
-    prog: Box<Program>,
-    compl_queue: Sender<Box<Program>>,
-    fin_queue: Sender<Box<Program>>,
-) -> () {
-    let (mut file, file_path) = create_temp_file("lua").await;
-    let code = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
-    let _ = file.write_all(code.as_bytes()).await.expect("Write should be successful");
-    let output = dbg!(run_program_with_timeout("lua", &[&file_path], Duration::from_secs(10)).await);
-    let succ = match output.map(|o| o.status.code().unwrap_or(1)) {
-        Some(0) => true,
+    let (mut file, tdir, fname) = create_temp_file(&prog.language).await;
+    let _ = file
+        .write_all(format!("{}\n{}\n{}", prog.prompt, prog.completion, prog.tests).as_bytes())
+        .await;
+    let mount = format!("{}:/tmp", tdir);
+    let out = run_program_with_timeout(
+        "podman",
+        &[
+            "run",
+            "--rm",
+            "-v",
+            &mount,
+            "multipl-e-simple",
+            "--file",
+            &fname,
+            "--lang",
+            &prog.language,
+        ],
+        Duration::from_secs(15),
+    )
+    .await
+    .unwrap();
+    let succ = match serde_json::from_str::<EvalResult>(std::str::from_utf8(&out.stdout).unwrap())
+        .unwrap()
+        .status
+        .to_lowercase()
+        .as_str()
+    {
+        "ok" => true,
         _ => false,
     };
-    //spawn(async move { tokio::fs::remove_file(file_path).await });
     dispatch_result(succ, prog, compl_queue, fin_queue).await;
 }
 
-async fn run_ocaml(
-    prog: Box<Program>,
-    compl_queue: Sender<Box<Program>>,
-    fin_queue: Sender<Box<Program>>,
-) -> () {
-    let (mut file, file_path) = create_temp_file("ml").await;
-    let code = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
-    let _ = file.write_all(code.as_bytes()).await.expect("Write should be successful");
-    let output = run_program_with_timeout("ocaml", &[&file_path], Duration::from_secs(10)).await;
-    let succ = match output.map(|o| o.status.code().unwrap_or(1)) {
-        Some(0) => true,
-        _ => false,
-    };
-    spawn(async move { tokio::fs::remove_file(file_path).await });
-    dispatch_result(succ, prog, compl_queue, fin_queue).await;
-}
-async fn run_python(
-    _prog: Box<Program>,
-    _compl_queue: Sender<Box<Program>>,
-    _fin_queue: Sender<Box<Program>>,
-) -> () {
-    todo!()
-}
-async fn run_typescript(
-    _prog: Box<Program>,
-    _compl_queue: Sender<Box<Program>>,
-    _fin_queue: Sender<Box<Program>>,
-) -> () {
-    todo!()
-}
-
-// Send a successful prompt to the fin_queue and an unsuccessful prompt
-// back onto the compl_queue with another attempt
 async fn dispatch_result(
     succ: bool,
     mut prog: Box<Program>,
