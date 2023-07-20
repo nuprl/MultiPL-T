@@ -123,11 +123,10 @@ impl From<Program> for DatasetOutput {
         let Program {
             original,
             prompt,
-            tests,
             completion,
             ..
         } = value;
-        let content = format!("{prompt}\n{completion}\n{tests}");
+        let content = format!("{prompt}\n{completion}");
         DatasetOutput {
             content,
             path: original,
