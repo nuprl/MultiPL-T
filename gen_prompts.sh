@@ -19,6 +19,7 @@ STAGES=${5:-"convert,translate,generate"}
 # already completed and compressed as clean-py-programs.tar.gz
 if [[ $STAGES == *"convert"* ]]; then
     echo "Converting programs..."
+    rm -fr ./stack-clean-python
     python3 $ROOT/multipl-t/src/dirty_proc_dataset.py 
 fi
 
@@ -31,7 +32,8 @@ if [[ $STAGES == *"translate"* ]]; then
     python3 prepare_prompts_json.py \
       --lang humaneval_to_$LANG.py\
       --output ../../multipl-t/$LANG-prompts.jsonl \
-      --originals ../../multipl-t/stack-clean-python/
+      --originals ../../multipl-t/stack-clean-python/ \
+      --add-canonical-to-prompt
     popd
 fi
 
