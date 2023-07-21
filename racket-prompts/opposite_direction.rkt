@@ -1,3 +1,5 @@
+#lang racket
+(require rackunit)
 ;; CompassDirection is one of:
 ;; - "North"
 ;; - "Northeast"
@@ -33,11 +35,11 @@
     [(string=? cd NORTHWEST) SOUTHEAST]))
 
 ;; <tests>
-(check-expect (opposite-direction "North") "South")
-(check-expect (opposite-direction "Northeast") "Southwest")
-(check-expect (opposite-direction "East") "West")
-(check-expect (opposite-direction "Southeast") "Northwest")
-(check-expect (opposite-direction "South") "North")
-(check-expect (opposite-direction "Southwest") "Northeast")
-(check-expect (opposite-direction "West") "East")
-(check-expect (opposite-direction "Northwest") "Southeast")
+(check-equal? (opposite-direction "North") "South")
+(check-equal? (opposite-direction "Northeast") "Southwest")
+(check-equal? (opposite-direction "East") "West")
+(check-equal? (opposite-direction "Southeast") "Northwest")
+(check-equal? (opposite-direction "South") "North")
+(check-equal? (opposite-direction "Southwest") "Northeast")
+(check-equal? (opposite-direction "West") "East")
+(check-equal? (opposite-direction "Northwest") "Southeast")

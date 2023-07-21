@@ -1,3 +1,5 @@
+#lang racket
+(require rackunit)
 ;; A DNASeq is one of:
 ;; - (make-adenine DNASeq)
 ;; - (make-guanine DNASeq)
@@ -5,10 +7,10 @@
 ;; - (make-thymine DNASeq)
 ;; - "empty sequence"
 ;; Interpretation: A DNASeq represents a sequence of nucleotides.
-(define-struct adenine [rest])
-(define-struct guanine [rest])
-(define-struct cytosine [rest])
-(define-struct thymine [rest])
+(define-struct adenine [rest] #:transparent)
+(define-struct guanine [rest] #:transparent)
+(define-struct cytosine [rest] #:transparent)
+(define-struct thymine [rest] #:transparent)
 
 ;; Every  DNA sequence has a complementary sequence, which substitutes
 ;; As with Ts, Ts with As, Cs with Gs, and Gs with Cs. Design a function
@@ -26,7 +28,7 @@
     [(string? d) "empty sequence"]))
 
 ;; <tests>
-(check-expect (dna-complement "empty sequence") "empty sequence")
-(check-expect (dna-complement (make-adenine "empty sequence")) (make-thymine "empty sequence"))
-(check-expect (dna-complement (make-thymine (make-cytosine (make-guanine (make-adenine "empty sequence")))))
+(check-equal? (dna-complement "empty sequence") "empty sequence")
+(check-equal? (dna-complement (make-adenine "empty sequence")) (make-thymine "empty sequence"))
+(check-equal? (dna-complement (make-thymine (make-cytosine (make-guanine (make-adenine "empty sequence")))))
               (make-adenine (make-guanine (make-cytosine (make-thymine "empty sequence")))))

@@ -1,3 +1,5 @@
+#lang racket
+(require rackunit)
 ;; CompassDirection is one of:
 ;; - "North"
 ;; - "Northeast"
@@ -33,11 +35,11 @@
     [(string=? cd NORTHWEST) #false]))
 
 ;; <tests>
-(check-expect (is-cardinal? "North") #true)
-(check-expect (is-cardinal? "Northeast") #false)
-(check-expect (is-cardinal? "East") #true)
-(check-expect (is-cardinal? "Southeast") #false)
-(check-expect (is-cardinal? "South") #true)
-(check-expect (is-cardinal? "Southwest") #false)
-(check-expect (is-cardinal? "West") #true)
-(check-expect (is-cardinal? "Northwest") #false)
+(check-equal? (is-cardinal? "North") #true)
+(check-equal? (is-cardinal? "Northeast") #false)
+(check-equal? (is-cardinal? "East") #true)
+(check-equal? (is-cardinal? "Southeast") #false)
+(check-equal? (is-cardinal? "South") #true)
+(check-equal? (is-cardinal? "Southwest") #false)
+(check-equal? (is-cardinal? "West") #true)
+(check-equal? (is-cardinal? "Northwest") #false)
