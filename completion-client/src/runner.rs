@@ -107,8 +107,8 @@ async fn run_eval_container(
     )
     .await
     .unwrap();
-    let _ = dbg!(out.clone());
-    let res = dbg!(std::str::from_utf8(&out.stdout).unwrap());
+    let _ = out.clone();
+    let res = std::str::from_utf8(&out.stdout).unwrap();
     let succ = match serde_json::from_str::<EvalResult>(res)
         .unwrap()
         .status
