@@ -46,11 +46,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str,
                         default="nuprl/stack-dedup-python-testgen-starcoder-filter-v2")
-    parser.add_argument("--min_coverage", type=float, default=0.9)
+    parser.add_argument("--min_coverage", type=float, default=90)
     args = parser.parse_args()
     ds = datasets.load_dataset(args.dataset, split="train")
     dir_of_this_script = os.path.dirname(os.path.realpath(__file__))
     up = os.path.dirname(dir_of_this_script)
     ds = ds.filter(lambda x: x["coverage"] >= args.min_coverage)
+    print(f"Writing {len(ds)} rows to {up}/stack-clean-python")
     ds.map(write_row_to_file(f"{up}/stack-clean-python"),
            load_from_cache_file=False)
