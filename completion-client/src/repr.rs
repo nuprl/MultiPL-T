@@ -63,14 +63,7 @@ pub struct DatasetOutput {
     attempts: usize,
 }
 
-// TODO: Come up with temperature ratcheting heuristic
-fn get_temp_from_attempts(attempts: usize) -> f64 {
-    if attempts < 50 {
-        0.2
-    } else {
-        0.8
-    }
-}
+
 impl From<Prompt> for Program {
     fn from(value: Prompt) -> Self {
         Program {
@@ -92,7 +85,7 @@ impl From<Program> for PromptMessage {
             best_of: 1,
             decoder_input_details: false,
             details: false,
-            do_sample: false,
+            do_sample: true,
             max_new_tokens: 512,
             repetition_penalty: None,
             return_full_text: None,
