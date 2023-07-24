@@ -38,9 +38,9 @@ async fn main() {
         num_connections,
     } = Cli::parse();
     let server_url: &'static str = Box::leak(server_url.into_boxed_str());
-    let (complq_send, complq_recv) = channel::<Box<Program>>(10 * num_connections);
-    let (runq_send, runq_recv) = channel::<Box<Program>>(10 * num_connections);
-    let (finq_send, finq_recv) = channel::<Box<Program>>(10 * num_connections);
+    let (complq_send, complq_recv) = channel::<Box<Program>>(100 + num_connections);
+    let (runq_send, runq_recv) = channel::<Box<Program>>(100 + num_connections);
+    let (finq_send, finq_recv) = channel::<Box<Program>>(100 + num_connections);
     let rd_hdl = spawn(reader::read_jsonl(prompt_file, complq_send.clone()));
     let c_hdl = spawn(completions::spawn_connections(
         num_connections,
