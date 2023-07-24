@@ -94,7 +94,10 @@ async fn run_eval_container(
                     let _ = compl_queue.send(prog).await;
                 }
             }
-            Err(_) => eprintln!("Error decoding: {}", std::str::from_utf8(&res.stdout).expect("Extra bad"))
+            Err(_) => { 
+                let _ = compl_queue.send(prog).await;
+                eprintln!("Error decoding: {}", std::str::from_utf8(&res.stdout).expect("Extra bad"))
+            }
         }
     }
     else {
