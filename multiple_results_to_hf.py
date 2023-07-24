@@ -47,6 +47,7 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
 
     pass_rate = num_passed / (num_passed + num_failed)
 
+    # TODO: when we dedup we should also take account of edu score
     if args.dedup:
         solns = dedup(solns, args.lang, args.dedup_threshold)
 
