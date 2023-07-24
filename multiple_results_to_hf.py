@@ -4,6 +4,7 @@ import gzip
 from pathlib import Path
 from typing import Generator
 from dedup_solutions import dedup
+from code_scorer.inference import CodeScorer
 from utils import clean_sol_prompt
 from argparse import ArgumentParser
 
@@ -16,9 +17,12 @@ pa.add_argument("--dedup_threshold", type=float, default=0.6)
 args = pa.parse_args()
 
 solutions = []
+edu_scores = []
 original_ids = []
 pass_rates = []
 tests = []
+
+scorer = CodeScorer("nuprl/code-scorer-edu-v1", device="cpu")
 
 for path in Path(args.path).glob("**/*.results.json.gz"):
     with gzip.open(path, "rt") as f:
@@ -46,14 +50,16 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
     if args.dedup:
         solns = dedup(solns, args.lang, args.dedup_threshold)
 
+    scores = scorer.score(solns)
     print(f"{path}: {len(solns)} solutions")
     solutions.extend(solns)
+    edu_scores.extend(scores)
     pass_rates.extend([pass_rate] * len(solns))
     original_ids.extend([original_id] * len(solns))
     tests.extend([func_tests] * len(solns))
 
 
 new_ds = datasets.Dataset.from_dict(
-    {"content": solutions, "pass_rate": pass_rates, "id": list(range(len(solutions))), "original_id": original_ids, "tests": tests})
+    {"content": solutions, "pass_rate": pass_rates, "id": list(range(len(solutions))), "original_id": original_ids, "tests": tests, "edu_score": edu_scores})
 print(len(new_ds))
 new_ds.push_to_hub(args.name)
