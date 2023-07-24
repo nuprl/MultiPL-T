@@ -1,7 +1,10 @@
 use crate::repr::EvalResult;
 
 use super::repr::Program;
-use std::{process::Output, time::Duration};
+use std::{
+    process::Output,
+    time::Duration,
+};
 
 use tokio::sync::mpsc::{Receiver, Sender};
 use tokio::task::spawn;
@@ -81,19 +84,20 @@ async fn run_eval_container(
         ],
         Duration::from_secs(15),
     )
-    .await
-    .unwrap();
-    let res = std::str::from_utf8(&out.stdout).unwrap();
-    match serde_json::from_str::<EvalResult>(res) {
-        Ok(res) => {
-            if res.status.to_lowercase().as_str() == "ok" {
+    .await;
+    if let Some(res) = out { 
+        match serde_json::from_str::<EvalResult>(std::str::from_utf8(&res.stdout).unwrap()) { 
+            Ok(res) => if res.status.to_lowercase().as_str() == "ok"{ 
                 let _ = fin_queue.send(prog).await;
             } else {
                 if let Some(()) = (*prog).inc_attempts() {
                     let _ = compl_queue.send(prog).await;
                 }
             }
+            Err(_) => eprintln!("Error decoding: {}", std::str::from_utf8(&res.stdout).expect("Extra bad"))
         }
-        Err(_) => eprintln!("Error decoding: {}", res),
+    }
+    else {
+        let _ = compl_queue.send(prog).await;
     }
 }
