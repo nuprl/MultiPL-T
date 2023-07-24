@@ -16,13 +16,17 @@ pa.add_argument("--dedup_threshold", type=float, default=0.6)
 args = pa.parse_args()
 
 solutions = []
+original_ids = []
 pass_rates = []
+tests = []
 
 for path in Path(args.path).glob("**/*.results.json.gz"):
     with gzip.open(path, "rt") as f:
         data = json.load(f)
 
+    original_id = int(path.stem.split("_")[1])
     results = data["results"]
+    func_tests = data["tests"]
 
     solns = []
     num_failed = 0
@@ -45,9 +49,11 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
     print(f"{path}: {len(solns)} solutions")
     solutions.extend(solns)
     pass_rates.extend([pass_rate] * len(solns))
+    original_ids.extend([original_id] * len(solns))
+    tests.extend([func_tests] * len(solns))
 
 
 new_ds = datasets.Dataset.from_dict(
-    {"content": solutions, "pass_rate": pass_rates, "id": list(range(len(solutions)))})
+    {"content": solutions, "pass_rate": pass_rates, "id": list(range(len(solutions))), "original_id": original_ids, "tests": tests})
 print(len(new_ds))
 new_ds.push_to_hub(args.name)
