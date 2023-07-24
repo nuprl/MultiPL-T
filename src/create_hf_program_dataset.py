@@ -14,6 +14,9 @@ if __name__ == "__main__":
     parser.add_argument("--push", action="store_true", help="Push to HuggingFace Datasets")
     parser.add_argument("--local-file", type=str, help="Local file to save in addition/instead-of to pushing to HuggingFace Datasets")
     args = parser.parse_args()
+    if not args.push and not args.local_file is None:
+        print("Must specify --push or --local-file")
+        exit(1)
     if args.ammend:
         try: 
             ds = datasets.load_dataset(args.dataset)
@@ -25,9 +28,6 @@ if __name__ == "__main__":
     else: 
         ds = datasets.Dataset.from_dict({})
         seen = set()
-    if not args.push and not args.local_file is None:
-        print("Must specify --push or --local-file")
-        exit(1)
 
    
     new_ds_dict = {
