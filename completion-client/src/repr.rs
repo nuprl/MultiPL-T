@@ -63,7 +63,6 @@ pub struct DatasetOutput {
     attempts: usize,
 }
 
-
 impl From<Prompt> for Program {
     fn from(value: Prompt) -> Self {
         Program {

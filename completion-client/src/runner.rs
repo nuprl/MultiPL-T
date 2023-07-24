@@ -3,21 +3,12 @@ use crate::repr::EvalResult;
 use super::repr::Program;
 use std::{
     process::Output,
-    sync::atomic::{AtomicUsize, Ordering},
     time::Duration,
 };
 
-use lazy_static::lazy_static;
-use tokio::fs::File;
+use tokio::sync::mpsc::{Receiver, Sender};
 use tokio::task::spawn;
-use tokio::{
-    io::AsyncWriteExt,
-    sync::mpsc::{Receiver, Sender},
-};
 
-lazy_static! {
-    static ref FILE_IDX: AtomicUsize = AtomicUsize::new(0);
-}
 pub async fn prog_runner(
     mut run_queue: Receiver<Box<Program>>,
     compl_queue: Sender<Box<Program>>,
@@ -31,6 +22,8 @@ pub async fn prog_runner(
 }
 
 // Copied from Federico's runner
+// Since the MultiPL-E container runs with a timer, this could be superfluous
+// however, the extra layer of indirection can't hurt.
 async fn run_program_with_timeout(
     program: &str,
     args: &[&str],
@@ -65,22 +58,8 @@ async fn run_program_with_timeout(
     }
 }
 
-async fn create_temp_file(ext: &str) -> (File, String, String) {
-    let idx = FILE_IDX.fetch_add(1, Ordering::SeqCst);
-    // temp dir
-    let temp_dir = std::env::temp_dir().join("codeexec");
-    if !temp_dir.exists() {
-        tokio::fs::create_dir_all(&temp_dir).await.unwrap();
-    }
-    let filename = format!("{idx}.{ext}");
-    let file = tokio::fs::File::create(&filename)
-        .await
-        .expect("File creation failed");
-    (file, temp_dir.to_string_lossy().to_string(), filename)
-}
-
 async fn run_eval_container(
-    prog: Box<Program>,
+    mut prog: Box<Program>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
 ) -> () {
@@ -107,26 +86,13 @@ async fn run_eval_container(
     )
     .await
     .unwrap();
-    let _ = out.clone();
     let res = std::str::from_utf8(&out.stdout).unwrap();
-    let succ = match serde_json::from_str::<EvalResult>(res)
+    let succ = serde_json::from_str::<EvalResult>(res)
         .unwrap()
         .status
         .to_lowercase()
         .as_str()
-    {
-        "ok" => true,
-        _ => false,
-    };
-    dispatch_result(succ, prog, compl_queue, fin_queue).await;
-}
-
-async fn dispatch_result(
-    succ: bool,
-    mut prog: Box<Program>,
-    compl_queue: Sender<Box<Program>>,
-    fin_queue: Sender<Box<Program>>,
-) -> () {
+        == "ok";
     if succ {
         let _ = fin_queue.send(prog).await;
     } else {
