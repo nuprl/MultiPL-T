@@ -1,6 +1,7 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use super::repr::{Program, PromptMessage};
+use reqwest::Client;
 use tokio::{
     sync::{
         mpsc::{Receiver, Sender},
@@ -8,6 +9,13 @@ use tokio::{
     },
     task::JoinSet,
 };
+
+#[derive(Debug)]
+enum ComplError {
+    RequestError(String),
+    StatusError(String),
+    SerializationError(String),
+}
 
 pub async fn spawn_connections(
     num_connections: usize,
@@ -25,6 +33,28 @@ pub async fn spawn_connections(
         ()
     }
 }
+async fn make_single_request(
+    prog: &Program,
+    client: &Client,
+    server_url: &'static str,
+) -> Result<String, ComplError> {
+    let msg = serde_json::to_string(&PromptMessage::from(prog.clone()))
+        .expect("Message should serialize");
+    let resp = client
+        .post(server_url)
+        .body(msg.clone())
+        .header("Content-Type", "application/json")
+        .send()
+        .await
+        .map_err(|e| ComplError::RequestError(format!("{:?}, sent msg: {}", e, msg)))?;
+    let resp_json = resp
+        .error_for_status()
+        .map_err(|e| ComplError::StatusError(format!("{:?}", e)))?
+        .json::<HashMap<String, String>>()
+        .await
+        .map_err(|e| ComplError::SerializationError(format!("{:?}", e)))?;
+    Ok(resp_json["generated_text"].to_string())
+}
 async fn make_completion_requests(
     compl_queue: Arc<Mutex<Receiver<Box<Program>>>>,
     run_queue: Sender<Box<Program>>,
@@ -39,28 +69,24 @@ async fn make_completion_requests(
                 Some(p) => p,
             }
         };
-        let msg = serde_json::to_string(&PromptMessage::from(*prog.clone()))
-            .expect("Message should serialize");
-        let completion = match client
-            .post(server_url)
-            .body(msg.clone())
-            .header("Content-Type", "application/json")
-            .send()
-            .await
-        {
-            Ok(resp) => {
-                if resp.status() == 200 {
-                    resp.json::<HashMap<String, String>>().await.unwrap()["generated_text"].clone()
-                } else {
-                    let _ = dbg!(resp.status());
-                    let _ = dbg!(msg);
-                    let _ = dbg!(resp.json::<HashMap<String, String>>().await.unwrap());
-                    panic!("Did not return a 200 response")
+        let mut attempts = 0;
+        while attempts < 10 {
+            match make_single_request(&prog, &client, server_url).await {
+                Ok(compl) => {
+                    (*prog).completion = compl;
+                    let _ = run_queue.send(prog).await;
+                    break;
+                }
+                Err(e) => {
+                    attempts += 1;
+                    eprintln!(
+                        "Faiiled with error: {:?}, Attempts remaining: {}",
+                        e,
+                        10 - attempts
+                    );
+                    tokio::time::sleep(Duration::from_secs(5)).await
                 }
             }
-            Err(e) => panic!("{}", e),
-        };
-        (*prog).completion = completion;
-        let _ = run_queue.send(prog).await;
+        }
     }
 }
