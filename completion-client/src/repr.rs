@@ -49,10 +49,6 @@ struct InferenceParams {
 
 #[derive(Deserialize, Debug)]
 pub struct EvalResult {
-    program: String,
-    stdout: String,
-    stderr: String,
-    exit_code: i32,
     pub status: String,
 }
 
