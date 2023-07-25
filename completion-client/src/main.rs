@@ -27,6 +27,9 @@ struct Cli {
 
     #[arg(long)]
     num_connections: usize,
+
+    #[arg(long)]
+    attempt_limit: usize,
 }
 
 #[tokio::main]
@@ -36,6 +39,7 @@ async fn main() {
         output_file,
         server_url,
         num_connections,
+        attempt_limit,
     } = Cli::parse();
     let server_url: &'static str = Box::leak(server_url.into_boxed_str());
     let (complq_send, complq_recv) = channel::<Box<Program>>(100 + num_connections);
@@ -52,6 +56,7 @@ async fn main() {
         runq_recv,
         complq_send.clone(),
         finq_send.clone(),
+        attempt_limit,
     ));
     let w_hdl = spawn(writer::write_jsonl(output_file, finq_recv));
     let _ = join!(rd_hdl, c_hdl, rn_hdl, w_hdl);

@@ -116,8 +116,8 @@ impl From<Program> for DatasetOutput {
 }
 
 impl Program {
-    pub fn inc_attempts(&mut self) -> Option<()> {
-        if self.attempts < 100 {
+    pub fn inc_attempts(&mut self, attempt_limit: usize) -> Option<()> {
+        if self.attempts < attempt_limit {
             self.attempts = self.attempts + 1;
             Some(())
         } else {
