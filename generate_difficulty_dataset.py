@@ -2,16 +2,13 @@ import datasets
 import json
 import gzip
 from pathlib import Path
-from typing import Generator
-from dedup_solutions import dedup
-from utils import clean_sol_prompt
 from argparse import ArgumentParser
 
 pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--original_dataset", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
-pa.add_argument("--min_tests", type=str, default=3)
+pa.add_argument("--min_tests", type=int, default=3)
 args = pa.parse_args()
 
 ds = datasets.load_dataset(args.original_dataset, split="train")
@@ -56,10 +53,9 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
     pass_rates.append(pass_rate)
     target_soln.append(sample)
 
-
 new_ds = datasets.Dataset.from_dict(
     {"content": funcs, "tests": tests, "pass_rate": pass_rates, "id": ids, "target_soln": target_soln})
-new_ds = new_ds.filter(lambda x: x["pass_rate"] > 0)
+new_ds = new_ds.filter(lambda x: x["pass_rate"] > 0.1)
 new_ds = new_ds.filter(lambda x: x["tests"] >= args.min_tests)
 print(len(new_ds))
 new_ds.push_to_hub(args.name)
