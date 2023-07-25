@@ -2,7 +2,7 @@ use crate::repr::EvalResult;
 
 use super::repr::Program;
 
-use tokio::sync::mpsc::{Receiver, Sender};
+use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio::task::spawn;
 
 pub async fn prog_runner(
@@ -10,11 +10,16 @@ pub async fn prog_runner(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
     attempt_limit: usize,
+    conncurrent_programs: usize
 ) {
+    let (tok_send, mut tok_recv) : (Sender<()>, Receiver<()>) = channel(conncurrent_programs + 1);
+    let _ = (0..conncurrent_programs).for_each(|_| drop(tok_send.blocking_send(())));
     while let Some(prog) = run_queue.recv().await {
         let cq = compl_queue.clone();
         let fq = fin_queue.clone();
-        spawn(async move { run_eval_container(prog, cq, fq, attempt_limit).await });
+        let _ = tok_recv.recv().await;
+        let rts = tok_send.clone();
+        spawn(async move { run_eval_container(prog, cq, fq, rts, attempt_limit).await });
     }
 }
 
@@ -22,6 +27,7 @@ async fn run_eval_container(
     mut prog: Box<Program>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
+    run_toks: Sender<()>,
     attempt_limit: usize,
 ) -> () {
     let full_prog_text = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
@@ -48,6 +54,7 @@ async fn run_eval_container(
         .spawn()
         .expect("Child should spawn successfully");
     let out = child.wait_with_output().await;
+    let _ = run_toks.send(()).await;
     if let Ok(res) = out {
         match serde_json::from_str::<EvalResult>(std::str::from_utf8(&res.stdout).unwrap()) {
             Ok(res) => {
