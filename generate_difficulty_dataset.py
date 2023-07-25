@@ -55,7 +55,7 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
 
 new_ds = datasets.Dataset.from_dict(
     {"content": funcs, "tests": tests, "pass_rate": pass_rates, "id": ids, "target_soln": target_soln})
-new_ds = new_ds.filter(lambda x: x["pass_rate"] > 0)
+new_ds = new_ds.filter(lambda x: x["pass_rate"] > 0.1)
 new_ds = new_ds.filter(lambda x: x["tests"] >= args.min_tests)
 print(len(new_ds))
 new_ds.push_to_hub(args.name)
