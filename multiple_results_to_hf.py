@@ -2,7 +2,6 @@ import datasets
 import json
 import gzip
 from pathlib import Path
-from typing import Generator
 from dedup_solutions import dedup
 from code_scorer.inference import CodeScorer
 from utils import clean_sol_prompt
@@ -14,6 +13,7 @@ pa.add_argument("--name", type=str, required=True)
 pa.add_argument("--dedup", action="store_true")
 pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
+pa.add_argument("--score_batch", type=int, default=32)
 args = pa.parse_args()
 
 solutions = []
@@ -49,15 +49,22 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
 
     # TODO: when we dedup we should also take account of edu score
     if args.dedup:
+        # simply dedup using set first
+        solns = list(set(solns))
         solns = dedup(solns, args.lang, args.dedup_threshold)
 
-    scores = scorer.score(solns)
     print(f"{path}: {len(solns)} solutions")
     solutions.extend(solns)
-    edu_scores.extend(scores)
     pass_rates.extend([pass_rate] * len(solns))
     original_ids.extend([original_id] * len(solns))
     tests.extend([func_tests] * len(solns))
+
+# score solutions
+for i in range(0, len(solutions), args.score_batch):
+    print(f"[{i}/{len(solutions)}] scoring...")
+    batch = solutions[i: i + args.score_batch]
+    scores = scorer.score(batch)
+    edu_scores.extend(scores)
 
 
 new_ds = datasets.Dataset.from_dict(
