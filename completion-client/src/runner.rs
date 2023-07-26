@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::repr::EvalResult;
 
 use super::repr::Program;
@@ -48,6 +50,7 @@ async fn run_eval_container(
         "--lang",
         &prog.language,
     ];
+    let _ = tokio::time::sleep(Duration::from_secs(5)).await;
     let child = tokio::process::Command::new("podman")
         .args(args)
         .stdout(std::process::Stdio::piped())
