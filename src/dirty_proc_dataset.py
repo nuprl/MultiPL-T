@@ -5,7 +5,7 @@ CANNONICAL_LINE = "### Canonical solution below ###"
 UNIT_LINE = "### Unit tests below ###"
 
 
-def write_row_to_file(prefix):
+def write_row_to_file(prefix, content_col):
     if not os.path.exists(prefix):
         os.mkdir(prefix)
 
@@ -14,7 +14,10 @@ def write_row_to_file(prefix):
         file = f"{prefix}/HumanEval_{row['id']}_{entrypoint}.py"
         fixed_tests = "\n\t".join(
             [t.replace(entrypoint, "candidate") for t in row["tests"]])
-        fixed_content = proc_content(row['content'])
+        content = row[content_col]
+        if content is None:
+            content = row["content"]
+        fixed_content = proc_content(content)
         test_body = f"def check(candidate):\n\t{fixed_tests}\ndef test_check():\n\tcheck({entrypoint})\n"
         with open(file, "w") as f:
             f.write(fixed_content)
@@ -47,11 +50,12 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str,
                         default="nuprl/stack-dedup-python-testgen-starcoder-filter-v2")
     parser.add_argument("--min_coverage", type=float, default=90)
+    parser.add_argument("--content_col", type=str, default="content")
     args = parser.parse_args()
     ds = datasets.load_dataset(args.dataset, split="train")
     dir_of_this_script = os.path.dirname(os.path.realpath(__file__))
     up = os.path.dirname(dir_of_this_script)
     ds = ds.filter(lambda x: x["coverage"] >= args.min_coverage)
     print(f"Writing {len(ds)} rows to {up}/stack-clean-python")
-    ds.map(write_row_to_file(f"{up}/stack-clean-python"),
+    ds.map(write_row_to_file(f"{up}/stack-clean-python", args.content_col),
            load_from_cache_file=False)
