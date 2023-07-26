@@ -17,6 +17,9 @@ def write_row_to_file(prefix, content_col):
         content = row[content_col]
         if content is None:
             content = row["content"]
+        start_asserts = content.find("\nassert ")
+        if start_asserts != -1:
+            content = content[:start_asserts]
         fixed_content = proc_content(content)
         test_body = f"def check(candidate):\n\t{fixed_tests}\ndef test_check():\n\tcheck({entrypoint})\n"
         with open(file, "w") as f:
