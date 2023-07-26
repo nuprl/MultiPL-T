@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use crate::repr::EvalResult;
 
 use super::repr::Program;
@@ -34,24 +32,14 @@ async fn run_eval_container(
     attempt_limit: usize,
 ) -> () {
     let full_prog_text = format!("{}\n{}\n{}", &prog.prompt, &prog.completion, &prog.tests);
-    let temp_dir = std::env::temp_dir().join("codeexec");
-    if !temp_dir.exists() {
-        tokio::fs::create_dir_all(&temp_dir).await.unwrap();
-    }
-    let mount = format!("{}:/tmp", temp_dir.to_string_lossy().to_string());
     let args = [
-        "run",
-        "--rm",
-        "-v",
-        &mount,
-        "multipl-e-simple",
+        "simple_eval.py",
         "--prog-text",
         &full_prog_text,
         "--lang",
         &prog.language,
     ];
-    let _ = tokio::time::sleep(Duration::from_secs(5)).await;
-    let child = tokio::process::Command::new("podman")
+    let child = tokio::process::Command::new("python3")
         .args(args)
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
