@@ -13,7 +13,9 @@ pub async fn prog_runner(
     conncurrent_programs: usize
 ) {
     let (tok_send, mut tok_recv) : (Sender<()>, Receiver<()>) = channel(conncurrent_programs + 1);
-    let _ = (0..conncurrent_programs).for_each(|_| drop(tok_send.blocking_send(())));
+    for _ in 0..conncurrent_programs {
+        let _ = tok_send.send(()).await;
+    }
     while let Some(prog) = run_queue.recv().await {
         let cq = compl_queue.clone();
         let fq = fin_queue.clone();
