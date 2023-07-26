@@ -16,10 +16,9 @@ pub async fn prog_runner(
     for _ in 0..conncurrent_programs {
         let _ = tok_send.send(()).await;
     }
-    while let Some(prog) = run_queue.recv().await {
+    while let (Some(prog), Some(())) = (run_queue.recv().await, tok_recv.recv().await) {
         let cq = compl_queue.clone();
         let fq = fin_queue.clone();
-        let _ = tok_recv.recv().await;
         let rts = tok_send.clone();
         spawn(async move { run_eval_container(prog, cq, fq, rts, attempt_limit).await });
     }
