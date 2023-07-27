@@ -1,6 +1,7 @@
 import datasets
 import json
 import gzip
+from progressbar import progressbar
 from pathlib import Path
 from dedup_solutions import dedup
 from code_scorer.inference import CodeScorer
@@ -41,7 +42,7 @@ def get_best_sol(scores, sols):
     return sols[best_sol_idx], max_score
 
 
-for path in Path(args.path).glob("**/*.results.json.gz"):
+for path in progressbar(Path(args.path).glob("**/*.results.json.gz")):
     with gzip.open(path, "rt") as f:
         data = json.load(f)
 
@@ -94,7 +95,7 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
 
 # score solutions (if dedup, otherwise we already have scores)
 if args.strategy == "dedup":
-    for i in range(0, len(solutions), args.score_batch):
+    for i in progressbar(range(0, len(solutions), args.score_batch)):
         print(f"[{i}/{len(solutions)}] scoring...")
         batch = solutions[i: i + args.score_batch]
         scores = scorer.score(batch)
