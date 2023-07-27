@@ -68,27 +68,28 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
     # simple set dedup
     solns = list(set(solns))
 
-    if args.strategy == "dedup":
-        solns = dedup(solns, args.lang, args.dedup_threshold)
-    elif args.strategy == "dedup_best":
-        # takes the best solution as the target for dedup
-        scores = scorer.score(solns)
-        sol_to_score = {sol: score for sol, score in zip(solns, scores)}
-        best, best_score = get_best_sol(solns)
-        # move best to the front of the list
-        solns.remove(best)
-        solns.insert(0, best)
-        # dedup
-        solns = dedup(solns, args.lang, args.dedup_threshold)
-        # get the scores of the remaining solutions
-        scores = [sol_to_score[sol] for sol in solns]
-        edu_scores.extend(scores)
-    elif args.strategy == "best":
-        # best determined by edu score
-        scores = scorer.score(solns)
-        best, best_score = get_best_sol(solns)
-        solns = [best]
-        edu_scores.append(best_score)
+    if len(solns) > 0:
+        if args.strategy == "dedup":
+            solns = dedup(solns, args.lang, args.dedup_threshold)
+        elif args.strategy == "dedup_best":
+            # takes the best solution as the target for dedup
+            scores = scorer.score(solns)
+            sol_to_score = {sol: score for sol, score in zip(solns, scores)}
+            best, best_score = get_best_sol(solns)
+            # move best to the front of the list
+            solns.remove(best)
+            solns.insert(0, best)
+            # dedup
+            solns = dedup(solns, args.lang, args.dedup_threshold)
+            # get the scores of the remaining solutions
+            scores = [sol_to_score[sol] for sol in solns]
+            edu_scores.extend(scores)
+        elif args.strategy == "best":
+            # best determined by edu score
+            scores = scorer.score(solns)
+            best, best_score = get_best_sol(solns)
+            solns = [best]
+            edu_scores.append(best_score)
 
     print(f"{path}: {len(solns)} solutions")
     solutions.extend(solns)
