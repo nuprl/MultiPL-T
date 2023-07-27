@@ -78,10 +78,11 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
             # IDEA: sort the solutions by score, then dedup, so higher scoring solutions are more likely to be kept
             scores = scorer.score(sols)
             score_sols = list(zip(scores, sols))
+            sols_to_score = {sol: score for score, sol in score_sols}
             score_sols.sort(key=lambda x: x[0], reverse=True)
-            scores = [x[0] for x in score_sols]
             sols = [x[1] for x in score_sols]
             sols = dedup(sols, args.lang, args.dedup_threshold)
+            scores = [sols_to_score[sol] for sol in sols]
             edu_scores.extend(scores)
         elif args.strategy == "best":
             # best determined by edu score
