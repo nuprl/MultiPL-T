@@ -2,7 +2,7 @@ use crate::repr::EvalResult;
 
 use super::repr::Program;
 
-use tokio::sync::mpsc::{Receiver, Sender, channel};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task::spawn;
 
 pub async fn prog_runner(
@@ -10,9 +10,9 @@ pub async fn prog_runner(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
     attempt_limit: usize,
-    conncurrent_programs: usize
+    conncurrent_programs: usize,
 ) {
-    let (tok_send, mut tok_recv) : (Sender<()>, Receiver<()>) = channel(conncurrent_programs + 1);
+    let (tok_send, mut tok_recv): (Sender<()>, Receiver<()>) = channel(conncurrent_programs + 1);
     for _ in 0..conncurrent_programs {
         let _ = tok_send.send(()).await;
     }
@@ -39,12 +39,22 @@ async fn run_eval_container(
         "--lang",
         &prog.language,
     ];
-    let child = tokio::process::Command::new("python3")
+    let child = match tokio::process::Command::new("python3")
         .args(args)
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()
-        .expect("Child should spawn successfully");
+    {
+        Ok(c) => c,
+        Err(e) => {
+            let _ = compl_queue.send(prog).await;
+            eprintln!(
+                "Failed to run program: {}\n got error {:?}",
+                &full_prog_text, e
+            );
+            return;
+        }
+    };
     let out = child.wait_with_output().await;
     let _ = run_toks.send(()).await;
     if let Ok(res) = out {
