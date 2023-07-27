@@ -42,8 +42,10 @@ def get_best_sol(scores, sols):
     return sols[best_sol_idx], max_score
 
 
-iterator = Path(args.path).glob("**/*.results.json.gz")
-for path in progressbar(iterator, max_value=len(list(iterator))):
+def make_path_iterator(): return Path(args.path).glob("**/*.results.json.gz")
+
+
+for path in progressbar(make_path_iterator(), max_value=len(list(make_path_iterator()))):
     with gzip.open(path, "rt") as f:
         data = json.load(f)
 
@@ -96,8 +98,8 @@ for path in progressbar(iterator, max_value=len(list(iterator))):
 # score solutions (if dedup, otherwise we already have scores)
 if args.strategy == "dedup":
     print(" #### scoring solutions #### ")
-    iterator = range(0, len(solutions), args.score_batch)
-    for i in progressbar(iterator, max_value=len(iterator)):
+    def make_score_iterator(): return range(0, len(solutions), args.score_batch)
+    for i in progressbar(make_score_iterator(), max_value=len(list(make_score_iterator()))):
         batch = solutions[i: i + args.score_batch]
         scores = scorer.score(batch)
         edu_scores.extend(scores)
