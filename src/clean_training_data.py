@@ -37,14 +37,18 @@ def clean_lua(sol):
     return "\n".join(sol_lines)
 
 
-def clean_lua_ex(ex):
-    ex["content"] = clean_lua(ex["content"])
+def clean_ml(sol):
+    return sol
+
+
+def clean_ex(ex, cleaner):
+    ex["content"] = cleaner(ex["content"])
     return ex
 
 
-def clean_racket_ex(ex):
-    ex["content"] = clean_racket(ex["content"])
-    return ex
+def clean_lua_ex(ex): return clean_ex(ex, clean_lua)
+def clean_racket_ex(ex): return clean_ex(ex, clean_racket)
+def clean_ml_ex(ex): return clean_ex(ex, clean_ml)
 
 
 if __name__ == "__main__":
@@ -59,13 +63,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dataset = datasets.load_dataset(args.input_dataset)
+    cleaner = None
     if args.language == "racket":
-        dataset = dataset.map(clean_racket_ex)
+        cleaner = clean_racket_ex
     elif args.language == "lua":
-        dataset = dataset.map(clean_lua_ex)
+        cleaner = clean_lua_ex
+    elif args.language == "ml":
+        cleaner = clean_ml_ex
     else:
         # crash with unimplemented language
         raise NotImplementedError(f"Language {args.language} not implemented")
+
+    dataset = dataset.map(cleaner)
 
     if args.push:
         dataset.push_to_hub(args.output_dataset)

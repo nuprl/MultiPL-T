@@ -1,25 +1,11 @@
-
+from src.clean_training_data import clean_lua, clean_racket, clean_ml
 
 def clean_sol_prompt(lang, sol):
-    # TODO: do this for other langs that are not lua
-    assert lang == "lua", "Gotta implement this for other langs"
-    sol = sol[:sol.find("\nlu =")]
-    sol_lines = sol.split("\n")
-    # TODO: the "**" is the old format, remove this later
-    if "** Canonical Python Solution **" in sol_lines[0] or "## Canonical Python Solution ##" in sol_lines[0]:
-        # remove the canonical solution from comment
-        # canonical solution lines start with " * "
-        not_canonical_i = 0
-        for i, line in enumerate(sol_lines):
-            if not line.startswith("-- *") and not line.startswith("-- #"):
-                not_canonical_i = i
-                break
-        sol_lines = sol_lines[not_canonical_i:]
-
-    # remove every line that is empty
-    sol_lines = [line for line in sol_lines if line.rstrip() !=
-                 "--" and line != ""]
-
-    sol = "\n".join(sol_lines)
-
-    return sol
+    if lang == "lua":
+        return clean_lua(sol)
+    elif lang == "racket":
+        return clean_racket(sol)
+    elif lang == "ml":
+        return clean_ml(sol)
+    else:
+        raise Exception("Unknown language: " + lang)
