@@ -87,7 +87,6 @@ for path in progressbar(Path(args.path).glob("**/*.results.json.gz")):
             sols = [best]
             edu_scores.append(best_score)
 
-    print(f"{path}: {len(sols)} solutions")
     solutions.extend(sols)
     pass_rates.extend([pass_rate] * len(sols))
     original_ids.extend([original_id] * len(sols))
@@ -95,8 +94,8 @@ for path in progressbar(Path(args.path).glob("**/*.results.json.gz")):
 
 # score solutions (if dedup, otherwise we already have scores)
 if args.strategy == "dedup":
+    print(" #### scoring solutions #### ")
     for i in progressbar(range(0, len(solutions), args.score_batch)):
-        print(f"[{i}/{len(solutions)}] scoring...")
         batch = solutions[i: i + args.score_batch]
         scores = scorer.score(batch)
         edu_scores.extend(scores)
@@ -104,5 +103,10 @@ if args.strategy == "dedup":
 
 new_ds = datasets.Dataset.from_dict(
     {"content": solutions, "pass_rate": pass_rates, "id": list(range(len(solutions))), "original_id": original_ids, "tests": tests, "edu_score": edu_scores})
-print(len(new_ds))
 new_ds.push_to_hub(args.name)
+
+# stats
+print(" #### stats #### ")
+print(f"total solutions: {len(solutions)}")
+print(f"average edu score: {sum(edu_scores) / len(edu_scores)}")
+print(f"average pass rate: {sum(pass_rates) / len(pass_rates)}")
