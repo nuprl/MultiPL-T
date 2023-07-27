@@ -56,8 +56,8 @@ async fn main() {
         runq_send.clone(),
         server_url,
     ));
-    let rn_hdl = spawn(runner::prog_runner(
-        runq_recv,
+    let rn_hdl = spawn(runner::spawn_runners(
+        Arc::new(Mutex::new(runq_recv)),
         complq_send.clone(),
         finq_send.clone(),
         attempt_limit,
