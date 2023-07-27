@@ -72,10 +72,10 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
         if args.strategy == "dedup":
             solns = dedup(solns, args.lang, args.dedup_threshold)
         elif args.strategy == "dedup_best":
-            # takes the best solution as the target for dedup
+            # IDEA: takes the best solution as the target for dedup
             scores = scorer.score(solns)
             sol_to_score = {sol: score for sol, score in zip(solns, scores)}
-            best, best_score = get_best_sol(solns)
+            best, _ = get_best_sol(solns)
             # move best to the front of the list
             solns.remove(best)
             solns.insert(0, best)
