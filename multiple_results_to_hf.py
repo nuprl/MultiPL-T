@@ -30,8 +30,7 @@ tests = []
 scorer = CodeScorer("nuprl/code-scorer-edu-v1", device=args.score_device)
 
 
-def get_best_sol(sols):
-    scores = scorer.score(sols)
+def get_best_sol(scores, sols):
     max_score = 0
     best_sol_idx = 0
     for i, score in enumerate(scores):
@@ -50,7 +49,7 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
     results = data["results"]
     func_tests = data["tests"]
 
-    solns = []
+    sols = []
     num_failed = 0
     num_passed = 0
     for res in results:
@@ -59,43 +58,39 @@ for path in Path(args.path).glob("**/*.results.json.gz"):
             sol = clean_sol_prompt(args.lang, res["program"])
             if "TODO" in sol:
                 continue
-            solns.append(sol)
+            sols.append(sol)
         else:
             num_failed += 1
 
     pass_rate = num_passed / (num_passed + num_failed)
 
     # simple set dedup
-    solns = list(set(solns))
+    sols = list(set(sols))
 
-    if len(solns) > 0:
+    if len(sols) > 0:
         if args.strategy == "dedup":
-            solns = dedup(solns, args.lang, args.dedup_threshold)
+            sols = dedup(sols, args.lang, args.dedup_threshold)
         elif args.strategy == "dedup_best":
-            # IDEA: takes the best solution as the target for dedup
-            scores = scorer.score(solns)
-            sol_to_score = {sol: score for sol, score in zip(solns, scores)}
-            best, _ = get_best_sol(solns)
-            # move best to the front of the list
-            solns.remove(best)
-            solns.insert(0, best)
-            # dedup
-            solns = dedup(solns, args.lang, args.dedup_threshold)
-            # get the scores of the remaining solutions
-            scores = [sol_to_score[sol] for sol in solns]
+            # IDEA: sort the solutions by score, then dedup, so higher scoring solutions are more likely to be kept
+            scores = scorer.score(sols)
+            score_sols = list(zip(scores, sols))
+            score_sols.sort(key=lambda x: x[0], reverse=True)
+            scores = [x[0] for x in score_sols]
+            sols = [x[1] for x in score_sols]
+            sols = dedup(sols, args.lang, args.dedup_threshold)
             edu_scores.extend(scores)
         elif args.strategy == "best":
             # best determined by edu score
-            scores = scorer.score(solns)
-            best, best_score = get_best_sol(solns)
-            solns = [best]
+            scores = scorer.score(sols)
+            best, best_score = get_best_sol(scores, sols)
+            sols = [best]
             edu_scores.append(best_score)
 
-    print(f"{path}: {len(solns)} solutions")
-    solutions.extend(solns)
-    pass_rates.extend([pass_rate] * len(solns))
-    original_ids.extend([original_id] * len(solns))
-    tests.extend([func_tests] * len(solns))
+    print(f"{path}: {len(sols)} solutions")
+    solutions.extend(sols)
+    pass_rates.extend([pass_rate] * len(sols))
+    original_ids.extend([original_id] * len(sols))
+    tests.extend([func_tests] * len(sols))
 
 # score solutions (if dedup, otherwise we already have scores)
 if args.strategy == "dedup":
