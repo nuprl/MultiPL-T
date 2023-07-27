@@ -17,6 +17,10 @@ pa.add_argument("--score_batch", type=int, default=32)
 pa.add_argument("--score_device", type=str, default="cpu")
 args = pa.parse_args()
 
+possible_strategies = ["dedup", "dedup_best", "best"]
+if args.strategy not in possible_strategies:
+    assert False, f"invalid strategy {args.strategy}, must be one of {possible_strategies}"
+
 solutions = []
 edu_scores = []
 original_ids = []
