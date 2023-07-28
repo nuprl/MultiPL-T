@@ -59,18 +59,20 @@ async fn run_programs(
                 Some(p) => p,
             }
         };
+        dbg!("New program to run");
         match run_single_program(&prog).await {
             Ok(RunRes::Succ) => fin_queue.send(prog).await.unwrap(),
             Ok(RunRes::Fail) => { 
                 if let Some(()) = prog.inc_attempts(attempt_limit) { 
-                    compl_queue.send(prog).await.unwrap()
+                    let _ = compl_queue.send(prog).await.unwrap();
                 }
             }
             Err(e) => { 
                 let _ = compl_queue.send(prog).await.unwrap();
-                eprintln!("{:?}", e)
+                println!("{:?}", e)
             }
         }
+        dbg!("Ran new program");
     }
 }
 

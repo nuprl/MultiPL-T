@@ -69,6 +69,7 @@ async fn make_completion_requests(
                 Some(p) => p,
             }
         };
+        dbg!("Got new program to send");
         let mut attempts = 0;
         while attempts < 10 {
             match make_single_request(&prog, &client, server_url).await {
@@ -79,7 +80,7 @@ async fn make_completion_requests(
                 }
                 Err(e) => {
                     attempts += 1;
-                    eprintln!(
+                    println!(
                         "Faiiled with error: {:?}, Attempts remaining: {}",
                         e,
                         10 - attempts
@@ -88,5 +89,6 @@ async fn make_completion_requests(
                 }
             }
         }
+        dbg!("Got response for program");
     }
 }

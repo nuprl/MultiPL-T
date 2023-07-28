@@ -24,7 +24,7 @@ pub async fn read_input_jsonl(
         let id = get_id_from_path(prompt.original.to_string()); 
         if !seen_ids.contains(&id) { 
             let prog = Program::from(prompt);
-            compl_queue.send(Box::new(prog)).await.unwrap()
+            let _ = compl_queue.send(Box::new(prog)).await;
         }
         else { 
             let _ = println!("Ingnoring prompt: {}", id);
