@@ -3,10 +3,10 @@
 # checkpoint at the end of training. Make sure to provide a train.py for this
 # experiment. 
 
-$MULTIPLE_IMAGE=0 #replace with path to singularity image
-$PASS_K=0 #replace with path to pass_k.py
-$VENV_ACTIVATE=0 #replace with path to venv/bin/activate
-$HF_CACHE="" #replace with path to huggingface cache
+MULTIPLE_IMAGE="" #replace with path to singularity image
+PASS_K="" #replace with path to pass_k.py
+VENV_ACTIVATE="" #replace with path to venv/bin/activate
+HF_CACHE="" #replace with path to huggingface cache
 
 # Check that MUTLIPLE_IMAGE and PASS_K are set
 if [ -z "$MULTIPLE_IMAGE" ]; then
