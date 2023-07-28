@@ -57,7 +57,7 @@ pub struct EvalResult {
 pub struct DatasetOutput {
     content: String,
     pub path: String,
-    attempts: Number,
+    attempts: Option<Number>,
 }
 
 impl From<Prompt> for Program {
@@ -111,7 +111,7 @@ impl From<Program> for DatasetOutput {
         DatasetOutput {
             content,
             path: original,
-            attempts: Number::from(attempts),
+            attempts: Some(Number::from(attempts)),
         }
     }
 }
