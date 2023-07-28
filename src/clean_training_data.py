@@ -75,7 +75,10 @@ if __name__ == "__main__":
     parser.add_argument("--push", action="store_true", help="Push to hub")
     args = parser.parse_args()
 
-    dataset = datasets.load_dataset(args.input_dataset)
+    if args.input_dataset.endswith(".jsonl"):
+        dataset = datasets.load_dataset("json", data_files=args.input_dataset, split="train")
+    else:
+        dataset = datasets.load_dataset(args.input_dataset, split="train")
     cleaner = None
     if args.language == "racket":
         cleaner = clean_racket_ex
