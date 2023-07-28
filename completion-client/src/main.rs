@@ -46,10 +46,11 @@ async fn main() {
         proc_limit,
     } = Cli::parse();
     let server_url: &'static str = Box::leak(server_url.into_boxed_str());
+    let seen_ids = reader::read_output_jsonl(&output_file).await;
     let (complq_send, complq_recv) = channel::<Box<Program>>(100 + num_connections);
     let (runq_send, runq_recv) = channel::<Box<Program>>(100 + num_connections);
     let (finq_send, finq_recv) = channel::<Box<Program>>(100 + num_connections);
-    let rd_hdl = spawn(reader::read_jsonl(prompt_file, complq_send.clone()));
+    let rd_hdl = spawn(reader::read_input_jsonl(prompt_file, complq_send.clone(), seen_ids));
     let c_hdl = spawn(completions::spawn_connections(
         num_connections,
         Arc::new(Mutex::new(complq_recv)),
