@@ -65,7 +65,7 @@ async fn make_completion_requests(
         let mut prog: Box<Program> = {
             let mut chan = compl_queue.clone().lock_owned().await;
             match chan.recv().await {
-                None => return,
+                None => { println!("Early return"); return},
                 Some(p) => p,
             }
         };
