@@ -26,6 +26,9 @@ pub async fn read_input_jsonl(
             let prog = Program::from(prompt);
             compl_queue.send(Box::new(prog)).await.unwrap()
         }
+        else { 
+            println!("Ingnoring prompt: {}", id);
+        }
     }
 }
 
@@ -36,8 +39,8 @@ pub async fn read_output_jsonl(out_file: &PathBuf) -> HashSet<String> {
             let f = BufReader::new(f);
             let mut lines = f.lines();
             while let Some(line) = lines.next_line().await.unwrap() {
-                let DatasetOutput { path, ..} = serde_json::from_str(&line).expect("Should be valid existing completion");
-                let id = get_id_from_path(path);
+                let ds: DatasetOutput = serde_json::from_str(&line).expect("Should be valid existing completion");
+                let id = get_id_from_path(ds.path);
                 let _ = seen.insert(id);
             }
         }
