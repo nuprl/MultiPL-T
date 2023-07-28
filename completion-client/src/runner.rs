@@ -96,7 +96,7 @@ async fn run_single_program(
         .await
         .map_err(|e| RunError::from(e))?;
     let res = serde_json::from_str::<EvalResult>(
-        std::str::from_utf8(&out.stdout).map_err(|e| RunError::from(e))?,
+        str_from_u8_nul_utf8(&out.stdout).map_err(|e| RunError::from(e))?,
     )
     .map_err(|e| RunError::from(e))?;
     if res.status.to_lowercase().as_str() == "ok" { 
@@ -108,3 +108,10 @@ async fn run_single_program(
 }
 
 
+//https://stackoverflow.com/a/42067321
+fn str_from_u8_nul_utf8(utf8_src: &[u8]) -> Result<&str, std::str::Utf8Error> {
+    let nul_range_end = utf8_src.iter()
+        .position(|&c| c == b'\0')
+        .unwrap_or(utf8_src.len()); // default to length if no `\0` present
+    ::std::str::from_utf8(&utf8_src[0..nul_range_end])
+}
