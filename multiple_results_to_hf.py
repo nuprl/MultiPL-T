@@ -16,12 +16,14 @@ pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
 pa.add_argument("--score_batch", type=int, default=32)
 pa.add_argument("--score_device", type=str, default="cpu")
+pa.add_argument("--no_score", action="store_true")
 args = pa.parse_args()
 
 possible_strategies = ["dedup", "dedup_best", "best"]
 if args.strategy not in possible_strategies:
     assert False, f"invalid strategy {args.strategy}, must be one of {possible_strategies}"
 
+num_has_at_least_one_passing = 0
 solutions = []
 edu_scores = []
 original_ids = []
@@ -66,6 +68,9 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
         else:
             num_failed += 1
 
+    if num_passed > 0:
+        num_has_at_least_one_passing += 1
+
     pass_rate = num_passed / (num_passed + num_failed)
 
     # simple set dedup
@@ -98,12 +103,16 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
 
 # score solutions (if dedup, otherwise we already have scores)
 if args.strategy == "dedup":
-    print(" #### scoring solutions #### ")
-    def make_score_iterator(): return range(0, len(solutions), args.score_batch)
-    for i in progressbar(make_score_iterator(), max_value=len(list(make_score_iterator()))):
-        batch = solutions[i: i + args.score_batch]
-        scores = scorer.score(batch)
-        edu_scores.extend(scores)
+    if args.no_score:
+        print(" #### not scoring solutions #### ")
+        edu_scores = [0] * len(solutions)
+    else:
+        print(" #### scoring solutions #### ")
+        def make_score_iterator(): return range(0, len(solutions), args.score_batch)
+        for i in progressbar(make_score_iterator(), max_value=len(list(make_score_iterator()))):
+            batch = solutions[i: i + args.score_batch]
+            scores = scorer.score(batch)
+            edu_scores.extend(scores)
 
 
 new_ds = datasets.Dataset.from_dict(
@@ -113,5 +122,7 @@ new_ds.push_to_hub(args.name)
 # stats
 print(" #### stats #### ")
 print(f"total solutions: {len(solutions)}")
+print(f"total unique solutions: {len(set(solutions))}")
+print(f"total problems with at least one solution: {num_has_at_least_one_passing}")
 print(f"average edu score: {sum(edu_scores) / len(edu_scores)}")
 print(f"average pass rate: {sum(pass_rates) / len(pass_rates)}")
