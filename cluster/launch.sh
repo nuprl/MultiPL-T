@@ -23,4 +23,4 @@ if [ -z "$VENV_ACTIVATE" ]; then
 fi
 
 TID=$(sbatch --parsable train.sbatch $VENV_ACTIVATE $HF_CACHE)
-sbatch executions.sbatch --dependency=afterok:$TID $MULTIPLE_IMAGE $PASS_K
+sbatch --dependency=afterok:$TID executions.sbatch $MULTIPLE_IMAGE $PASS_K
