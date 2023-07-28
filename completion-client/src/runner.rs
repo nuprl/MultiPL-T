@@ -90,15 +90,15 @@ async fn run_single_program(
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()
-        .map_err(|e| RunError::from(e))?;
+        .map_err(|e| RunError(format!("Error running child: {:?}", e)))?;
     let out = child
         .wait_with_output()
         .await
         .map_err(|e| RunError::from(e))?;
     let res = serde_json::from_str::<EvalResult>(
-        str_from_u8_nul_utf8(&out.stdout).map_err(|e| RunError::from(e))?,
+        str_from_u8_nul_utf8(&out.stdout).map_err(|e| RunError(format!("Error parsing utf8: {:?}", e)))?,
     )
-    .map_err(|e| RunError::from(e))?;
+    .map_err(|e| RunError(format!("Serialization Error: {:?}", e)))?;
     if res.status.to_lowercase().as_str() == "ok" { 
         Ok(RunRes::Succ)
     }
