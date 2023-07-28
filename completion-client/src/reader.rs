@@ -27,9 +27,10 @@ pub async fn read_input_jsonl(
             compl_queue.send(Box::new(prog)).await.unwrap()
         }
         else { 
-            println!("Ingnoring prompt: {}", id);
+            let _ = println!("Ingnoring prompt: {}", id);
         }
     }
+    println!("Read all prompts")
 }
 
 pub async fn read_output_jsonl(out_file: &PathBuf) -> HashSet<String> {

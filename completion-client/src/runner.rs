@@ -68,7 +68,7 @@ async fn run_programs(
             }
             Err(e) => { 
                 let _ = compl_queue.send(prog).await.unwrap();
-                eprint!("{:?}", e)
+                eprintln!("{:?}", e)
             }
         }
     }
