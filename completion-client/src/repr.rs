@@ -5,7 +5,7 @@ pub struct Prompt {
     name: String,
     language: String,
     prompt: String,
-    original: String,
+    pub original: String,
     tests: String,
     stop_tokens: Vec<String>,
 }
@@ -52,10 +52,10 @@ pub struct EvalResult {
     pub status: String,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct DatasetOutput {
     content: String,
-    path: String,
+    pub path: String,
     attempts: usize,
 }
 
