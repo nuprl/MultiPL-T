@@ -24,9 +24,10 @@ def clean_lua(sol):
         # remove the canonical solution from comment
         # canonical solution lines start with " * "
         not_canonical_i = 0
-        for i, line in enumerate(sol_lines):
+        for i, line in enumerate(sol_lines[1:]):
+            r_i = i + 1
             if not line.startswith("-- *") and not line.startswith("-- #"):
-                not_canonical_i = i
+                not_canonical_i = r_i
                 break
         sol_lines = sol_lines[not_canonical_i:]
 
@@ -41,20 +42,20 @@ def clean_ml(sol):
     sol = sol[:sol.find("\nlet assertions")]
     sol_lines = sol.split("\n")
     if "## Canonical Python Solution ##" in sol_lines[0]:
-        # remove the canonical solution from comment
-        # canonical solution lines start with " * "
         not_canonical_i = 0
-        for i, line in enumerate(sol_lines):
+        for i, line in enumerate(sol_lines[1:]):
+            r_i = i + 1
             if not line.strip().startswith("#"):
-                not_canonical_i=i
+                not_canonical_i = r_i
                 break
-        sol_lines[not_canonical_i]="(*"+sol_lines[not_canonical_i]
-        sol_lines=sol_lines[not_canonical_i:]
-    return sol
+        sol_lines = sol_lines[not_canonical_i:]
+        sol_lines = ["(**"] + sol_lines
+    sol_lines = [line for line in sol_lines if line.rstrip() != ""]
+    return "\n".join(sol_lines)
 
 
 def clean_ex(ex, cleaner):
-    ex["content"]=cleaner(ex["content"])
+    ex["content"] = cleaner(ex["content"])
     return ex
 
 
@@ -64,7 +65,7 @@ def clean_ml_ex(ex): return clean_ex(ex, clean_ml)
 
 
 if __name__ == "__main__":
-    parser=argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument("--input-dataset", type=str,
                         required=True, help="Input dataset name")
     parser.add_argument("--output-dataset", type=str,
@@ -72,21 +73,21 @@ if __name__ == "__main__":
     parser.add_argument("--language", type=str, required=True,
                         help="Language of the dataset")
     parser.add_argument("--push", action="store_true", help="Push to hub")
-    args=parser.parse_args()
+    args = parser.parse_args()
 
-    dataset=datasets.load_dataset(args.input_dataset)
-    cleaner=None
+    dataset = datasets.load_dataset(args.input_dataset)
+    cleaner = None
     if args.language == "racket":
-        cleaner=clean_racket_ex
+        cleaner = clean_racket_ex
     elif args.language == "lua":
-        cleaner=clean_lua_ex
+        cleaner = clean_lua_ex
     elif args.language == "ml":
-        cleaner=clean_ml_ex
+        cleaner = clean_ml_ex
     else:
         # crash with unimplemented language
         raise NotImplementedError(f"Language {args.language} not implemented")
 
-    dataset=dataset.map(cleaner)
+    dataset = dataset.map(cleaner)
 
     if args.push:
         dataset.push_to_hub(args.output_dataset)
