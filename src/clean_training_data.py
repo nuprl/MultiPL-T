@@ -11,7 +11,7 @@ def clean_racket(sol):
     whitespace = re.compile(r"^\s*$")
     new_content = []
     for line in content_lines:
-        if not re.match(canon_regex, line) and re.match(comment_line, line) and re.match(whitespace, line):
+        if not (re.match(canon_regex, line) or re.match(comment_line, line) or re.match(whitespace, line) or "** Canonical Python Solution **" in line):
             new_content.append(line)
     return "\n".join(new_content)
 
@@ -38,7 +38,16 @@ def clean_lua(sol):
 
 
 def clean_ml(sol):
-    return sol
+
+    canon_regex = re.compile(r"^\s*\*\s*#.*$")
+    comment_line = re.compile(r"^\s*\*\s*$")
+    whitespace = re.compile(r"^\s*$")
+    content_lines = sol.split("\n")
+    new_content = []
+    for line in content_lines:
+        if not (re.match(canon_regex, line) or re.match(comment_line, line) or re.match(whitespace, line) or "** Canonical Python Solution **" in line):
+            new_content.append(line)
+    return "\n".join(new_content)
 
 
 def clean_ex(ex, cleaner):
