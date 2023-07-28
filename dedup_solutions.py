@@ -8,14 +8,14 @@ def strip_comments(code: str, lang: str):
         "python": "#",
         "javascript": "//",
         "racket": ";",
-        "ocaml": "(*",
+        "ml": "(*",
     }
     comment_postfix = {
         "lua": "",
         "python": "",
         "javascript": "",
         "racket": "",
-        "ocaml": "*)",
+        "ml": "*)",
     }
 
     # Get comment prefix and postfix for given language

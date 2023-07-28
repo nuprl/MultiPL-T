@@ -7,4 +7,9 @@
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:v100-sxm2:1
 #SBATCH --output=train_%j.out
-python3 train.py
+VENV_ACTIVATE=$1
+HF_CACHE=$2
+module unload 
+module load python
+source $VENV_ACTIVATE
+HF_DATASETS_CACHE=HF_CACHE python3 train.py
