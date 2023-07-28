@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Number;
 
 #[derive(Deserialize)]
 pub struct Prompt {
@@ -17,7 +18,7 @@ pub struct Program {
     pub prompt: String,
     pub tests: String,
     pub completion: String,
-    pub attempts: usize,
+    pub attempts: u32,
     pub stop_tokens: Vec<String>,
     pub original: String,
 }
@@ -56,7 +57,7 @@ pub struct EvalResult {
 pub struct DatasetOutput {
     content: String,
     pub path: String,
-    attempts: usize,
+    attempts: Number,
 }
 
 impl From<Prompt> for Program {
@@ -110,13 +111,13 @@ impl From<Program> for DatasetOutput {
         DatasetOutput {
             content,
             path: original,
-            attempts,
+            attempts: Number::from(attempts),
         }
     }
 }
 
 impl Program {
-    pub fn inc_attempts(&mut self, attempt_limit: usize) -> Option<()> {
+    pub fn inc_attempts(&mut self, attempt_limit: u32) -> Option<()> {
         if self.attempts < attempt_limit {
             self.attempts = self.attempts + 1;
             Some(())

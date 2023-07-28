@@ -29,7 +29,7 @@ struct Cli {
     num_connections: usize,
 
     #[arg(long)]
-    attempt_limit: usize,
+    attempt_limit: u32,
 
     #[arg(long)]
     proc_limit: usize,

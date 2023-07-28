@@ -30,7 +30,7 @@ pub async fn spawn_runners(
     run_queue: Arc<Mutex<Receiver<Box<Program>>>>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
-    attempt_limit: usize, 
+    attempt_limit: u32, 
     num_runners: usize,
 ) -> () {
     let mut tasks = JoinSet::new();
@@ -49,7 +49,7 @@ async fn run_programs(
     run_queue: Arc<Mutex<Receiver<Box<Program>>>>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
-    attempt_limit: usize,
+    attempt_limit: u32,
 ) {
     loop {
         let mut prog: Box<Program> = {
