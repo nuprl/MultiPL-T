@@ -38,10 +38,10 @@ pub async fn spawn_runners(
         let rq = run_queue.clone();
         let cq = compl_queue.clone();
         let fq = fin_queue.clone();
-        tasks.spawn(run_programs(rq, cq, fq, attempt_limit));
+        tasks.spawn_blocking(move || run_programs(rq, cq, fq, attempt_limit));
     }
-    while let Some(_) = tasks.join_next().await {
-        ()
+    while let Some(t) = tasks.join_next().await {
+        t.unwrap().await
     }
 
 }

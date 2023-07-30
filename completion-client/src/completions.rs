@@ -27,10 +27,10 @@ pub async fn spawn_connections(
     for _ in 0..num_connections {
         let cq = compl_queue.clone();
         let rq = run_queue.clone();
-        tasks.spawn(make_completion_requests(cq, rq, server_url));
+        tasks.spawn_blocking( move || make_completion_requests(cq, rq, server_url) );
     }
-    while let Some(_) = tasks.join_next().await {
-        ()
+    while let Some(t) = tasks.join_next().await {
+        t.unwrap().await
     }
 }
 async fn make_single_request(
