@@ -135,6 +135,21 @@
     ]
   },
   {
+    "name": "right_choice",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n\n;; A Computable is:\n;; - (make-computable X [X -> X])\n;; Interpretation: A value that can be processed by the function to make a series\n(define-struct computable [value func] #:transparent)\n\n;; update: Computable -> Computable\n;; Runs the computable to make the next computable in the series\n(define (update c)",
+    "doctests": "original",
+    "original": "racket-prompts\\right_choice.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(define (add-one x) (+ x 1))\n(check-equal? (update (make-computable 5 add-one)) (make-computable 6 add-one))\n(define (repeat-string s) (string-append s s))\n(check-equal? (update (make-computable \"hi\" repeat-string)) (make-computable \"hihi\" repeat-string))\n(define (divide-2 x) (/ x 2))\n(check-equal? (update (make-computable 6 divide-2)) (make-computable 3 divide-2))",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
     "name": "social_time",
     "language": "rkt",
     "prompt": "#lang racket\n(require rackunit)\n\n;; A CallType is one of:\n;; - \"zoom\"\n;; - \"teams\"\n;; - \"phone\"\n;; Interpretation: a type of call\n\n(define CT-ZOOM \"zoom\")\n(define CT-TEAMS \"teams\")\n(define CT-PHONE \"phone\")\n\n;; An Event is one of:\n;; - (make-call CallType PosInt [NEList-of String] String)\n;; - (make-mtg PosInt [NEList-of String] String)\n;; - (make-alone PosInt String)\n;; Interpretation: an event in some period of time, which is either:\n;; - A call using some technology, lasting some number of minutes with attendees\n;;  (by name), and a description;\n;; - An in-person meeting lasting some number of minutes\n;;   with attendees (by name) and a description; or\n;; - Time spent alone for some number of minutes with a description.\n(define-struct call [type duration attendees description] #:transparent)\n(define-struct mtg [duration attendees description] #:transparent)\n(define-struct alone [duration description] #:transparent)\n\n;; social-time : Event -> PosInt\n;; gets the duration of calls and meetings; 0 for alone\n(define (social-event-time e)\n  (cond\n    [(call? e) (call-duration e)]\n    [(mtg? e) (mtg-duration e)]\n    [(alone? e) 0]))\n\n;; social-time : [List-of Event] -> PosInt\n;; how much time was spent on calls and meetings?\n(define (social-time loe)",
