@@ -51,5 +51,6 @@ new_ds = datasets.Dataset.from_dict(
     {"id": ids, "num_tests": num_tests, "tests": tests,
         "pass": funcs_pass, "fail": funcs_fail})
 new_ds = new_ds.filter(lambda x: x["num_tests"] >= args.min_tests)
+new_ds = new_ds.filter(lambda x: len(x["pass"]) > 0 and len(x["fail"]) > 0)
 print(len(new_ds))
 new_ds.push_to_hub(args.name)
