@@ -1,13 +1,12 @@
 use std::error::Error;
 use std::fmt::Debug;
-use std::sync::Arc;
 
 use crate::repr::EvalResult;
 
 use super::repr::Program;
+use super::mpmc::{SharedReceiver, recv_shared};
 
-use tokio::sync::Mutex;
-use tokio::sync::mpsc::{Receiver, Sender};
+use tokio::sync::mpsc::Sender;
 use tokio::task::JoinSet;
 
 #[derive(Debug)]
@@ -27,7 +26,7 @@ enum RunRes {
     Fail
 }
 pub async fn spawn_runners(
-    run_queue: Arc<Mutex<Receiver<Box<Program>>>>,
+    run_queue: SharedReceiver<Box<Program>>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
     attempt_limit: u32, 
@@ -38,41 +37,36 @@ pub async fn spawn_runners(
         let rq = run_queue.clone();
         let cq = compl_queue.clone();
         let fq = fin_queue.clone();
-        tasks.spawn_blocking(move || run_programs(rq, cq, fq, attempt_limit));
+        tasks.spawn(run_programs(rq, cq, fq, attempt_limit));
     }
-    while let Some(t) = tasks.join_next().await {
-        t.unwrap().await
-    }
-
+    tasks.detach_all()
 }
 async fn run_programs(
-    run_queue: Arc<Mutex<Receiver<Box<Program>>>>,
+    run_queue: SharedReceiver<Box<Program>>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
     attempt_limit: u32,
 ) {
     loop {
-        let mut prog: Box<Program> = {
-            let mut chan = run_queue.clone().lock_owned().await;
-            match chan.recv().await {
-                None => return,
-                Some(p) => p,
-            }
+        let mut prog: Box<Program> = match recv_shared(run_queue.clone()).await { 
+            None => { println!("Early return from runners"); return}
+            Some(p) => p
         };
-        dbg!("New program to run");
         match run_single_program(&prog).await {
             Ok(RunRes::Succ) => fin_queue.send(prog).await.unwrap(),
             Ok(RunRes::Fail) => { 
                 if let Some(()) = prog.inc_attempts(attempt_limit) { 
                     let _ = compl_queue.send(prog).await.unwrap();
                 }
+                else {
+                    println!("No more attempts for {}", prog.name);
+                }
             }
             Err(e) => { 
-                let _ = compl_queue.send(prog).await.unwrap();
+                compl_queue.send(prog).await.unwrap();
                 println!("{:?}", e)
             }
         }
-        dbg!("Ran new program");
     }
 }
 
