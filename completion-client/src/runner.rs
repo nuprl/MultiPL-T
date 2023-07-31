@@ -63,7 +63,9 @@ async fn run_programs(
                 }
             }
             Err(e) => { 
-                compl_queue.send(prog).await.unwrap();
+                if let Some(()) =  prog.inc_attempts(attempt_limit) {
+                    compl_queue.send(prog).await.unwrap();
+                }
                 println!("{:?}", e)
             }
         }
