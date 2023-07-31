@@ -34,7 +34,6 @@ if __name__ == "__main__":
         "id": [],
         "path": [],
         "attempts": [],
-        "cannon": []
     }
     for file in Path(args.json_dir).glob("*.jsonl"):
         print(f"Processing {file}")
@@ -47,7 +46,6 @@ if __name__ == "__main__":
                 new_ds_dict["content"].append(d["content"])
                 new_ds_dict["path"].append(d["path"])
                 new_ds_dict["id"].append(id)
-                new_ds_dict["cannon"].append(None)
                 try:
                     new_ds_dict["attempts"].append(d["attempts"])
                 except KeyError:

@@ -13,16 +13,18 @@ pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--min_tests", type=int, default=3)
 args = pa.parse_args()
 
-funcs_pass = []
-funcs_fail = []
+passed = []
+failed = []
 tests = []
 num_tests = []
 ids = []
+relative_ids = []
 
 
 def make_path_iterator(): return Path(args.path).glob("**/*.results.json.gz")
 
 
+r_i = 0
 for path in progressbar(make_path_iterator(), max_value=len(list(make_path_iterator()))):
     with gzip.open(path, "rt") as f:
         data = json.load(f)
@@ -31,32 +33,47 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
     results = data["results"]
     tests_code = data["tests"]
 
-    passed = []
-    failed = []
-
-    for res in results:
-        sol = clean_sol_prompt(args.lang, res["program"])
-        if res["exit_code"] == 0:
-            passed.append(sol)
-        else:
-            failed.append(sol)
-
     _num_tests = None
     if args.lang == "lua":
         _num_tests = tests_code.count("lu.assertEquals")
     else:
         raise NotImplementedError("Only 'lua' is supported for now")
 
-    num_tests.append(_num_tests)
-    tests.append(tests_code)
-    funcs_pass.append(passed)
-    funcs_fail.append(failed)
-    ids.append(e_id)
+    if _num_tests < args.min_tests:
+        continue
+
+    passing = []
+    failing = []
+    for res in results:
+        sol = clean_sol_prompt(args.lang, res["program"])
+        if res["exit_code"] == 0:
+            passing.append(sol)
+        else:
+            failing.append(sol)
+
+    if len(passing) == 0 or len(failing) == 0:
+        continue
+
+    for p in passing:
+        for f in failing:
+            passed.append(p)
+            failed.append(f)
+            tests.append(tests_code)
+            num_tests.append(_num_tests)
+            ids.append(e_id)
+            relative_ids.append(r_i)
+            r_i += 1
+
 
 new_ds = datasets.Dataset.from_dict(
-    {"id": ids, "num_tests": num_tests, "tests": tests,
-        "pass": funcs_pass, "fail": funcs_fail})
-new_ds = new_ds.filter(lambda x: x["num_tests"] >= args.min_tests)
-new_ds = new_ds.filter(lambda x: len(x["pass"]) > 0 and len(x["fail"]) > 0)
+    {
+        "passed": passed,
+        "failed": failed,
+        "tests": tests,
+        "num_tests": num_tests,
+        "id": ids,
+        "relative_id": relative_ids,
+    }
+)
 print(len(new_ds))
 new_ds.push_to_hub(args.name)

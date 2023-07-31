@@ -23,8 +23,8 @@ async def main():
     compl_queue = asyncio.Queue()
     fin_queue = asyncio.Queue()
     await read_prompts(args.prompt_file, seen, compl_queue)
-    await spawn_runners(run_queue, compl_queue, fin_queue, args.attempt_limit, args.num_runners)
     await spawn_connections(args.num_connections, args.endpoint_url, run_queue, compl_queue, fin_queue)
+    await spawn_runners(run_queue, compl_queue, fin_queue, args.attempt_limit, args.num_runners)
     await write_completions(args.out_file, fin_queue)
 
 if __name__ == "__main__":

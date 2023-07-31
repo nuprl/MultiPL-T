@@ -14,4 +14,3 @@ for check in ./checkpoint_*; do
   check=${check:2}
   sbatch eval_checkpoint.sbatch $check $MULTIPLE_IMAGE $PASS_K
 done
-```
