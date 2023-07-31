@@ -15,22 +15,21 @@
 ;; that a student has received in all courses.
 (define-struct student-grades [name grades] #:transparent)
 
-;;; grades-for-student : Student -> StudentGrades
-;;; looks up all the grades for the supplied student
-(define (grades-for-student student)
-  (make-student-grades
-    (student-name student)
-    (map grade-value
-        (filter
-          (λ (g) (= (grade-nuid g) (student-nuid student)))
-          grades))))
-
 ;; student-grades: [List-of Student] [List-of Grade] -> [List-of StudentGrades]
 ;; Produces a StudentGrade for each student, with the list of grades that
 ;; student received.
 (define (students->student-grades students grades)
 ;; <solution>
-    (map grades-for-student students))
+    (local [;; grades-for-student : Student -> StudentGrades
+            ;; looks up all the grades for the supplied student
+            (define (grades-for-student student)
+              (make-student-grades
+                (student-name student)
+                (map grade-value
+                    (filter
+                      (λ (g) (= (grade-nuid g) (student-nuid student)))
+                      grades))))]
+    (map grades-for-student students)))
 
 ;; <tests>
 (check-equal?
