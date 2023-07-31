@@ -1,12 +1,10 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashMap, time::Duration};
 
 use super::repr::{Program, PromptMessage};
+use super::mpmc::{SharedReceiver, recv_shared};
 use reqwest::Client;
 use tokio::{
-    sync::{
-        mpsc::{Receiver, Sender},
-        Mutex,
-    },
+    sync::mpsc::Sender,
     task::JoinSet,
 };
 
@@ -19,7 +17,7 @@ enum ComplError {
 
 pub async fn spawn_connections(
     num_connections: usize,
-    compl_queue: Arc<Mutex<Receiver<Box<Program>>>>,
+    compl_queue: SharedReceiver<Box<Program>>,
     run_queue: Sender<Box<Program>>,
     server_url: &'static str,
 ) -> () {
@@ -27,11 +25,9 @@ pub async fn spawn_connections(
     for _ in 0..num_connections {
         let cq = compl_queue.clone();
         let rq = run_queue.clone();
-        tasks.spawn_blocking( move || make_completion_requests(cq, rq, server_url) );
+        tasks.spawn(make_completion_requests(cq, rq, server_url)) ;
     }
-    while let Some(t) = tasks.join_next().await {
-        t.unwrap().await
-    }
+    tasks.detach_all()
 }
 async fn make_single_request(
     prog: &Program,
@@ -56,20 +52,16 @@ async fn make_single_request(
     Ok(resp_json["generated_text"].to_string())
 }
 async fn make_completion_requests(
-    compl_queue: Arc<Mutex<Receiver<Box<Program>>>>,
+    compl_queue: SharedReceiver<Box<Program>>,
     run_queue: Sender<Box<Program>>,
     server_url: &'static str,
 ) -> () {
     let client = reqwest::Client::new();
     loop {
-        let mut prog: Box<Program> = {
-            let mut chan = compl_queue.clone().lock_owned().await;
-            match chan.recv().await {
-                None => return,
-                Some(p) => p,
-            }
-        };
-        dbg!("Got new program to send");
+        let mut prog: Box<Program> = match recv_shared(compl_queue.clone()).await { 
+            None => { println!("Early return from completions"); return}
+            Some(p) => p
+        }; 
         let mut attempts = 0;
         while attempts < 10 {
             match make_single_request(&prog, &client, server_url).await {
@@ -89,6 +81,5 @@ async fn make_completion_requests(
                 }
             }
         }
-        dbg!("Got response for program");
     }
 }

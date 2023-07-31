@@ -3,6 +3,7 @@ mod reader;
 mod repr;
 mod runner;
 mod writer;
+mod mpmc;
 
 use std::{path::PathBuf, sync::Arc};
 
