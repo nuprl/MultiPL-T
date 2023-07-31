@@ -28,7 +28,6 @@ pub async fn read_input_jsonl(
         }
         else { 
             let _ = println!("Ingnoring prompt: {}", id);
-            continue;
         }
     }
     println!("Read all prompts")
