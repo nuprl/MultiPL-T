@@ -3,10 +3,10 @@
 # checkpoint at the end of training. Make sure to provide a train.py for this
 # experiment. 
 
-MULTIPLE_IMAGE="" #replace with path to singularity image
-PASS_K="" #replace with path to pass_k.py
-VENV_ACTIVATE="" #replace with path to venv/bin/activate
-HF_CACHE="" #replace with path to huggingface cache
+MULTIPLE_IMAGE="/work/arjunguha-research-group/gouwar.j/multipl-e-evaluation_latest.sif"
+PASS_K="/work/arjunguha-research-group/arjun/projects/MultiPL-T/MultiPL-E/pass_k.py" 
+VENV_ACTIVATE="/work/arjunguha-research-group/gouwar.j/venv/bin/activate" 
+HF_CACHE="/work/arjunguha-research-group/gouwar.j/cache"
 
 # Check that MUTLIPLE_IMAGE and PASS_K are set
 if [ -z "$MULTIPLE_IMAGE" ]; then
@@ -23,4 +23,6 @@ if [ -z "$VENV_ACTIVATE" ]; then
 fi
 
 TID=$(sbatch --parsable train.sbatch $VENV_ACTIVATE $HF_CACHE)
-sbatch --dependency=afterok:$TID executions.sbatch $MULTIPLE_IMAGE $PASS_K
+sbatch --dependency=afterok:$TID executions.sbatch $MULTIPLE_IMAGE $PASS_K 
+
+

@@ -3,7 +3,7 @@
 #SBATCH --mem=24G
 #SBATCH --export=ALL
 #SBATCH --cpus-per-task=24
-#SBATCH --time=0:05:00
+#SBATCH --time=0:15:00
 #SBATCH --job-name=executions
 #SBATCH --partition=express
 #SBATCH --output=eval_%j.out
@@ -27,6 +27,5 @@ singularity exec --home tmp_home:/home/$USER \
   $MULTIPLE_IMAGE \
   python3 /code/main.py \
   --dir /dataset --output-dir /dataset --recursive
-python3 $PASS_K $1/eval | tee passk_$1.csv sbatch --dependency=afterok:$TID executions.sbatch $check $MULTIPLE_IMAGE $PASS_K
-
+python3 $PASS_K $CHECKPOINT/eval | tee passk_$CHECKPOINT.csv 
 
