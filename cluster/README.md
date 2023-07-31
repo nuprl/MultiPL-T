@@ -7,13 +7,15 @@ Activate your python venv and make sure you have the requirements specified in
     [gouwar.j@login-01 ~]$: source venv/bin/activate
     [gouwar.j@login-01 ~]$: pip install -r requirements.txt
 
-## The Training Script 
+## train_eval
+
+### The Training Script 
 
 The `train.py` script runs the simple trainer from the `code_llms` "package." 
 Edit this script to set the hyperparameters and describe how to load the train 
 and test data. 
 
-## The Launch Script 
+### The Launch Script 
  
 `launch.sh` configures how the experiment is run. It has 4 paths that need to be 
 set: 
@@ -25,3 +27,5 @@ set:
 Setting the 4 variables at the top of the script launches the training run described 
 in `train.py` on a V100 node, spawns an evaluation job for each checkpoint, and 
 then runs the `pass_k.py` script on the evaluation results. 
+
+## inf_eval
