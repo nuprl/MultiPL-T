@@ -135,13 +135,43 @@
     ]
   },
   {
-    "name": "right_choice",
+    "name": "points_and_lines",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n\n;; A Point is:\n;; - (make-point Number Number)\n;; Interpretation: A point on a cartesian plane\n(define-struct point [x y] #:transparent)\n\n;; A Line is:\n;; - (make-line Point Point)\n;; Interpretation: A straight line between two points\n(define-struct line [start end] #:transparent)\n\n;; manhattan-distance: Line -> Number\n;; Computes the manhattan distance that a line covers\n;; manhattan distance = |x_1 - x_2| + |y_1 - y_2|\n(define (manhattan-distance l)",
+    "doctests": "original",
+    "original": "racket-prompts\\points_and_lines.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(check-equal? (manhattan-distance (make-line (make-point 0 0) (make-point 4 3))) 7)\n(check-equal? (manhattan-distance (make-line (make-point 1 3) (make-point 4 3))) 3)\n(check-equal? (manhattan-distance (make-line (make-point 4 2) (make-point 4 3))) 1)\n(check-equal? (manhattan-distance (make-line (make-point 5 8) (make-point 4 3))) 6)\n(check-equal? (manhattan-distance (make-line (make-point 7 0) (make-point 7 -5))) 5)\n(check-equal? (manhattan-distance (make-line (make-point 4 0) (make-point -4 0))) 8)",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
+    "name": "series",
     "language": "rkt",
     "prompt": "#lang racket\n(require rackunit)\n\n;; A Computable is:\n;; - (make-computable X [X -> X])\n;; Interpretation: A value that can be processed by the function to make a series\n(define-struct computable [value func] #:transparent)\n\n;; update: Computable -> Computable\n;; Runs the computable to make the next computable in the series\n(define (update c)",
     "doctests": "original",
-    "original": "racket-prompts\\right_choice.rkt",
+    "original": "racket-prompts\\series.rkt",
     "prompt_terminology": "verbatim",
     "tests": "(define (add-one x) (+ x 1))\n(check-equal? (update (make-computable 5 add-one)) (make-computable 6 add-one))\n(define (repeat-string s) (string-append s s))\n(check-equal? (update (make-computable \"hi\" repeat-string)) (make-computable \"hihi\" repeat-string))\n(define (divide-2 x) (/ x 2))\n(check-equal? (update (make-computable 6 divide-2)) (make-computable 3 divide-2))",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
+    "name": "shapes",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n\n;; A Shape is one of:\n;; - (make-circle Number)\n;; - (make-rectangle Number Number)\n;; - (make-triangle Number Number Number)\n;; Interpretation: A closed shape\n(define-struct circle [radius] #:transparent)\n(define-struct rectangle [w l] #:transparent)\n(define-struct triangle [s1 s2 s3] #:transparent)\n\n;; circle-perimeter: Circle -> Number\n;; Computes the perimeter of a circle\n(define (circle-perimeter c)\n    (* 6.28 (circle-radius c)))\n\n;; rectangle-perimeter: Rectangle -> Number\n;; Computes the perimeter of a rectangle\n(define (rectangle-perimeter r)\n    (+ (* 2 (rectangle-w r)) (* 2 (rectangle-l r))))\n\n;; triangle-perimeter: Triangle -> Number\n;; Computes the perimeter of a triangle\n(define (triangle-perimeter t)\n    (+ (triangle-s1 t) (+ (triangle-s2 t) (triangle-s3 t))))\n\n;; shape-perimeter: Shape -> Number\n;; Computes the perimeter of any Shape\n(define (shape-perimeter s)",
+    "doctests": "original",
+    "original": "racket-prompts\\shapes.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(check-equal? (shape-perimeter (make-circle 2)) 12.56)\n(check-equal? (shape-perimeter (make-rectangle 2 4)) 12)\n(check-equal? (shape-perimeter (make-triangle  3 3 3)) 9)",
     "stop_tokens": [
       "\n(define ",
       "\n#|",
