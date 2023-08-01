@@ -12,7 +12,7 @@
 ;; add-edge-to-station : String Station -> Station
 ;; Adds a single edge to a station.
 (define (add-edge-to-station t s)
-  (if (ormap (λ (t2) (string=? t t2)) (station-connections s))
+  (if (ormap (lambda (t2) (string=? t t2)) (station-connections s))
       s
       (make-station (station-name s) (cons t (station-connections s)))))
 

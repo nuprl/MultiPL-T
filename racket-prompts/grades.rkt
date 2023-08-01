@@ -27,7 +27,7 @@
                 (student-name student)
                 (map grade-value
                     (filter
-                      (λ (g) (= (grade-nuid g) (student-nuid student)))
+                      (lambda (g) (= (grade-nuid g) (student-nuid student)))
                       grades))))]
     (map grades-for-student students)))
 

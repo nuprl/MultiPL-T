@@ -15,7 +15,7 @@
   (local [; num-peeps/loo : [List-of OrgChart] -> Nat
           ; how many people are in the list?
           (define (num-peeps/loo loo)
-            (foldr (λ (o sum) (+ (num-peeps o) sum))
+            (foldr (lambda (o sum) (+ (num-peeps o) sum))
                    0
                    loo))]
     (cond
