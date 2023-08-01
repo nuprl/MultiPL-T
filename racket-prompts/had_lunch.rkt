@@ -25,24 +25,16 @@
 (define-struct mtg [duration attendees description] #:transparent)
 (define-struct alone [duration description] #:transparent)
 
-;; is-lunch? : Event -> Boolean
-;; is this a lunch event?
-(define (is-lunch? e)
-  (cond
-    [(call? e) (has-lunch? (call-description e))]
-    [(mtg? e) (has-lunch? (mtg-description e))]
-    [(alone? e) (has-lunch? (alone-description e))]))
-
-;; has-lunch? : String -> Boolean
-;; does this contain the word "lunch"?
-(define (has-lunch? s)
-  (string-contains? (string-downcase s) "lunch"))
-
 ;; had-lunch? : [List-of Event] -> Boolean
 ;; Is there an event containing the word lunch?
 (define (had-lunch? loe)
 ;; <solution>
-  (ormap is-lunch? loe))
+  (local [(define (is-lunch? e)
+    (string-contains? (string-downcase (cond
+      [(call? e) (call-description e)]
+      [(mtg? e) (mtg-description e)]
+      [(alone? e) (alone-description e)])) "lunch"))]
+    (ormap is-lunch? loe)))
 
 ;; <tests>
 (check-equal? (had-lunch? '()) #false)

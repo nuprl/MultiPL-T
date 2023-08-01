@@ -19,25 +19,25 @@ pub async fn spawn_connections(
     num_connections: usize,
     compl_queue: SharedReceiver<Box<Program>>,
     run_queue: Sender<Box<Program>>,
-    server_url: &'static str,
+    endpoint_url: &'static str,
 ) -> () {
     let mut tasks = JoinSet::new();
     for _ in 0..num_connections {
         let cq = compl_queue.clone();
         let rq = run_queue.clone();
-        tasks.spawn(make_completion_requests(cq, rq, server_url)) ;
+        tasks.spawn(make_completion_requests(cq, rq, endpoint_url));
     }
     tasks.detach_all()
 }
 async fn make_single_request(
     prog: &Program,
     client: &Client,
-    server_url: &'static str,
+    endpoint_url: &'static str,
 ) -> Result<String, ComplError> {
     let msg = serde_json::to_string(&PromptMessage::from(prog.clone()))
         .expect("Message should serialize");
     let resp = client
-        .post(server_url)
+        .post(endpoint_url)
         .body(msg.clone())
         .header("Content-Type", "application/json")
         .send()
@@ -54,7 +54,7 @@ async fn make_single_request(
 async fn make_completion_requests(
     compl_queue: SharedReceiver<Box<Program>>,
     run_queue: Sender<Box<Program>>,
-    server_url: &'static str,
+    endpoint_url: &'static str,
 ) -> () {
     let client = reqwest::Client::new();
     loop {
@@ -64,7 +64,7 @@ async fn make_completion_requests(
         }; 
         let mut attempts = 0;
         while attempts < 10 {
-            match make_single_request(&prog, &client, server_url).await {
+            match make_single_request(&prog, &client, endpoint_url).await {
                 Ok(compl) => {
                     (*prog).completion = compl;
                     let _ = run_queue.send(prog).await;

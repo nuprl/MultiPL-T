@@ -13,7 +13,7 @@
 ; to every person in the org chart.
 (define (full-title org name)
 ;; <solution>
-  (local [(define F (λ (o) (full-title o name)))]
+  (local [(define F (lambda (o) (full-title o name)))]
     (cond
       [(person? org)
        (make-person

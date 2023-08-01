@@ -24,7 +24,7 @@ struct Cli {
     output_file: PathBuf,
 
     #[arg(long)]
-    server_url: String,
+    endpoint_url: String,
 
     #[arg(long)]
     num_connections: usize,
@@ -33,7 +33,7 @@ struct Cli {
     attempt_limit: u32,
 
     #[arg(long)]
-    proc_limit: usize,
+    num_runners: usize,
 }
 
 #[tokio::main]
@@ -41,12 +41,12 @@ async fn main() {
     let Cli {
         prompt_file,
         output_file,
-        server_url,
+        endpoint_url,
         num_connections,
         attempt_limit,
-        proc_limit,
+        num_runners,
     } = Cli::parse();
-    let server_url: &'static str = Box::leak(server_url.into_boxed_str());
+    let endpoint_url: &'static str = Box::leak(endpoint_url.into_boxed_str());
     let seen_ids = reader::read_output_jsonl(&output_file).await;
     let (complq_send, complq_recv) = channel::<Box<Program>>(100 + num_connections);
     let (runq_send, runq_recv) = channel::<Box<Program>>(100 + num_connections);
@@ -56,14 +56,14 @@ async fn main() {
         num_connections,
         Arc::new(Mutex::new(complq_recv)),
         runq_send.clone(),
-        server_url,
+        endpoint_url,
     ));
     let rn_hdl = spawn(runner::spawn_runners(
         Arc::new(Mutex::new(runq_recv)),
         complq_send.clone(),
         finq_send.clone(),
         attempt_limit,
-        proc_limit,
+        num_runners,
     ));
     let w_hdl = spawn(writer::write_jsonl(output_file, finq_recv));
     let _ = join!(rd_hdl, c_hdl, rn_hdl, w_hdl);
