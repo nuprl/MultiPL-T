@@ -105,6 +105,21 @@
     ]
   },
   {
+    "name": "hello_goodbye",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n\n;; hello : String -> String\n;; Greets you hello!\n(define (hello s)\n  (string-append \"Hello \" s \"!\"))\n\n;; goodbye : String -> String \n;; Greets you goodbye!\n(define (goodbye s)\n  (string-append \"Goodbye \" s \"!\"))\n\n;; hello-goodbye : [List-of String] -> [List-of String]\n;; Greets everyone hello and goodbye.\n(define (hello-goodbye l)\n  (double-do-it hello goodbye l))\n\n;; double-do-it : (X Y) [X -> Y] [X -> Y] [List-of X] -> [List-of Y]\n;; Helper for hello-goodbye.\n(define (double-do-it f g l)\n  (cond\n    [(empty? l) '()]\n    [(cons? l)\n     (cons (f (first l))\n           (cons (g (first l))\n                 (double-do-it f g (rest l))))]))\n                 \n;; <tests>\n(check-equal? (hello-goodbye '()) '())\n(check-equal?\n (hello-goodbye (cons \"Alice\" (cons \"Bob\" '())))\n (cons \"Hello Alice!\" (cons \"Goodbye Alice!\" (cons \"Hello Bob!\" (cons \"Goodbye Bob!\" '())))))\n(check-equal? (double-do-it sqr sqrt '()) '())\n(check-equal? (double-do-it sqr sqrt (cons 25 (cons 9 '())))",
+    "doctests": "original",
+    "original": "racket-prompts\\hello_goodbye.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(check-equal? (hello-goodbye '()) '())\n(check-equal?\n (hello-goodbye (cons \"Alice\" (cons \"Bob\" '())))\n (cons \"Hello Alice!\" (cons \"Goodbye Alice!\" (cons \"Hello Bob!\" (cons \"Goodbye Bob!\" '())))))\n(check-equal? (double-do-it sqr sqrt '()) '())\n(check-equal? (double-do-it sqr sqrt (cons 25 (cons 9 '())))\n              (cons 625 (cons 5 (cons 81 (cons 3 '())))))",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
     "name": "make_subway",
     "language": "rkt",
     "prompt": "#lang racket\n(require rackunit)\n\n;; A Station is a (make-station String [List-of String])\n;; Interpretation: The name of a station and the names of stations that directly\n;; connect to it.\n(define-struct station [name connections] #:transparent)\n\n;; A Subway is a [List-of Station]\n;; Interpretation: A list of stations that make a subway network.\n\n;; A [List-of-2-or-more X] is one of:\n;; - (cons X (cons X '()))\n;; - (cons X [List-of-2-or-more X])\n;; A list with two or more items.\n\n;; add-forward-edges : Subway [List-of-2-or-more String] -> Subway\n;; Adds the list of stations to the subway, in one direction.\n(define (add-forward-edges subway lo2om)\n  (cond\n    [(empty? (rest (rest lo2om))) \n     (add-edge (first lo2om) (first (rest lo2om)) subway)]\n    [(cons? (rest (rest lo2om)))\n     (add-forward-edges\n      (add-edge (first lo2om) (first (rest lo2om)) subway)\n      (rest lo2om))]))\n\n;; add-edge : String String Subway -> Subway\n;; (add-edge from to station) adds a connection to the subway, if it does not\n;; already exist. Assumes that both from and to stations in the Subway.\n(define (add-edge from to subway)\n  (cond\n    [(empty? subway) subway]\n    [(cons? subway)\n     (if (string=? from (station-name (first subway)))\n         (cons (add-edge-to-station to (first subway)) (rest subway))\n         (cons (first subway) (add-edge from to (rest subway))))]))\n\n;; line->subway : [List-of-2-or-more String] -> Subway\n;; Given a list of stations on a line, produces a Subway.\n(define (line->subway line)",
