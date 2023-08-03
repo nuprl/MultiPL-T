@@ -11,6 +11,7 @@ pub async fn logger(mut log_queue: Receiver<(String, Option<String>)>, log_file:
     let f = OpenOptions::new()
         .write(true)
         .append(true)
+        .create(true)
         .open(log_file)
         .await
         .expect("Log file open should succeed");
