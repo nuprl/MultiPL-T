@@ -97,11 +97,12 @@ async fn run_single_program(prog: &Program) -> Result<RunRes, RunError> {
         .spawn()
         .map_err(|e| RunError(format!("Error running child: {:?}", e)))?;
     let mut child_stdin = child.stdin.take().expect("Child stdin");
-    let _ = child_stdin.write_all(full_prog_text.as_bytes()).await;
+    let _ = child_stdin.write_all(format!("\"{}\"", full_prog_text).as_bytes()).await;
     let out = child
         .wait_with_output()
         .await
         .map_err(|e| RunError::from(e))?;
+    dbg!(out.clone());
     let res = serde_json::from_str::<EvalResult>(
         str_from_u8_nul_utf8(&out.stdout)
             .map_err(|e| RunError(format!("Error parsing utf8: {:?}", e)))?,
