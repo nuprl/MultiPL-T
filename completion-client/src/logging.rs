@@ -22,4 +22,5 @@ pub async fn logger(mut log_queue: Receiver<(String, Option<String>)>, log_file:
             let _ = f.write_all(format!("{}\n----\n", pstr).as_bytes()).await;
         }
     }
+    let _ = f.flush();
 }

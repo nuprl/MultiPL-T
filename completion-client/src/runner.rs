@@ -6,6 +6,7 @@ use crate::repr::EvalResult;
 use super::mpmc::{recv_shared, SharedReceiver};
 use super::repr::Program;
 
+use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinSet;
 
@@ -85,17 +86,18 @@ async fn run_single_program(prog: &Program) -> Result<RunRes, RunError> {
     let full_prog_text = String::from(prog);
     let args = [
         "simple_eval.py",
-        "--prog-text",
-        &full_prog_text,
         "--lang",
         &prog.language,
     ];
-    let child = tokio::process::Command::new("python3")
+    let mut child = tokio::process::Command::new("python3")
         .args(args)
+        .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()
         .map_err(|e| RunError(format!("Error running child: {:?}", e)))?;
+    let mut child_stdin = child.stdin.take().expect("Child stdin");
+    let _ = child_stdin.write_all(format!("{}\n", full_prog_text).as_bytes());
     let out = child
         .wait_with_output()
         .await
