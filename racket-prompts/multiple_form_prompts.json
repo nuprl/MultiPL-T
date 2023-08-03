@@ -1,5 +1,20 @@
 [
   {
+    "name": "add_left",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n\n;; A NumTree is one of:\n;; - (make-numtree Number NumTree NumTree)\n;; - Number\n;; Interpretation: A set of numbers arranged in a tree shape.\n(define-struct numtree [num left right] #:transparent)\n\n;; add-left: NumTree -> Number\n;; Adds only the numbers on the leftmost side of the tree.\n(define (add-left tree)",
+    "doctests": "original",
+    "original": "racket-prompts\\add_left.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(check-equal? (add-left 4) 4)\n(check-equal? (add-left (make-numtree 5 6 7)) 11)\n(check-equal? (add-left (make-numtree -3 (make-numtree 3 0 9) (make-numtree 4 9 10))) 0)",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
     "name": "add_station",
     "language": "rkt",
     "prompt": "#lang racket\n(require rackunit)\n\n;; A Station is a (make-station String [List-of String])\n;; Interpretation: The name of a station and the names of stations that directly\n;; connect to it.\n(define-struct station [name connections] #:transparent)\n\n;; A Subway is a [List-of Station]\n;; Interpretation: A list of stations that make a subway network.\n\n;; add-edge-to-station : String Station -> Station\n;; Adds a single edge to a station.\n(define (add-edge-to-station t s)\n  (if (ormap (lambda (t2) (string=? t t2)) (station-connections s))\n      s\n      (make-station (station-name s) (cons t (station-connections s)))))\n\n;; add-edge : String String Subway -> Subway\n;; (add-edge from to station) adds a connection to the subway, if it does not\n;; already exist. Assumes that both from and to stations in the Subway.\n(define (add-edge from to subway)",
@@ -67,6 +82,21 @@
     "original": "racket-prompts\\dna_inverse.rkt",
     "prompt_terminology": "verbatim",
     "tests": "(check-equal? (dna-complement \"empty sequence\") \"empty sequence\")\n(check-equal? (dna-complement (make-adenine \"empty sequence\")) (make-thymine \"empty sequence\"))\n(check-equal? (dna-complement (make-thymine (make-cytosine (make-guanine (make-adenine \"empty sequence\")))))\n              (make-adenine (make-guanine (make-cytosine (make-thymine \"empty sequence\")))))",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
+    "name": "flip_tree",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n\n;; A NumTree is one of:\n;; - (make-numtree Number NumTree NumTree)\n;; - Number\n;; Interpretation: A set of numbers arranged in a tree shape.\n(define-struct numtree [num left right] #:transparent)\n\n;; mirror: NumTree -> NumTree\n;; Mirrors the tree around the center point\n(define (mirror tree)",
+    "doctests": "original",
+    "original": "racket-prompts\\flip_tree.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(check-equal? (mirror 5) 5)\n(check-equal? (mirror (make-numtree 5 6 7)) (make-numtree 5 7 6))\n(check-equal? (mirror (make-numtree 5 (make-numtree 8 9 10) (make-numtree 4 3 2))) (make-numtree 5 (make-numtree 4 2 3) (make-numtree 8 10 9)))",
     "stop_tokens": [
       "\n(define ",
       "\n#|",
