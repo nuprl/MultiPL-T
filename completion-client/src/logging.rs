@@ -6,12 +6,12 @@ use tokio::{
     sync::mpsc::Receiver,
 };
 
-use crate::repr::Program;
 
 pub async fn logger(mut log_queue: Receiver<(String, Option<String>)>, log_file: PathBuf) {
     let f = OpenOptions::new()
         .write(true)
         .append(true)
+        .create(true)
         .open(log_file)
         .await
         .expect("Log file open should succeed");
@@ -22,4 +22,5 @@ pub async fn logger(mut log_queue: Receiver<(String, Option<String>)>, log_file:
             let _ = f.write_all(format!("{}\n----\n", pstr).as_bytes()).await;
         }
     }
+    let _ = f.flush();
 }
