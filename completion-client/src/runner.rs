@@ -104,7 +104,6 @@ async fn run_single_program(prog: &Program) -> Result<RunRes, RunError> {
         .wait_with_output()
         .await
         .map_err(|e| RunError::from(e))?;
-    dbg!(out.clone());
     let res = serde_json::from_str::<EvalResult>(
         str_from_u8_nul_utf8(&out.stdout)
             .map_err(|e| RunError(format!("Error parsing utf8: {:?}", e)))?,
