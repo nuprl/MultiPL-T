@@ -6,7 +6,6 @@ use tokio::{
     sync::mpsc::Receiver,
 };
 
-use crate::repr::Program;
 
 pub async fn logger(mut log_queue: Receiver<(String, Option<String>)>, log_file: PathBuf) {
     let f = OpenOptions::new()
