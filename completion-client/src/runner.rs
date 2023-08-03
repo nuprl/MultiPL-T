@@ -97,7 +97,9 @@ async fn run_single_program(prog: &Program) -> Result<RunRes, RunError> {
         .spawn()
         .map_err(|e| RunError(format!("Error running child: {:?}", e)))?;
     let mut child_stdin = child.stdin.take().expect("Child stdin");
-    let _ = child_stdin.write_all(full_prog_text.as_bytes()).await;
+    let _ = child_stdin.write_all(format!("{}", full_prog_text).as_bytes()).await;
+    let _ = child_stdin.shutdown().await;
+    drop(child_stdin);
     let out = child
         .wait_with_output()
         .await
