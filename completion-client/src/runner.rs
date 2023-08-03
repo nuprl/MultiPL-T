@@ -3,8 +3,8 @@ use std::fmt::Debug;
 
 use crate::repr::EvalResult;
 
+use super::mpmc::{recv_shared, SharedReceiver};
 use super::repr::Program;
-use super::mpmc::{SharedReceiver, recv_shared};
 
 use tokio::sync::mpsc::Sender;
 use tokio::task::JoinSet;
@@ -21,15 +21,16 @@ where
     }
 }
 
-enum RunRes { 
+enum RunRes {
     Succ,
-    Fail
+    Fail,
 }
 pub async fn spawn_runners(
     run_queue: SharedReceiver<Box<Program>>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
-    attempt_limit: u32, 
+    log_queue: Sender<(String, Option<String>)>,
+    attempt_limit: u32,
     num_runners: usize,
 ) -> () {
     let mut tasks = JoinSet::new();
@@ -37,7 +38,8 @@ pub async fn spawn_runners(
         let rq = run_queue.clone();
         let cq = compl_queue.clone();
         let fq = fin_queue.clone();
-        tasks.spawn(run_programs(rq, cq, fq, attempt_limit));
+        let lq = log_queue.clone();
+        tasks.spawn(run_programs(rq, cq, fq, lq, attempt_limit));
     }
     tasks.detach_all()
 }
@@ -45,37 +47,42 @@ async fn run_programs(
     run_queue: SharedReceiver<Box<Program>>,
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
+    log_queue: Sender<(String, Option<String>)>,
     attempt_limit: u32,
 ) {
     loop {
-        let mut prog: Box<Program> = match recv_shared(run_queue.clone()).await { 
-            None => { println!("Early return from runners"); return}
-            Some(p) => p
+        let mut prog: Box<Program> = match recv_shared(run_queue.clone()).await {
+            None => {
+                println!("Early return from runners");
+                return;
+            }
+            Some(p) => p,
         };
         match run_single_program(&prog).await {
-            Ok(RunRes::Succ) => fin_queue.send(prog).await.unwrap(),
-            Ok(RunRes::Fail) => { 
-                if let Some(()) = prog.inc_attempts(attempt_limit) { 
+            Ok(RunRes::Succ) => { 
+                let _ = log_queue.send((format!("Success for {}:", &prog.name), None)).await;
+                let _ = fin_queue.send(prog).await.unwrap();
+            }
+            Ok(RunRes::Fail) => {
+                if let Some(()) = prog.inc_attempts(attempt_limit) {
                     let _ = compl_queue.send(prog).await.unwrap();
-                }
-                else {
-                    println!("No more attempts for {}", prog.name);
+                } else {
+                    let _ = log_queue.send((format!("No more attempts for {}", prog.name), None)).await;
                 }
             }
-            Err(e) => { 
-                if let Some(()) =  prog.inc_attempts(attempt_limit) {
+            Err(e) => {
+                let pstr = String::from(&*prog);
+                if let Some(()) = prog.inc_attempts(attempt_limit) {
                     compl_queue.send(prog).await.unwrap();
                 }
-                println!("{:?}", e)
+                let _ = log_queue.send((format!("{:?}", e), Some(pstr))).await;
             }
         }
     }
 }
 
-async fn run_single_program(
-    prog: &Program, 
-) -> Result<RunRes, RunError> {
-    let full_prog_text = format!("{}\n{}\n{}", prog.prompt, prog.completion, prog.tests);
+async fn run_single_program(prog: &Program) -> Result<RunRes, RunError> {
+    let full_prog_text = String::from(prog);
     let args = [
         "simple_eval.py",
         "--prog-text",
@@ -94,21 +101,21 @@ async fn run_single_program(
         .await
         .map_err(|e| RunError::from(e))?;
     let res = serde_json::from_str::<EvalResult>(
-        str_from_u8_nul_utf8(&out.stdout).map_err(|e| RunError(format!("Error parsing utf8: {:?}", e)))?,
+        str_from_u8_nul_utf8(&out.stdout)
+            .map_err(|e| RunError(format!("Error parsing utf8: {:?}", e)))?,
     )
     .map_err(|e| RunError(format!("Serialization Error: {:?}", e)))?;
-    if res.status.to_lowercase().as_str() == "ok" { 
+    if res.status.to_lowercase().as_str() == "ok" {
         Ok(RunRes::Succ)
-    }
-    else { 
+    } else {
         Ok(RunRes::Fail)
     }
 }
 
-
 //https://stackoverflow.com/a/42067321
 fn str_from_u8_nul_utf8(utf8_src: &[u8]) -> Result<&str, std::str::Utf8Error> {
-    let nul_range_end = utf8_src.iter()
+    let nul_range_end = utf8_src
+        .iter()
         .position(|&c| c == b'\0')
         .unwrap_or(utf8_src.len()); // default to length if no `\0` present
     ::std::str::from_utf8(&utf8_src[0..nul_range_end])

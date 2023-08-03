@@ -1,12 +1,9 @@
 use std::{collections::HashMap, time::Duration};
 
+use super::mpmc::{recv_shared, SharedReceiver};
 use super::repr::{Program, PromptMessage};
-use super::mpmc::{SharedReceiver, recv_shared};
 use reqwest::Client;
-use tokio::{
-    sync::mpsc::Sender,
-    task::JoinSet,
-};
+use tokio::{sync::mpsc::Sender, task::JoinSet};
 
 #[derive(Debug)]
 enum ComplError {
@@ -19,13 +16,15 @@ pub async fn spawn_connections(
     num_connections: usize,
     compl_queue: SharedReceiver<Box<Program>>,
     run_queue: Sender<Box<Program>>,
+    log_queue: Sender<(String, Option<String>)>,
     endpoint_url: &'static str,
 ) -> () {
     let mut tasks = JoinSet::new();
     for _ in 0..num_connections {
         let cq = compl_queue.clone();
         let rq = run_queue.clone();
-        tasks.spawn(make_completion_requests(cq, rq, endpoint_url));
+        let lq = log_queue.clone();
+        tasks.spawn(make_completion_requests(cq, rq, lq, endpoint_url));
     }
     tasks.detach_all()
 }
@@ -54,14 +53,20 @@ async fn make_single_request(
 async fn make_completion_requests(
     compl_queue: SharedReceiver<Box<Program>>,
     run_queue: Sender<Box<Program>>,
+    log_queue: Sender<(String, Option<String>)>,
     endpoint_url: &'static str,
 ) -> () {
     let client = reqwest::Client::new();
     loop {
-        let mut prog: Box<Program> = match recv_shared(compl_queue.clone()).await { 
-            None => { println!("Early return from completions"); return}
-            Some(p) => p
-        }; 
+        let mut prog: Box<Program> = match recv_shared(compl_queue.clone()).await {
+            None => {
+                let _ = log_queue
+                    .send(("Early return from completions".to_string(), None))
+                    .await;
+                return;
+            }
+            Some(p) => p,
+        };
         let mut attempts = 0;
         while attempts < 10 {
             match make_single_request(&prog, &client, endpoint_url).await {
@@ -72,11 +77,16 @@ async fn make_completion_requests(
                 }
                 Err(e) => {
                     attempts += 1;
-                    println!(
-                        "Faiiled with error: {:?}, Attempts remaining: {}",
-                        e,
-                        10 - attempts
-                    );
+                    let _ = log_queue
+                        .send((
+                            format!(
+                                "Faiiled with error: {:?}, Attempts remaining: {}",
+                                e,
+                                10 - attempts
+                            ),
+                            None,
+                        ))
+                        .await;
                     tokio::time::sleep(Duration::from_secs(5)).await
                 }
             }

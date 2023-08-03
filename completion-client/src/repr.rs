@@ -116,6 +116,12 @@ impl From<Program> for DatasetOutput {
     }
 }
 
+impl From<&Program> for String {
+    fn from(prog: &Program) -> Self {
+        format!("{}\n{}\n{}", prog.prompt, prog.completion, prog.tests)
+    }
+}
+
 impl Program {
     pub fn inc_attempts(&mut self, attempt_limit: u32) -> Option<()> {
         if self.attempts < attempt_limit {

@@ -10,9 +10,10 @@ use crate::repr::DatasetOutput;
 use super::repr::{Program, Prompt};
 
 pub async fn read_input_jsonl(
-    prompt_file: PathBuf, 
+    prompt_file: PathBuf,
     compl_queue: Sender<Box<Program>>,
-    seen_ids: HashSet<String>
+    log_queue: Sender<(String, Option<String>)>,
+    seen_ids: HashSet<String>,
 ) {
     let f = File::open(prompt_file)
         .await
@@ -21,13 +22,12 @@ pub async fn read_input_jsonl(
     let mut lines = f.lines();
     while let Some(line) = lines.next_line().await.unwrap() {
         let prompt: Prompt = serde_json::from_str(&line).expect("Should be valid prompt");
-        let id = get_id_from_path(prompt.original.to_string()); 
-        if !seen_ids.contains(&id) { 
+        let id = get_id_from_path(prompt.original.to_string());
+        if !seen_ids.contains(&id) {
             let prog = Program::from(prompt);
             let _ = compl_queue.send(Box::new(prog)).await;
-        }
-        else { 
-            let _ = println!("Ingnoring prompt: {}", id);
+        } else {
+            let _ = log_queue.send((format!("Ignoring prompt: {}", id), None)).await;
         }
     }
     println!("Read all prompts")
@@ -35,17 +35,18 @@ pub async fn read_input_jsonl(
 
 pub async fn read_output_jsonl(out_file: &PathBuf) -> HashSet<String> {
     let mut seen = HashSet::new();
-    match File::open(out_file).await { 
-        Ok(f) => { 
+    match File::open(out_file).await {
+        Ok(f) => {
             let f = BufReader::new(f);
             let mut lines = f.lines();
             while let Some(line) = lines.next_line().await.unwrap() {
-                let ds: DatasetOutput = serde_json::from_str(&line).expect("Should be valid existing completion");
+                let ds: DatasetOutput =
+                    serde_json::from_str(&line).expect("Should be valid existing completion");
                 let id = get_id_from_path(ds.path);
                 let _ = seen.insert(id);
             }
         }
-        Err(_) => { 
+        Err(_) => {
             File::create(out_file)
                 .await
                 .expect("File creation should succeed");
@@ -54,7 +55,7 @@ pub async fn read_output_jsonl(out_file: &PathBuf) -> HashSet<String> {
     seen
 }
 
-fn get_id_from_path(path_str: String) -> String { 
+fn get_id_from_path(path_str: String) -> String {
     path_str
         .split("/")
         .last()
