@@ -60,36 +60,6 @@
     ]
   },
   {
-    "name": "count_tree",
-    "language": "rkt",
-    "prompt": "#lang racket\n(require rackunit)\n\n; An OrgChart is one of:\n; - (make-person String String [List-of OrgChart])\n; - (make-group String [List-of OrgChart])\n; Interpretation: an organizational chart\n(define-struct person [name title reports]  #:transparent)\n(define-struct group [name members] #:transparent)\n\n; num-peeps : OrgChart -> Nat\n; counts people in an org chart\n(define (num-peeps org)",
-    "doctests": "original",
-    "original": "racket-prompts\\count_tree.rkt",
-    "prompt_terminology": "verbatim",
-    "tests": "(check-equal?\n (num-peeps (make-group \"test\" '())) 0)\n\n(check-equal?\n (num-peeps (make-person \"David Madigan\"\n               \"Provost and Senior Vice President for Academic Affairs\"\n               (list\n                (make-group \"Administration\"\n                            (list (make-person \"Thomas Sheahan\"\n                                               \"Senior Vice Provost, Curriculum and Programs\" '())))\n                (make-group \"Academic Deans\"\n                            (list (make-person \"Alan Mislove\"\n                                               \"Interim Dean, Khoury College of Computer Sciences\"\n                                               '())\n                                  (make-person \"Carmen Sceppa\"\n                                               \"Dean, Bouv\u00c3\u00a9 College of Health Sciences\"\n                                               '())\n                                  (make-person \"Uta G. Poiger\"\n                                               \"Dean, College of Social Sciences & Humanities\"\n                                               '())))))) 5)\n\n(check-equal?\n (num-peeps (make-group \"Cabinet\"\n              (list (make-person \"Karl Reid\"\n                                 \"Senior Vice Provost and Inclusion Officer\"\n                                 '())\n                    (make-person \"Madeleine Estabrook\"\n                                 \"Senior Advisor for Global Student Experience\"\n                                 '())\n                    (make-person \"David Madigan\"\n               \"Provost and Senior Vice President for Academic Affairs\"\n               (list\n                (make-group \"Administration\"\n                            (list (make-person \"Thomas Sheahan\"\n                                               \"Senior Vice Provost, Curriculum and Programs\" '())))\n                (make-group \"Academic Deans\"\n                            (list (make-person \"Alan Mislove\"\n                                               \"Interim Dean, Khoury College of Computer Sciences\"\n                                               '())\n                                  (make-person \"Carmen Sceppa\"\n                                               \"Dean, Bouv\u00c3\u00a9 College of Health Sciences\"\n                                               '())\n                                  (make-person \"Uta G. Poiger\"\n                                               \"Dean, College of Social Sciences & Humanities\"\n                                               '())))))))) 7)\n\n(check-equal?\n (num-peeps (make-person \"Joseph E. Aoun\"\n               \"President\"\n               (list (make-group \"Cabinet\"\n              (list (make-person \"Karl Reid\"\n                                 \"Senior Vice Provost and Inclusion Officer\"\n                                 '())\n                    (make-person \"Madeleine Estabrook\"\n                                 \"Senior Advisor for Global Student Experience\"\n                                 '())\n                    (make-person \"David Madigan\"\n               \"Provost and Senior Vice President for Academic Affairs\"\n               (list\n                (make-group \"Administration\"\n                            (list (make-person \"Thomas Sheahan\"\n                                               \"Senior Vice Provost, Curriculum and Programs\" '())))\n                (make-group \"Academic Deans\"\n                            (list (make-person \"Alan Mislove\"\n                                               \"Interim Dean, Khoury College of Computer Sciences\"\n                                               '())\n                                  (make-person \"Carmen Sceppa\"\n                                               \"Dean, Bouv\u00c3\u00a9 College of Health Sciences\"\n                                               '())\n                                  (make-person \"Uta G. Poiger\"\n                                               \"Dean, College of Social Sciences & Humanities\"\n                                               '())))))))))) 8)",
-    "stop_tokens": [
-      "\n(define ",
-      "\n#|",
-      "\n;",
-      "\n("
-    ]
-  },
-  {
-    "name": "dna_inverse",
-    "language": "rkt",
-    "prompt": "#lang racket\n(require rackunit)\n;; A DNASeq is one of:\n;; - (make-adenine DNASeq)\n;; - (make-guanine DNASeq)\n;; - (make-cytosine DNASeq)\n;; - (make-thymine DNASeq)\n;; - \"empty sequence\"\n;; Interpretation: A DNASeq represents a sequence of nucleotides.\n(define-struct adenine [rest] #:transparent)\n(define-struct guanine [rest] #:transparent)\n(define-struct cytosine [rest] #:transparent)\n(define-struct thymine [rest] #:transparent)\n\n;; Every  DNA sequence has a complementary sequence, which substitutes\n;; As with Ts, Ts with As, Cs with Gs, and Gs with Cs. Design a function\n;; to calculate the complement of a DNA sequence.\n\n;; dna-complement : DNASeq -> DNASeq\n;; Computes the complement of a DNA sequence.\n(define (dna-complement d)",
-    "doctests": "original",
-    "original": "racket-prompts\\dna_inverse.rkt",
-    "prompt_terminology": "verbatim",
-    "tests": "(check-equal? (dna-complement \"empty sequence\") \"empty sequence\")\n(check-equal? (dna-complement (make-adenine \"empty sequence\")) (make-thymine \"empty sequence\"))\n(check-equal? (dna-complement (make-thymine (make-cytosine (make-guanine (make-adenine \"empty sequence\")))))\n              (make-adenine (make-guanine (make-cytosine (make-thymine \"empty sequence\")))))",
-    "stop_tokens": [
-      "\n(define ",
-      "\n#|",
-      "\n;",
-      "\n("
-    ]
-  },
-  {
     "name": "flip_tree",
     "language": "rkt",
     "prompt": "#lang racket\n(require rackunit)\n\n;; A NumTree is one of:\n;; - (make-numtree Number NumTree NumTree)\n;; - Number\n;; Interpretation: A set of numbers arranged in a tree shape.\n(define-struct numtree [num left right] #:transparent)\n\n;; mirror: NumTree -> NumTree\n;; Mirrors the tree around the center point\n(define (mirror tree)",
@@ -105,73 +75,13 @@
     ]
   },
   {
-    "name": "grades",
-    "language": "rkt",
-    "prompt": "#lang racket\n(require rackunit)\n\n;; A Student is a (make-student String Number)\n;; Interpretation: (make-student name nuid) represents a student.\n(define-struct student [name nuid] #:transparent)\n\n;; A Grade is a (make-grade Number String Number)\n;; Interpretation: (make-grade nuid course grade) represents the grade that\n;; a student received in a course.\n(define-struct grade [nuid course value] #:transparent)\n\n;; A StudentGrades is a (make-student-grades String [List-of Number]).\n;; Interpretation: (make-student-grades name grades) represents the grades\n;; that a student has received in all courses.\n(define-struct student-grades [name grades] #:transparent)\n\n;; student-grades: [List-of Student] [List-of Grade] -> [List-of StudentGrades]\n;; Produces a StudentGrade for each student, with the list of grades that\n;; student received.\n(define (students->student-grades students grades)",
-    "doctests": "original",
-    "original": "racket-prompts\\grades.rkt",
-    "prompt_terminology": "verbatim",
-    "tests": "(check-equal?\n (students->student-grades '() '())\n '())\n\n(check-equal?\n (students->student-grades '() (list  (make-grade 1 \"Fundies 1\" 95) (make-grade 1 \"Psychoceramics\" 65) (make-grade 2 \"Programming Languages\" 85) (make-grade 2 \"Fundies 1\" 75)))\n '())\n\n(check-equal?\n (students->student-grades (list (make-student \"Alice\" 1) (make-student \"Bob\" 2)) '())\n (list (make-student-grades \"Alice\" '()) (make-student-grades \"Bob\" '())))\n\n(check-equal?\n (students->student-grades (list (make-student \"Alice\" 1))\n                           (list  (make-grade 1 \"Fundies 1\" 95) (make-grade 1 \"Psychoceramics\" 65) (make-grade 2 \"Programming Languages\" 85) (make-grade 2 \"Fundies 1\" 75)))\n (list (make-student-grades \"Alice\" (list 95 65))))\n\n(check-equal?\n (students->student-grades (list (make-student \"Alice\" 1) (make-student \"Bob\" 2) (make-student \"Carol\" 3))\n                           (list  (make-grade 1 \"Fundies 1\" 95) (make-grade 1 \"Psychoceramics\" 65) (make-grade 2 \"Programming Languages\" 85) (make-grade 2 \"Fundies 1\" 75)\n                                 (make-grade 3 \"Fundies 1\" 68) (make-grade 3 \"Cybernetics\" 82) (make-grade 3 \"Phonology\" 89) (make-grade 4 \"Fundies 1\" 55)))\n (list (make-student-grades \"Alice\" (list 95 65)) (make-student-grades \"Bob\" (list 85 75)) (make-student-grades \"Carol\" (list 68 82 89))))\n",
-    "stop_tokens": [
-      "\n(define ",
-      "\n#|",
-      "\n;",
-      "\n("
-    ]
-  },
-  {
-    "name": "had_lunch",
-    "language": "rkt",
-    "prompt": "#lang racket\n(require rackunit)\n\n;; A CallType is one of:\n;; - \"zoom\"\n;; - \"teams\"\n;; - \"phone\"\n;; Interpretation: a type of call\n\n(define CT-ZOOM \"zoom\")\n(define CT-TEAMS \"teams\")\n(define CT-PHONE \"phone\")\n\n;; An Event is one of:\n;; - (make-call CallType PosInt [NEList-of String] String)\n;; - (make-mtg PosInt [NEList-of String] String)\n;; - (make-alone PosInt String)\n;; Interpretation: an event in some period of time, which is either:\n;; - A call using some technology, lasting some number of minutes with attendees\n;;  (by name), and a description;\n;; - An in-person meeting lasting some number of minutes\n;;   with attendees (by name) and a description; or\n;; - Time spent alone for some number of minutes with a description.\n(define-struct call [type duration attendees description] #:transparent)\n(define-struct mtg [duration attendees description] #:transparent)\n(define-struct alone [duration description] #:transparent)\n\n;; had-lunch? : [List-of Event] -> Boolean\n;; Is there an event containing the word lunch?\n(define (had-lunch? loe)",
-    "doctests": "original",
-    "original": "racket-prompts\\had_lunch.rkt",
-    "prompt_terminology": "verbatim",
-    "tests": "(check-equal? (had-lunch? '()) #false)\n(check-equal? (had-lunch? (list (make-call CT-ZOOM 22 (list \"Dr. Zoidberg\")\n             \"Doctor appointment about a stomach ache after some bad seafood :(\") \n             (make-alone 25 \"The Three-Body Problem isn't going to read itself!\") \n             (make-call CT-PHONE 1 (list \"Unknown\") \"Who calls!? I think it was a scam...\")\n                (make-alone 34 \"Lunch\") \n                (make-call CT-TEAMS 7 (list \"Mike\" \"Tajel\")\n             \"Office hours with my partner to ask clarifying questions about the Design Recipe!\") \n                (make-mtg 28 (list \"Ali\")\n            \"Meeting with advisor to talk about a combined major\")\n                 (make-mtg 62 (list \"Rachel\" \"Ross\" \"Joey\" \"Phoebe\" \"Chandler\" \"Monica\")\n            \"Getting ahead on studying for Exam 2!\"))) #true)\n(check-equal? (had-lunch? (list (make-call CT-ZOOM 22 (list \"Dr. Zoidberg\")\n             \"Doctor appointment about a stomach ache after some bad seafood :(\"))) #false)\n(check-equal?\n (had-lunch? (list (make-call CT-ZOOM 22 (list \"Dr. Zoidberg\")\n             \"Doctor appointment about a stomach ache after some bad seafood :(\")\n                   (make-call CT-ZOOM 20 (list \"Mom\") \"Virtual lunch\")))\n #true)\n(check-equal?\n (had-lunch? (list (make-call CT-ZOOM 22 (list \"Dr. Zoidberg\")\n             \"Doctor appointment about a stomach ache after some bad seafood :(\")\n                   (make-mtg 50 (list \"Alice\" \"Bob\") \"GROUP LUNCH\")))\n #true)",
-    "stop_tokens": [
-      "\n(define ",
-      "\n#|",
-      "\n;",
-      "\n("
-    ]
-  },
-  {
     "name": "hello_goodbye",
     "language": "rkt",
-    "prompt": "#lang racket\n(require rackunit)\n\n;; hello : String -> String\n;; Greets you hello!\n(define (hello s)\n  (string-append \"Hello \" s \"!\"))\n\n;; goodbye : String -> String \n;; Greets you goodbye!\n(define (goodbye s)\n  (string-append \"Goodbye \" s \"!\"))\n\n;; hello-goodbye : [List-of String] -> [List-of String]\n;; Greets everyone hello and goodbye.\n(define (hello-goodbye l)\n  (double-do-it hello goodbye l))\n\n;; double-do-it : (X Y) [X -> Y] [X -> Y] [List-of X] -> [List-of Y]\n;; Helper for hello-goodbye.\n(define (double-do-it f g l)\n  (cond\n    [(empty? l) '()]\n    [(cons? l)\n     (cons (f (first l))\n           (cons (g (first l))\n                 (double-do-it f g (rest l))))]))\n                 \n;; <tests>\n(check-equal? (hello-goodbye '()) '())\n(check-equal?\n (hello-goodbye (cons \"Alice\" (cons \"Bob\" '())))\n (cons \"Hello Alice!\" (cons \"Goodbye Alice!\" (cons \"Hello Bob!\" (cons \"Goodbye Bob!\" '())))))\n(check-equal? (double-do-it sqr sqrt '()) '())\n(check-equal? (double-do-it sqr sqrt (cons 25 (cons 9 '())))",
+    "prompt": "#lang racket\n(require rackunit)\n\n;; hello : String -> String\n;; Greets you hello!\n(define (hello s)\n  (string-append \"Hello \" s \"!\"))\n\n;; goodbye : String -> String \n;; Greets you goodbye!\n(define (goodbye s)\n  (string-append \"Goodbye \" s \"!\"))\n\n;; hello-goodbye : [List-of String] -> [List-of String]\n;; Greets everyone hello and goodbye.\n(define (hello-goodbye l)\n  (double-do-it hello goodbye l))\n\n;; double-do-it : (X Y) [X -> Y] [X -> Y] [List-of X] -> [List-of Y]\n;; Helper for hello-goodbye. Applies both functions to each item in the list \n;; and returns a new list with the output of both functions.\n(define (double-do-it f g l)",
     "doctests": "original",
     "original": "racket-prompts\\hello_goodbye.rkt",
     "prompt_terminology": "verbatim",
     "tests": "(check-equal? (hello-goodbye '()) '())\n(check-equal?\n (hello-goodbye (cons \"Alice\" (cons \"Bob\" '())))\n (cons \"Hello Alice!\" (cons \"Goodbye Alice!\" (cons \"Hello Bob!\" (cons \"Goodbye Bob!\" '())))))\n(check-equal? (double-do-it sqr sqrt '()) '())\n(check-equal? (double-do-it sqr sqrt (cons 25 (cons 9 '())))\n              (cons 625 (cons 5 (cons 81 (cons 3 '())))))",
-    "stop_tokens": [
-      "\n(define ",
-      "\n#|",
-      "\n;",
-      "\n("
-    ]
-  },
-  {
-    "name": "make_subway",
-    "language": "rkt",
-    "prompt": "#lang racket\n(require rackunit)\n\n;; A Station is a (make-station String [List-of String])\n;; Interpretation: The name of a station and the names of stations that directly\n;; connect to it.\n(define-struct station [name connections] #:transparent)\n\n;; A Subway is a [List-of Station]\n;; Interpretation: A list of stations that make a subway network.\n\n;; A [List-of-2-or-more X] is one of:\n;; - (cons X (cons X '()))\n;; - (cons X [List-of-2-or-more X])\n;; A list with two or more items.\n\n;; add-forward-edges : Subway [List-of-2-or-more String] -> Subway\n;; Adds the list of stations to the subway, in one direction.\n(define (add-forward-edges subway lo2om)\n  (cond\n    [(empty? (rest (rest lo2om))) \n     (add-edge (first lo2om) (first (rest lo2om)) subway)]\n    [(cons? (rest (rest lo2om)))\n     (add-forward-edges\n      (add-edge (first lo2om) (first (rest lo2om)) subway)\n      (rest lo2om))]))\n\n;; add-edge : String String Subway -> Subway\n;; (add-edge from to station) adds a connection to the subway, if it does not\n;; already exist. Assumes that both from and to stations in the Subway.\n(define (add-edge from to subway)\n  (cond\n    [(empty? subway) subway]\n    [(cons? subway)\n     (if (string=? from (station-name (first subway)))\n         (cons (add-edge-to-station to (first subway)) (rest subway))\n         (cons (first subway) (add-edge from to (rest subway))))]))\n\n;; line->subway : [List-of-2-or-more String] -> Subway\n;; Given a list of stations on a line, produces a Subway.\n(define (line->subway line)",
-    "doctests": "original",
-    "original": "racket-prompts\\make_subway.rkt",
-    "prompt_terminology": "verbatim",
-    "tests": "(check-equal? \n (line->subway (list \"A\" \"B\"))\n (list (make-station \"A\" (list \"B\"))\n       (make-station \"B\" (list \"A\"))))\n\n(check-equal? \n (line->subway (list \"A\" \"B\" \"C\"))\n (list (make-station \"A\" (list \"B\"))\n       (make-station \"B\" (list \"A\" \"C\"))\n       (make-station \"C\" (list \"B\"))))",
-    "stop_tokens": [
-      "\n(define ",
-      "\n#|",
-      "\n;",
-      "\n("
-    ]
-  },
-  {
-    "name": "org_trees",
-    "language": "rkt",
-    "prompt": "#lang racket\n(require rackunit)\n\n; An OrgChart is one of:\n; - (make-person String String [List-of OrgChart])\n; - (make-group String [List-of OrgChart])\n; Interpretation: an organizational chart\n(define-struct person [name title reports] #:transparent)\n(define-struct group [name members] #:transparent)\n\n; full-title: OrgChart String -> OrgChart\n; Adds the name of the organization in parenthesis\n; to every person in the org chart.\n(define (full-title org name)",
-    "doctests": "original",
-    "original": "racket-prompts\\org_trees.rkt",
-    "prompt_terminology": "verbatim",
-    "tests": "(check-equal?\n (full-title (make-person \"Joseph E. Aoun\"\n               \"President\"\n               (list (make-group \"Cabinet\"\n              (list (make-person \"Karl Reid\"\n                                 \"Senior Vice Provost and Inclusion Officer\"\n                                 '())\n                    (make-person \"Madeleine Estabrook\"\n                                 \"Senior Advisor for Global Student Experience\"\n                                 '())\n                    (make-person \"David Madigan\"\n               \"Provost and Senior Vice President for Academic Affairs\"\n               (list\n                (make-group \"Administration\"\n                            (list (make-person \"Thomas Sheahan\"\n                                               \"Senior Vice Provost, Curriculum and Programs\" '())))\n                (make-group \"Academic Deans\"\n                            (list (make-person \"Alan Mislove\"\n                                               \"Interim Dean, Khoury College of Computer Sciences\"\n                                               '())\n                                  (make-person \"Carmen Sceppa\"\n                                               \"Dean, Bouv\u00c3\u00a9 College of Health Sciences\"\n                                               '())\n                                  (make-person \"Uta G. Poiger\"\n                                               \"Dean, College of Social Sciences & Humanities\"\n                                               '()))))))))) \"Northeastern University\")\n (make-person\n  \"Joseph E. Aoun\"\n  \"President (Northeastern University)\"\n  (list\n   (make-group\n    \"Cabinet\"\n    (list\n     (make-person \"Karl Reid\"\n                  \"Senior Vice Provost and Inclusion Officer (Northeastern University)\"\n                  '())\n     (make-person \"Madeleine Estabrook\"\n                  \"Senior Advisor for Global Student Experience (Northeastern University)\"\n                  '())\n     (make-person\n      \"David Madigan\"\n      \"Provost and Senior Vice President for Academic Affairs (Northeastern University)\"\n      (list\n       (make-group\n        \"Administration\"\n        (list (make-person\n               \"Thomas Sheahan\"\n               \"Senior Vice Provost, Curriculum and Programs (Northeastern University)\" '())))\n       (make-group\n        \"Academic Deans\"\n        (list (make-person\n               \"Alan Mislove\"\n               \"Interim Dean, Khoury College of Computer Sciences (Northeastern University)\"\n               '())\n              (make-person\n               \"Carmen Sceppa\"\n               \"Dean, Bouv\u00c3\u00a9 College of Health Sciences (Northeastern University)\"\n               '())\n              (make-person\n               \"Uta G. Poiger\"\n               \"Dean, College of Social Sciences & Humanities (Northeastern University)\"\n               '()))))))))))",
     "stop_tokens": [
       "\n(define ",
       "\n#|",
@@ -201,7 +111,7 @@
     "doctests": "original",
     "original": "racket-prompts\\series.rkt",
     "prompt_terminology": "verbatim",
-    "tests": "(define (add-one x) (+ x 1))\n(check-equal? (update (make-computable 5 add-one)) (make-computable 6 add-one))\n(define (repeat-string s) (string-append s s))\n(check-equal? (update (make-computable \"hi\" repeat-string)) (make-computable \"hihi\" repeat-string))\n(define (divide-2 x) (/ x 2))\n(check-equal? (update (make-computable 6 divide-2)) (make-computable 3 divide-2))",
+    "tests": "(define (add-one x) (+ x 1))\n(define 0-add-one (make-computable 5 add-one))\n(define 1-add-one (update 0-add-one))\n(define 2-add-one (update 1-add-one))\n(check-equal? (computable-value (update 0-add-one)) 6)\n(check-equal? (computable-value (update 1-add-one)) 7)\n(check-equal? (computable-value (update 2-add-one)) 8)\n(define (repeat-string s) (string-append s s))\n(define 0-repeat-string (make-computable \"hi\" repeat-string))\n(define 1-repeat-string (update 0-repeat-string))\n(define 2-repeat-string (update 1-repeat-string))\n(check-equal? (computable-value (update 0-repeat-string)) \"hihi\")\n(check-equal? (computable-value (update 1-repeat-string)) \"hihihihi\")\n(check-equal? (computable-value (update 2-repeat-string)) \"hihihihihihihihi\")\n(define (divide-2 x) (/ x 2))\n(define 0-divide-2 (make-computable 40 divide-2))\n(define 1-divide-2 (update 0-divide-2))\n(define 2-divide-2 (update 1-divide-2))\n(check-equal? (computable-value (update 0-divide-2)) 20)\n(check-equal? (computable-value (update 1-divide-2)) 10)\n(check-equal? (computable-value (update 2-divide-2)) 5)",
     "stop_tokens": [
       "\n(define ",
       "\n#|",
