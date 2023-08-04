@@ -60,6 +60,21 @@
     ]
   },
   {
+    "name": "collatz",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n\n;; collatz-n: Number Number -> Number\n;; Apply the Collatz conjecture to the first number\n;; n times. Divide by 2 if its even, otherwise\n;; multiply by 3 and add 1. Solve this with Recursion.\n(define (collatz num n)",
+    "doctests": "original",
+    "original": "racket-prompts\\collatz.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(check-equal? (collatz 5 0) 5)\n(check-equal? (collatz 5 1) 16)\n(check-equal? (collatz 5 2) 8)\n(check-equal? (collatz 5 3) 4)\n(check-equal? (collatz 6 0) 6)\n(check-equal? (collatz 6 1) 3)\n(check-equal? (collatz 6 2) 10)\n(check-equal? (collatz 6 3) 5)",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
     "name": "flip_tree",
     "language": "rkt",
     "prompt": "#lang racket\n(require rackunit)\n\n;; A NumTree is one of:\n;; - (make-numtree Number NumTree NumTree)\n;; - Number\n;; Interpretation: A set of numbers arranged in a tree shape.\n(define-struct numtree [num left right] #:transparent)\n\n;; mirror: NumTree -> NumTree\n;; Mirrors the tree around the center point\n(define (mirror tree)",

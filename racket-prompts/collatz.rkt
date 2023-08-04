@@ -4,7 +4,7 @@
 ;; collatz-n: Number Number -> Number
 ;; Apply the Collatz conjecture to the first number
 ;; n times. Divide by 2 if its even, otherwise
-;; multiply by 3 and add 1
+;; multiply by 3 and add 1. Solve this with Recursion.
 (define (collatz num n)
 ;; <solution>
     (if (= n 0) 
