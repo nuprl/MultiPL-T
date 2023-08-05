@@ -24,8 +24,8 @@ pub async fn logger(mut log_queue: Receiver<(String, Option<String>)>, log_file:
         }
         nmsgs = (nmsgs + 1) % 50;
         if nmsgs == 0 { 
-            let _ = f.flush();
+            let _ = f.flush().await;
         }
     }
-    let _ = f.flush();
+    let _ = f.flush().await;
 }
