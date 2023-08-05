@@ -31,6 +31,7 @@ pub async fn spawn_runners(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
     log_queue: Sender<(String, Option<String>)>,
+    read_toks: Sender<()>,
     attempt_limit: u32,
     num_runners: usize,
 ) -> () {
@@ -40,7 +41,8 @@ pub async fn spawn_runners(
         let cq = compl_queue.clone();
         let fq = fin_queue.clone();
         let lq = log_queue.clone();
-        tasks.spawn(run_programs(rq, cq, fq, lq, attempt_limit));
+        let rt = read_toks.clone();
+        tasks.spawn(run_programs(rq, cq, fq, lq, rt, attempt_limit));
     }
     tasks.detach_all()
 }
@@ -49,6 +51,7 @@ async fn run_programs(
     compl_queue: Sender<Box<Program>>,
     fin_queue: Sender<Box<Program>>,
     log_queue: Sender<(String, Option<String>)>,
+    read_toks: Sender<()>,
     attempt_limit: u32,
 ) {
     loop {
@@ -63,18 +66,24 @@ async fn run_programs(
             Ok(RunRes::Succ) => { 
                 let _ = log_queue.send((format!("Success for {}:", &prog.name), None)).await;
                 let _ = fin_queue.send(prog).await.unwrap();
+                let _ = read_toks.send(()).await.unwrap();
             }
             Ok(RunRes::Fail) => {
                 if let Some(()) = prog.inc_attempts(attempt_limit) {
                     let _ = compl_queue.send(prog).await.unwrap();
                 } else {
                     let _ = log_queue.send((format!("No more attempts for {}", prog.name), None)).await;
+                    let _ = read_toks.send(()).await;
                 }
             }
             Err(e) => {
                 let pstr = String::from(&*prog);
                 if let Some(()) = prog.inc_attempts(attempt_limit) {
                     compl_queue.send(prog).await.unwrap();
+                }
+                else { 
+                    let _ = log_queue.send((format!("No more attempts for {}", prog.name), None)).await;
+                    let _ = read_toks.send(()).await;
                 }
                 let _ = log_queue.send((format!("{:?}", e), Some(pstr))).await;
             }
