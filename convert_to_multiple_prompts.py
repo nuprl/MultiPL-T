@@ -12,11 +12,11 @@ lang_to_stop_tokens = {
 }
 
 def get_prompt(code):
-    prompt = code[:code.find(SOLUTION_TOKEN)]
+    prompt = code[:code.index(SOLUTION_TOKEN)]
     return prompt.rsplit("\n", 1)[0]
 
 def get_test(code):
-    return code[code.find(TEST_TOKEN) + len(TEST_TOKEN):]
+    return code[code.index(TEST_TOKEN) + len(TEST_TOKEN):]
 
 def main(directory, language, extension, save):
     multiple_prompts = [] # MultiPL-E expects

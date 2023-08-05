@@ -17,8 +17,10 @@
   (double-do-it hello goodbye l))
 
 ;; double-do-it : (X Y) [X -> Y] [X -> Y] [List-of X] -> [List-of Y]
-;; Helper for hello-goodbye.
+;; Helper for hello-goodbye. Applies both functions to each item in the list 
+;; and returns a new list with the output of both functions.
 (define (double-do-it f g l)
+;; <solution>
   (cond
     [(empty? l) '()]
     [(cons? l)
