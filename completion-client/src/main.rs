@@ -53,7 +53,7 @@ async fn main() {
     } = Cli::parse();
     let endpoint_url: &'static str = Box::leak(endpoint_url.into_boxed_str());
     let seen_ids = reader::read_output_jsonl(&output_file);
-    let channel_size = (2 * num_connections) + (2 * num_runners);  
+    let channel_size = 2 * usize::max(num_connections, num_runners);  
     let (readtoks_send, readtoks_recv) = channel::<()>(channel_size);
     for _ in 0..num_connections { 
         let _ = readtoks_send.send(()).await;
