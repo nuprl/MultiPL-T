@@ -18,7 +18,7 @@ pa.add_argument("--global_dedup", action="store_true")
 pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
 pa.add_argument("--score_batch", type=int, default=32)
-pa.add_argument("--processing_batch", type=int, default=256)
+pa.add_argument("--processing_batch", type=int, default=512)
 pa.add_argument("--score_device", type=str, default="cpu")
 pa.add_argument("--no_score", action="store_true")
 args = pa.parse_args()
@@ -134,16 +134,15 @@ with multiprocessing.Pool() as pool:
             batch = []
 
 # score solutions (if dedup, otherwise we already have scores)
-if args.strategy == "dedup":
-    if not args.no_score:
-        assert scorer is not None
-        print(" #### scoring solutions #### ")
-        def make_score_iterator(): return range(0, len(solutions), args.score_batch)
-        for i in progressbar(make_score_iterator(), max_value=len(list(make_score_iterator()))):
-            batch = solutions[i: i + args.score_batch]
-            scores = scorer.score([sol.code for sol in batch])
-            for sol, score in zip(batch, scores):
-                sol.score = score
+if args.strategy == "dedup" and not args.no_score:
+    assert scorer is not None
+    print(" #### scoring solutions #### ")
+    def make_score_iterator(): return range(0, len(solutions), args.score_batch)
+    for i in progressbar(make_score_iterator(), max_value=len(list(make_score_iterator()))):
+        batch = solutions[i: i + args.score_batch]
+        scores = scorer.score([sol.code for sol in batch])
+        for sol, score in zip(batch, scores):
+            sol.score = score
 
 
 solution_codes = []
