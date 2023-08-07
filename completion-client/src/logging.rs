@@ -16,11 +16,16 @@ pub async fn logger(mut log_queue: Receiver<(String, Option<String>)>, log_file:
         .await
         .expect("Log file open should succeed");
     let mut f = BufWriter::new(f);
+    let mut nmsgs = 0;
     while let Some((lmsg, opstr)) = log_queue.recv().await {
         let _ = f.write_all(format!("{}\n", lmsg).as_bytes()).await;
         if let Some(pstr) = opstr {
             let _ = f.write_all(format!("{}\n----\n", pstr).as_bytes()).await;
         }
+        nmsgs = (nmsgs + 1) % 50;
+        if nmsgs == 0 { 
+            let _ = f.flush().await;
+        }
     }
-    let _ = f.flush();
+    let _ = f.flush().await;
 }

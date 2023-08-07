@@ -52,14 +52,19 @@ async fn main() {
         log_file,
     } = Cli::parse();
     let endpoint_url: &'static str = Box::leak(endpoint_url.into_boxed_str());
-    let seen_ids = reader::read_output_jsonl(&output_file).await;
-    let (complq_send, complq_recv) = channel::<Box<Program>>(100 + num_connections);
-    let (runq_send, runq_recv) = channel::<Box<Program>>(100 + num_connections);
-    let (finq_send, finq_recv) = channel::<Box<Program>>(100 + num_connections);
-    let (logq_send, logq_recv) =
-        channel::<(String, Option<String>)>(100 + num_connections + num_runners);
+    let seen_ids = reader::read_output_jsonl(&output_file);
+    let channel_size = 2 * usize::max(num_connections, num_runners);  
+    let (readtoks_send, readtoks_recv) = channel::<()>(channel_size);
+    for _ in 0..num_connections { 
+        let _ = readtoks_send.send(()).await;
+    }
+    let (complq_send, complq_recv) = channel::<Box<Program>>(channel_size);
+    let (runq_send, runq_recv) = channel::<Box<Program>>(channel_size);
+    let (finq_send, finq_recv) = channel::<Box<Program>>(channel_size);
+    let (logq_send, logq_recv) = channel::<(String, Option<String>)>(channel_size);
     let rd_hdl = spawn(reader::read_input_jsonl(
         prompt_file,
+        readtoks_recv,
         complq_send.clone(),
         logq_send.clone(), 
         seen_ids 
@@ -76,6 +81,7 @@ async fn main() {
         complq_send.clone(),
         finq_send.clone(),
         logq_send.clone(),
+        readtoks_send.clone(),
         attempt_limit,
         num_runners,
     ));

@@ -14,6 +14,7 @@ pub async fn write_jsonl(out_file: PathBuf, mut fin_queue: Receiver<Box<Program>
     let f = OpenOptions::new()
         .write(true)
         .append(true)
+        .create(true)
         .open(out_file)
         .await
         .expect("Out file open should succeed");

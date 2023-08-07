@@ -1,3 +1,8 @@
+'''
+This script takes the raw filtered python functions with generated tests 
+and processes them into individual files in the HumanEval format. 
+Cli provided in __main__.
+'''
 import datasets
 import os
 
@@ -51,9 +56,10 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str,
-                        default="nuprl/stack-dedup-python-testgen-starcoder-filter-v2")
-    parser.add_argument("--min_coverage", type=float, default=90)
-    parser.add_argument("--content_col", type=str, default="content")
+                        default="nuprl/stack-dedup-python-testgen-starcoder-filter-v2", 
+                        help="Dataset of functions with tests to process")
+    parser.add_argument("--min_coverage", type=float, default=90, help="Minimum coverage of tests")
+    parser.add_argument("--content_col", type=str, default="content", help="Column name of content")
     args = parser.parse_args()
     ds = datasets.load_dataset(args.dataset, split="train")
     dir_of_this_script = os.path.dirname(os.path.realpath(__file__))
