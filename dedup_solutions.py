@@ -45,7 +45,7 @@ def strip_comments(code: str, lang: str):
     return code
 
 
-def dedup(solutions: list[str], lang="lua", dedup_threshold=0.6):
+def rouge_dedup(solutions: list[str], lang="lua", dedup_threshold=0.6):
     scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
     keep_mask = np.ones(len(solutions), dtype=bool)
     solutions_stripped = [strip_comments(sol, lang) for sol in solutions]
@@ -150,7 +150,7 @@ if __name__ == "__main__":
         SOLN_3,
         SOLN_4,
     ]
-    deduped = dedup(SOLUTIONS, dedup_threshold=0.6)
+    deduped = rouge_dedup(SOLUTIONS, dedup_threshold=0.6)
     for soln in deduped:
         print(soln)
         print()

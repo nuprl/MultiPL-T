@@ -1,11 +1,13 @@
-from typing import List
+from typing import List, Tuple
 import datasets
 import json
+import os
 import gzip
 import multiprocessing
+import random
 from progressbar import progressbar
 from pathlib import Path
-from dedup_solutions import dedup
+from dedup_solutions import rouge_dedup
 from code_scorer.inference import CodeScorer
 from utils import clean_sol_prompt
 from argparse import ArgumentParser
@@ -14,7 +16,8 @@ pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
 pa.add_argument("--strategy", type=str, default="dedup")
-pa.add_argument("--global_dedup", action="store_true")
+pa.add_argument("--global_dedup_rounds", type=int, default=0)
+pa.add_argument("--global_dedup_group_size", type=int, default=256)
 pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
 pa.add_argument("--score_batch", type=int, default=32)
@@ -61,9 +64,6 @@ def make_path_iterator(): return Path(args.path).glob("**/*.results.json.gz")
 
 
 def process_path(path):
-    global num_has_at_least_one_passing
-    global solutions
-    global scorer
     with gzip.open(path, "rt") as f:
         data = json.load(f)
 
@@ -84,9 +84,6 @@ def process_path(path):
         else:
             num_failed += 1
 
-    if num_passed > 0:
-        num_has_at_least_one_passing += 1
-
     pass_rate = num_passed / (num_passed + num_failed)
 
     # simple set dedup
@@ -95,7 +92,7 @@ def process_path(path):
     edu_scores = []
     if len(sols) > 0:
         if args.strategy == "dedup":
-            sols = dedup(sols, args.lang, args.dedup_threshold)
+            sols = rouge_dedup(sols, args.lang, args.dedup_threshold)
             edu_scores.extend([0] * len(sols))
         elif args.strategy == "dedup_best":
             # IDEA: sort the solutions by score, then dedup, so higher scoring solutions are more likely to be kept
@@ -105,7 +102,7 @@ def process_path(path):
             sols_to_score = {sol: score for score, sol in score_sols}
             score_sols.sort(key=lambda x: x[0], reverse=True)
             sols = [x[1] for x in score_sols]
-            sols = dedup(sols, args.lang, args.dedup_threshold)
+            sols = rouge_dedup(sols, args.lang, args.dedup_threshold)
             scores = [sols_to_score[sol] for sol in sols]
             edu_scores.extend(scores)
         elif args.strategy == "best":
@@ -116,22 +113,58 @@ def process_path(path):
             sols = [best]
             edu_scores.append(best_score)
 
-    obj_sols = []
+    obj_sols: List[Solution] = []
     for sol, score in zip(sols, edu_scores):
         obj_sols.append(
             Solution(sol, score, original_id, pass_rate, func_tests))
 
-    solutions.extend(obj_sols)
+    return obj_sols, num_passed > 0
 
 
-with multiprocessing.Pool() as pool:
-    batch = []
-    iter_size = len(list(make_path_iterator()))
-    for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
-        batch.append(path)
-        if len(batch) >= args.processing_batch or i == iter_size - 1:
-            pool.map(process_path, batch)
-            batch = []
+def process_dedup(tpl: Tuple[List[Solution], str, float]) -> List[Solution]:
+    sols, lang, threshold = tpl
+    code_to_sol = {}
+    for sol in sols:
+        code_to_sol[sol.code] = sol
+
+    sols_code = list(code_to_sol.keys())
+    sols_code = rouge_dedup(sols_code, lang, threshold)
+    return [code_to_sol[sol] for sol in sols_code]
+
+
+pool = multiprocessing.Pool(os.cpu_count() - 1)  # type: ignore
+batch = []
+iter_size = len(list(make_path_iterator()))
+for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
+    batch.append(path)
+    if len(batch) >= args.processing_batch or i == iter_size - 1:
+        solns = pool.map(process_path, batch)
+        for soln, has_at_least_one_passing in solns:
+            solutions.extend(soln)
+            if has_at_least_one_passing:
+                num_has_at_least_one_passing += 1
+        batch = []
+
+
+for rnd in range(args.global_dedup_rounds):
+    print(
+        f" #### global dedup round {rnd+1}/{args.global_dedup_rounds}. current num solutions: {len(solutions)} ####")
+    # shuffle solutions
+    random.shuffle(solutions)
+    groups = []
+    for i in range(0, len(solutions), args.global_dedup_group_size):
+        group = solutions[i: i + args.global_dedup_group_size]
+        groups.append((group, args.lang, args.dedup_threshold))
+    print(f"    # deduping {len(groups)} groups #")
+    # dedup each group
+    deduped_groups = pool.map(process_dedup, groups)
+    # flatten
+    solutions = []
+    for group in deduped_groups:
+        solutions.extend(group)
+
+pool.close()
+pool.join()
 
 # score solutions (if dedup, otherwise we already have scores)
 if args.strategy == "dedup" and not args.no_score:

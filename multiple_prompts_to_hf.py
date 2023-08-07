@@ -1,7 +1,7 @@
 import datasets
 import json
 from pathlib import Path
-from dedup_solutions import dedup
+from dedup_solutions import rouge_dedup
 from argparse import ArgumentParser
 
 pa = ArgumentParser()
