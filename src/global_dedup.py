@@ -103,7 +103,7 @@ if __name__ == "__main__":
     chunks = [stripped_content[i:i+max(chunk_size, len(stripped_content))] for i in range(0, len(stripped_content), chunk_size)]
     with multiprocessing.Pool(args.nthreads) as pool:
         dedup_chunks = pool.map(
-            functools.partial(dedup_chunk(args.dedup_threshold)),
+            functools.partial(dedup_chunk, args.dedup_threshold),
             chunks
         )
         keep_mask = [True for _ in stripped_content]
@@ -111,7 +111,7 @@ if __name__ == "__main__":
         for i, chunk in tqdm(enumerate(dedup_chunks)):
             for bchunk in dedup_chunks[i+1:]:
                 is_dup = pool.map(
-                    functools.partial(check_single_function(bchunk, args.dedup_threshold)), 
+                    functools.partial(check_single_function, bchunk, args.dedup_threshold), 
                     chunk
                 )
                 for j in range(i, i+len(chunk)):
