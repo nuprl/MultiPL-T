@@ -8,7 +8,7 @@ from rouge_score import rouge_scorer
 import datasets 
 import argparse
 from tqdm import tqdm
-import multiprocess
+import multiprocessing
 
 
 def strip_comments(code: str, lang: str):
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     stripped_content = [ strip_comments(code, args.lang) for code in ds["content"] ]
     chunk_size = len(stripped_content) // args.nthreads
     chunks = [stripped_content[i:i+max(chunk_size, len(stripped_content))] for i in range(0, len(stripped_content), chunk_size)]
-    with multiprocess.Pool(args.nthreads) as pool:
+    with multiprocessing.Pool(args.nthreads) as pool:
         dedup_chunks = pool.map(
             lambda chunk: dedup_chunk(chunk, args.dedup_threshold),
             chunks
