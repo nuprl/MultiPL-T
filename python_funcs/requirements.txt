@@ -1,0 +1,11 @@
+tree_sitter
+datasets
+pyright
+coverage
+requests
+transformers
+accelerate
+torch
+pyzmq
+openai
+progressbar2

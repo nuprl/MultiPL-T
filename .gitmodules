@@ -10,3 +10,6 @@
 [submodule "code_scorer"]
 	path = code_scorer
 	url = https://github.com/cassanof/code-scorer
+[submodule "python_funcs/python_code_exec_server"]
+	path = python_funcs/python_code_exec_server
+	url = git@github.com:cassanof/python_code_exec_server
