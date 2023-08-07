@@ -79,8 +79,8 @@ def dedup_chunk_mask(dedup_threshold, chunk):
         keep_mask[i] = check_single_function(chunk[ind:], sol, dedup_threshold, i)
     return keep_mask
 
-def dedup_chunk(chunk, dedup_threshold):
-    keep_mask = dedup_chunk_mask(chunk, dedup_threshold)
+def dedup_chunk(dedup_threshold, chunk):
+    keep_mask = dedup_chunk_mask(dedup_threshold, chunk)
     return [chunk[i] for i in range(len(chunk)) if keep_mask[i]]
 
 
