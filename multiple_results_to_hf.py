@@ -1,3 +1,4 @@
+from typing import List
 import datasets
 import json
 import gzip
@@ -12,6 +13,7 @@ pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
 pa.add_argument("--strategy", type=str, default="dedup")
+pa.add_argument("--global_dedup", action="store_true")
 pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
 pa.add_argument("--score_batch", type=int, default=32)
@@ -24,13 +26,22 @@ if args.strategy not in possible_strategies:
     assert False, f"invalid strategy {args.strategy}, must be one of {possible_strategies}"
 
 num_has_at_least_one_passing = 0
-solutions = []
-edu_scores = []
-original_ids = []
-pass_rates = []
-tests = []
 
-scorer = CodeScorer("nuprl/code-scorer-edu-v1", device=args.score_device)
+
+class Solution:
+    def __init__(self, code, score, original_id, pass_rate, tests):
+        self.code = code
+        self.score = score
+        self.original_id = original_id
+        self.pass_rate = pass_rate
+        self.tests = tests
+
+
+solutions: List[Solution] = []
+
+scorer = None
+if not args.no_score:
+    scorer = CodeScorer("nuprl/code-scorer-edu-v1", device=args.score_device)
 
 
 def get_best_sol(scores, sols):
@@ -76,11 +87,14 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
     # simple set dedup
     sols = list(set(sols))
 
+    edu_scores = []
     if len(sols) > 0:
         if args.strategy == "dedup":
             sols = dedup(sols, args.lang, args.dedup_threshold)
+            edu_scores.extend([0] * len(sols))
         elif args.strategy == "dedup_best":
             # IDEA: sort the solutions by score, then dedup, so higher scoring solutions are more likely to be kept
+            assert scorer is not None
             scores = scorer.score(sols)
             score_sols = list(zip(scores, sols))
             sols_to_score = {sol: score for score, sol in score_sols}
@@ -91,38 +105,61 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
             edu_scores.extend(scores)
         elif args.strategy == "best":
             # best determined by edu score
+            assert scorer is not None
             scores = scorer.score(sols)
             best, best_score = get_best_sol(scores, sols)
             sols = [best]
             edu_scores.append(best_score)
 
-    solutions.extend(sols)
-    pass_rates.extend([pass_rate] * len(sols))
-    original_ids.extend([original_id] * len(sols))
-    tests.extend([func_tests] * len(sols))
+    obj_sols = []
+    for sol, score in zip(sols, edu_scores):
+        obj_sols.append(
+            Solution(sol, score, original_id, pass_rate, func_tests))
+
+    solutions.extend(obj_sols)
 
 # score solutions (if dedup, otherwise we already have scores)
 if args.strategy == "dedup":
-    if args.no_score:
-        print(" #### not scoring solutions #### ")
-        edu_scores = [0] * len(solutions)
-    else:
+    if not args.no_score:
+        assert scorer is not None
         print(" #### scoring solutions #### ")
         def make_score_iterator(): return range(0, len(solutions), args.score_batch)
         for i in progressbar(make_score_iterator(), max_value=len(list(make_score_iterator()))):
             batch = solutions[i: i + args.score_batch]
-            scores = scorer.score(batch)
-            edu_scores.extend(scores)
+            scores = scorer.score([sol.code for sol in batch])
+            for sol, score in zip(batch, scores):
+                sol.score = score
 
+
+solution_codes = []
+edu_scores = []
+pass_rates = []
+original_ids = []
+tests = []
+
+for sol in solutions:
+    solution_codes.append(sol.code)
+    edu_scores.append(sol.score)
+    pass_rates.append(sol.pass_rate)
+    original_ids.append(sol.original_id)
+    tests.append(sol.tests)
 
 new_ds = datasets.Dataset.from_dict(
-    {"content": solutions, "pass_rate": pass_rates, "id": list(range(len(solutions))), "original_id": original_ids, "tests": tests, "edu_score": edu_scores})
+    {
+        "content": solution_codes,
+        "pass_rate": pass_rates,
+        "id": list(range(len(solutions))),
+        "original_id": original_ids,
+        "tests": tests,
+        "edu_score": edu_scores
+    })
 new_ds.push_to_hub(args.name)
 
 # stats
 print(" #### stats #### ")
 print(f"total solutions: {len(solutions)}")
 print(f"total unique solutions: {len(set(solutions))}")
-print(f"total problems with at least one solution: {num_has_at_least_one_passing}")
+print(
+    f"total problems with at least one solution: {num_has_at_least_one_passing}")
 print(f"average edu score: {sum(edu_scores) / len(edu_scores)}")
 print(f"average pass rate: {sum(pass_rates) / len(pass_rates)}")
