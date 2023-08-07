@@ -73,7 +73,8 @@ def check_single_function(
 def dedup_chunk_mask(chunk, dedup_threshold):
     keep_mask = [True for _ in chunk]
     for i, sol in enumerate(chunk):
-        keep_mask[i] = check_single_function(chunk, sol, dedup_threshold, i)
+        ind = max(i+1, len(chunk)-1)
+        keep_mask[i] = check_single_function(chunk[ind:], sol, dedup_threshold, i)
     return keep_mask
 
 def dedup_chunk(chunk, dedup_threshold):
