@@ -13,3 +13,6 @@
 [submodule "python_funcs/python_code_exec_server"]
 	path = python_funcs/python_code_exec_server
 	url = git@github.com:cassanof/python_code_exec_server
+[submodule "python_funcs/testright"]
+	path = python_funcs/testright
+	url = git@github.com:cassanof/testright
