@@ -150,8 +150,7 @@ for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size)
 
 if args.global_dedup:
     dedup_group_size = min(len(solutions) // THREADS, 200)
-    # the smaller the dedup_group_size, more rounds of deduping
-    dedup_rounds = int(math.log(dedup_group_size, 2)
+    dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
                        * args.global_dedup_factor)
     for rnd in progressbar(range(dedup_rounds)):
         print(
