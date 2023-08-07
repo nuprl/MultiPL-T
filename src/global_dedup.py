@@ -1,3 +1,8 @@
+'''
+This script takes a dataset of completions and deduplicates (in parallel) them using the 
+ROGUE score. 
+Cli provided in __main__.
+'''
 import numpy as np
 from rouge_score import rouge_scorer
 import datasets 

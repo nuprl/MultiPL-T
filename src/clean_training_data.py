@@ -1,3 +1,8 @@
+'''
+This script cleans the training data for the Lua, Racket, and OCaml datasets.
+It removes lines that are blank, comments, or canonical solutions.
+Cli provided in __main__.
+'''
 import datasets
 import argparse
 import re
