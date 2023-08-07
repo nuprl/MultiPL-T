@@ -21,6 +21,17 @@ def capture_assertions(fn_name, node):
             yield cap
 
 
+def assert_block_start_prelude(func_name):
+    prompt = f"""# Unit tests for {func_name}
+# These unit tests are strictly in the `assert {func_name}(...) == ...` format.
+# Additionally, these unit tests are not allowed to use keyword arguments.\n"""
+    return f"\n\n{prompt}"
+
+
+def assert_block_start(func_name):
+    return f"{assert_block_start_prelude(func_name)}assert {func_name}("
+
+
 if __name__ == "__main__":
     assert_code = """
     assert 1 == 1

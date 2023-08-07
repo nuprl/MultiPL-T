@@ -1,6 +1,6 @@
 import datasets
 from tree_sitter_parser import global_parser, node_to_string, get_fn_name
-from assert_test import capture_assertions
+from assert_test import capture_assertions, assert_block_start
 import time
 from accelerate import Accelerator
 import argparse
@@ -48,13 +48,6 @@ def extract_assertions(parser, code, name):
     code_bytes = bytes(code, "utf-8")
     tree = parser.parse(code_bytes)
     return list(map(lambda n: node_to_string(code_bytes, n), capture_assertions(name, tree.root_node)))
-
-
-def assert_block_start(func_name):
-    prompt = f"""# Unit tests for {func_name}\n
-# These unit tests are strictly in the `assert {func_name}(...) == ...` format.\n
-# Additionally, these unit tests are not allowed to use keyword arguments.\n"""
-    return f"\n\n{prompt}assert {func_name}("
 
 
 context = zmq.Context()

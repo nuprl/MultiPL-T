@@ -1,3 +1,0 @@
-tree-sitter
-tree-sitter-languages
-autopep8
