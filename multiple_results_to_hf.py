@@ -170,7 +170,7 @@ if args.global_dedup:
         for group in deduped_groups:
             solutions.extend(group)
 
-        dedup_group_size = len(solutions) // THREADS
+        dedup_group_size = min(len(solutions) // THREADS, 200)
 
 pool.close()
 pool.join()
