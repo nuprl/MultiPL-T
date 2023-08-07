@@ -1,4 +1,5 @@
 from typing import List, Tuple
+import math
 import datasets
 import json
 import os
@@ -16,8 +17,8 @@ pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
 pa.add_argument("--strategy", type=str, default="dedup")
-pa.add_argument("--global_dedup_rounds", type=int, default=0)
-pa.add_argument("--global_dedup_group_size", type=int, default=256)
+pa.add_argument("--global_dedup", action="store_true")
+pa.add_argument("--global_dedup_factor", type=float, default=1.0)
 pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
 pa.add_argument("--score_batch", type=int, default=32)
@@ -132,7 +133,8 @@ def process_dedup(tpl: Tuple[List[Solution], str, float]) -> List[Solution]:
     return [code_to_sol[sol] for sol in sols_code]
 
 
-pool = multiprocessing.Pool(os.cpu_count() - 1)  # type: ignore
+THREADS = os.cpu_count() - 1  # type: ignore
+pool = multiprocessing.Pool(THREADS)
 batch = []
 iter_size = len(list(make_path_iterator()))
 for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
@@ -146,22 +148,34 @@ for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size)
         batch = []
 
 
-for rnd in range(args.global_dedup_rounds):
-    print(
-        f" #### global dedup round {rnd+1}/{args.global_dedup_rounds}. current num solutions: {len(solutions)} ####")
-    # shuffle solutions
-    random.shuffle(solutions)
-    groups = []
-    for i in range(0, len(solutions), args.global_dedup_group_size):
-        group = solutions[i: i + args.global_dedup_group_size]
-        groups.append((group, args.lang, args.dedup_threshold))
-    print(f"    # deduping {len(groups)} groups #")
-    # dedup each group
-    deduped_groups = pool.map(process_dedup, groups)
-    # flatten
-    solutions = []
-    for group in deduped_groups:
-        solutions.extend(group)
+if args.global_dedup:
+    rnd = 0
+    dedup_rounds = 1
+    while rnd < dedup_rounds:
+        dedup_group_size = min(len(solutions) // THREADS, 200)
+        # the smaller the dedup_group_size, more rounds of deduping
+        dedup_rounds = int(math.log(dedup_group_size, 2)
+                           * args.global_dedup_factor)
+
+        print(
+            f" #### global dedup round {rnd+1}/{dedup_rounds}. current num solutions: {len(solutions)} ####")
+        # shuffle solutions
+        random.shuffle(solutions)
+        groups = []
+        for i in range(0, len(solutions), dedup_group_size):
+            group = solutions[i: i + dedup_group_size]
+            groups.append((group, args.lang, args.dedup_threshold))
+        print(
+            f"    # deduping {len(groups)} groups with {dedup_group_size} solutions each #")
+        # dedup each group
+        deduped_groups = pool.map(process_dedup, groups)
+        # flatten
+        solutions = []
+        for group in deduped_groups:
+            solutions.extend(group)
+
+        dedup_group_size = len(solutions) // THREADS
+        rnd += 1
 
 pool.close()
 pool.join()
