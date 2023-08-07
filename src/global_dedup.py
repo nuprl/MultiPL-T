@@ -104,7 +104,7 @@ if __name__ == "__main__":
         )
         keep_mask = [True for _ in stripped_content]
         print(f"Deduped within chunks. Chunk size:{chunk_size}. Now deduping across chunks")
-        for i, chunk in tqdm(enumerate(dedup_chunks)):
+        for i, chunk in tqdm(enumerate(dedup_chunks), total=len(dedup_chunks)):
             for bchunk in dedup_chunks[i+1:]:
                 is_dup = pool.map(
                     functools.partial(check_single_function, bchunk, args.dedup_threshold), 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
                 for j in range(i, i+len(chunk)):
                     if is_dup[j-i]:
                         keep_mask[j] = False
-    dedup_ds = ds.select(keep_mask)
+    dedup_ds = ds.select([i for i, b in enumerate(keep_mask) if b ])
     dedup_ds.to_json(args.output_dataset)
                  
             
