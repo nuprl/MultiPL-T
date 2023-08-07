@@ -113,7 +113,7 @@ if __name__ == "__main__":
                 for j in range(i, i+len(chunk)):
                     if is_dup[j-i]:
                         keep_mask[j] = False
-    dedup_ds = ds.select([i for i, b in enumerate(keep_mask) if b ])
+    dedup_ds = ds.select([i for i, b in enumerate(keep_mask) if b])
     dedup_ds.to_json(args.output_dataset)
                  
             
