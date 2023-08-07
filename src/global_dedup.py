@@ -9,6 +9,8 @@ import datasets
 import argparse
 from tqdm import tqdm
 import multiprocessing
+import functools
+
 
 
 def strip_comments(code: str, lang: str):
@@ -55,9 +57,9 @@ def strip_comments(code: str, lang: str):
 
 def check_single_function(
         base_chunk: list[str], 
+        dedup_threshold,
+        ingnore_index,
         new_solution, 
-        dedup_threshold=0.6,
-        ingnore_index=-1
     ) -> bool:
     scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
     exists_ignore_index = ingnore_index >= 0
@@ -70,7 +72,7 @@ def check_single_function(
             return False
     return True
 
-def dedup_chunk_mask(chunk, dedup_threshold):
+def dedup_chunk_mask(dedup_threshold, chunk):
     keep_mask = [True for _ in chunk]
     for i, sol in enumerate(chunk):
         ind = max(i+1, len(chunk)-1)
@@ -101,7 +103,7 @@ if __name__ == "__main__":
     chunks = [stripped_content[i:i+max(chunk_size, len(stripped_content))] for i in range(0, len(stripped_content), chunk_size)]
     with multiprocessing.Pool(args.nthreads) as pool:
         dedup_chunks = pool.map(
-            lambda chunk: dedup_chunk(chunk, args.dedup_threshold),
+            functools.partial(dedup_chunk(args.dedup_threshold)),
             chunks
         )
         keep_mask = [True for _ in stripped_content]
@@ -109,7 +111,7 @@ if __name__ == "__main__":
         for i, chunk in tqdm(enumerate(dedup_chunks)):
             for bchunk in dedup_chunks[i+1:]:
                 is_dup = pool.map(
-                    lambda soln: check_single_function(bchunk, soln, args.dedup_threshold), 
+                    functools.partial(check_single_function(bchunk, args.dedup_threshold)), 
                     chunk
                 )
                 for j in range(i, i+len(chunk)):
