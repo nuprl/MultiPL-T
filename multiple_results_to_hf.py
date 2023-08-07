@@ -2,6 +2,7 @@ from typing import List
 import datasets
 import json
 import gzip
+import multiprocessing
 from progressbar import progressbar
 from pathlib import Path
 from dedup_solutions import dedup
@@ -17,6 +18,7 @@ pa.add_argument("--global_dedup", action="store_true")
 pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
 pa.add_argument("--score_batch", type=int, default=32)
+pa.add_argument("--processing_batch", type=int, default=256)
 pa.add_argument("--score_device", type=str, default="cpu")
 pa.add_argument("--no_score", action="store_true")
 args = pa.parse_args()
@@ -58,7 +60,10 @@ def get_best_sol(scores, sols):
 def make_path_iterator(): return Path(args.path).glob("**/*.results.json.gz")
 
 
-for path in progressbar(make_path_iterator(), max_value=len(list(make_path_iterator()))):
+def process_path(path):
+    global num_has_at_least_one_passing
+    global solutions
+    global scorer
     with gzip.open(path, "rt") as f:
         data = json.load(f)
 
@@ -117,6 +122,16 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
             Solution(sol, score, original_id, pass_rate, func_tests))
 
     solutions.extend(obj_sols)
+
+
+with multiprocessing.Pool() as pool:
+    batch = []
+    iter_size = len(list(make_path_iterator()))
+    for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
+        batch.append(path)
+        if len(batch) >= args.processing_batch or i == iter_size - 1:
+            pool.map(process_path, batch)
+            batch = []
 
 # score solutions (if dedup, otherwise we already have scores)
 if args.strategy == "dedup":
