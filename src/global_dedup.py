@@ -52,7 +52,7 @@ def strip_comments(code: str, lang: str, strip_parens=False):
         lines = code.split("\n")
         lines = [line for line in lines if not line.lstrip().startswith(prefix)]
         if strip_parens: 
-            lines = [line.replace("(", " ").replace(")", " ") for line in lines]
+            lines = [line.replace("(", "" ).replace(")", "") for line in lines]
         code = "\n".join(lines)
     
 
