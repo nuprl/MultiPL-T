@@ -149,14 +149,11 @@ for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size)
 
 
 if args.global_dedup:
-    rnd = 0
-    dedup_rounds = 1
-    while rnd < dedup_rounds:
-        dedup_group_size = min(len(solutions) // THREADS, 200)
-        # the smaller the dedup_group_size, more rounds of deduping
-        dedup_rounds = int(math.log(dedup_group_size, 2)
-                           * args.global_dedup_factor)
-
+    dedup_group_size = min(len(solutions) // THREADS, 200)
+    # the smaller the dedup_group_size, more rounds of deduping
+    dedup_rounds = int(math.log(dedup_group_size, 2)
+                       * args.global_dedup_factor)
+    for rnd in progressbar(range(dedup_rounds)):
         print(
             f" #### global dedup round {rnd+1}/{dedup_rounds}. current num solutions: {len(solutions)} ####")
         # shuffle solutions
@@ -175,7 +172,6 @@ if args.global_dedup:
             solutions.extend(group)
 
         dedup_group_size = len(solutions) // THREADS
-        rnd += 1
 
 pool.close()
 pool.join()
