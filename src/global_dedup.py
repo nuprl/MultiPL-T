@@ -13,7 +13,7 @@ import functools
 
 
 
-def strip_comments(code: str, lang: str):
+def strip_comments(code: str, lang: str, strip_parens=False):
     comment_prefix = {
         "lua": "--",
         "python": "#",
@@ -51,7 +51,10 @@ def strip_comments(code: str, lang: str):
         # If comment postfix is empty, handle single-line comments
         lines = code.split("\n")
         lines = [line for line in lines if not line.lstrip().startswith(prefix)]
+        if strip_parens: 
+            lines = [line.replace("(", " ").replace(")", " ") for line in lines]
         code = "\n".join(lines)
+    
 
     return code
 
@@ -91,10 +94,11 @@ if __name__ == "__main__":
     cli.add_argument("--dedup-threshold", type=float, default=0.6)
     cli.add_argument("--nthreads", type=int, default=1)
     cli.add_argument("--lang", type=str)
+    cli.add_argument("--strip-parens", action="store_true")
     args = cli.parse_args()
 
     ds = datasets.load_dataset("json", data_files=args.input_dataset, split="train")
-    stripped_content = [ strip_comments(code, args.lang) for code in ds["content"] ]
+    stripped_content = [ strip_comments(code, args.lang, args.strip_parens) for code in ds["content"] ]
     chunk_size = len(stripped_content) // args.nthreads
     chunks = [stripped_content[i:i+max(chunk_size, len(stripped_content))] for i in range(0, len(stripped_content), chunk_size)]
     with multiprocessing.Pool(args.nthreads) as pool:
