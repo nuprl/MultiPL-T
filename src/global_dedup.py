@@ -57,29 +57,25 @@ def strip_comments(code: str, lang: str):
 
 def check_single_function(
         base_chunk: list[str], 
-        dedup_threshold,
-        ingnore_index,
-        new_solution, 
+        dedup_threshold: float,
+        new_solution: str, 
     ) -> bool:
     scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
-    exists_ignore_index = ingnore_index >= 0
-    for i, sol in enumerate(base_chunk):
-        if exists_ignore_index and i == ingnore_index:
-            continue
+    for sol in base_chunk:
         scores = scorer.score(new_solution, sol)
         rouge_score = scores['rougeLsum'].fmeasure
         if rouge_score > dedup_threshold:
             return False
     return True
 
-def dedup_chunk_mask(dedup_threshold, chunk):
+def dedup_chunk_mask(dedup_threshold: float, chunk: list[str]):
     keep_mask = [True for _ in chunk]
     for i, sol in enumerate(chunk):
         ind = max(i+1, len(chunk)-1)
         keep_mask[i] = check_single_function(chunk[ind:], sol, dedup_threshold, i)
     return keep_mask
 
-def dedup_chunk(dedup_threshold, chunk):
+def dedup_chunk(dedup_threshold: float, chunk: list[str]):
     keep_mask = dedup_chunk_mask(dedup_threshold, chunk)
     return [chunk[i] for i in range(len(chunk)) if keep_mask[i]]
 
