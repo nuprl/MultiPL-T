@@ -2,7 +2,7 @@
 import argparse
 import requests
 import datasets
-from python_code_exec_server.code_exec_reqs import exec_test
+from code_exec_server.code_exec_reqs import exec_test
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset", type=str)

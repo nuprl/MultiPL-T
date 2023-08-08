@@ -6,7 +6,7 @@ from accelerate import Accelerator
 import argparse
 import json
 import zmq
-from python_code_exec_server.code_exec_reqs import exec_test, run_coverage
+from code_exec_server.code_exec_reqs import exec_test, run_coverage
 from codegen import HFCodeGen, GPTCodeGen
 
 parser = argparse.ArgumentParser()

@@ -3,7 +3,7 @@ from tree_sitter import Language, Parser
 Language.build_library(
     'build/lang.so',
     [
-        '../tree-sitter-python'
+        './tree-sitter-python'
     ]
 )
 LANGUAGE = Language('build/lang.so', 'python')
