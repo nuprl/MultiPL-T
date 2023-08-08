@@ -26,7 +26,7 @@ pushd $SCRIPT_DIR
 if [[ $STAGES == *"convert"* ]]; then
     echo "Converting programs..."
     rm -fr ./stack-clean-python
-    python3 $ROOT/multipl-t/target_lang_processing/dirty_proc_dataset.py 
+    python3 $ROOT/multipl-t/multipl_e_target_adaptor/dirty_proc_dataset.py 
 fi
 
 # MultiPL-E relies a bunch on relative pathes, so it's often easier to just
@@ -37,8 +37,8 @@ if [[ $STAGES == *"translate"* ]]; then
     echo "Translating prompts..."
     python3 prepare_prompts_json.py \
       --lang humaneval_to_$LANG.py\
-      --output ../../multipl-t/$LANG-prompts.jsonl \
-      --originals ../../multipl-t/target_lang_processing/stack-clean-python/ \
+      --output ../../multipl-t/multipl_e_target_adaptor/$LANG-prompts.jsonl \
+      --originals ../../multipl-t/multipl_e_target_adaptor/stack-clean-python/ \
       --add-canonical-to-prompt
     popd
 fi
@@ -68,7 +68,7 @@ if [[ $STAGES == *"generate"* ]]; then
       NVIDIA_VISIBLE_DEVICES=$i CUDA_VISIBLE_DEVICES=$i python3 automodel.py \
           --name /home/arjun/models/starcoderbase \
           --use-local \
-          --dataset ../multipl-t/$LANG-prompts.jsonl \
+          --dataset ../multipl-t/multipl_e_target_adaptor/$LANG-prompts.jsonl \
           --completion-limit 50 \
           --batch-size 50 \
           --temperature 0.8 \
