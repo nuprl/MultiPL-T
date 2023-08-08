@@ -1,0 +1,39 @@
+from code_llms.training import simple_train
+from pathlib import Path
+import datasets
+
+raw_data = datasets.load_dataset(
+    "json", 
+    data_files={{train_file}}},
+    split="train"
+)
+sds = raw_data.train_test_split(test_size=0.05)
+sds["train"] = sds["train"].map(
+    lambda x: {"content": "\n".join(x["content"].split("\n")[1:])}
+)
+train_data = datasets.concatenate_datasets([sds["train"], sds["test"]]).shuffle()
+test_data = {{test_file}}
+
+# The name of the directory in which this file is located. E.g., if the file is
+# called "/home/arjun/experiment1/train.py", then THIS_DIRECTORY_NAME is "experiment1".
+THIS_DIRECTORY_NAME = Path(".").absolute().name
+
+# Validation
+if train_data is None:
+    raise ValueError("Please load train data into the variable 'train_data'.")
+if test_data is None:
+    raise ValueError("Please load test data into the variable 'test_data'.")
+
+
+simple_train(
+    model="/work/arjunguha-research-group/arjun/models/starcoderbase-1b",
+    batch_size={{batch_size}}},
+    epochs={{epochs}} ,
+    learning_rate={{learning_rate}},
+    warmup_steps={{warmup_steps}},
+    train_data=train_data,
+    test_data=test_data,
+    dataset_limit=None,
+    log_dir="logs",
+    schedule="{{schedule}}"
+)
