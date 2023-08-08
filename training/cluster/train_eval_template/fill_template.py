@@ -1,6 +1,8 @@
 from pathlib import Path
 import chevron
 import shutil
+import argparse
+
 def build_single_experiment(
     exp_root: Path,
     lr: float,
@@ -11,6 +13,7 @@ def build_single_experiment(
     test_data: Path, 
     train_data: Path,
     ):
+    exp_dir = exp_root / Path(f"lr_{lr}_bs_{bs}_sched_{sched}_epochs_{epochs}_warmup_{warmup_steps}")
     with open("train-py.mustache", "r") as f:
         py_text = chevron.render(
             f, 
@@ -24,9 +27,43 @@ def build_single_experiment(
                 "train_data": train_data,
             }
         )
-    with open(exp_root / Path("train.py"), "w") as f:
+    with open(exp_dir / Path("train.py"), "w") as f:
         f.write(py_text)
-    shutil.copy("train.sbatch", exp_root / Path("train.sbatch"))
-    shutil.copy("eval_checkpoint.sbatch", exp_root / Path("eval_checkpoint.sbatch"))
-    shutil.copy("executions.sbatch", exp_root / Path("eval_final.sbatch"))
-    shutil.copy("launch.sh", exp_root / Path("launch.sh"))
+    shutil.copy("train.sbatch", exp_dir / Path("train.sbatch"))
+    shutil.copy("eval_checkpoint.sbatch", exp_dir / Path("eval_checkpoint.sbatch"))
+    shutil.copy("executions.sbatch", exp_dir / Path("eval_final.sbatch"))
+    shutil.copy("launch.sh", exp_dir / Path("launch.sh"))
+
+def all_build_experiments(exp_root: Path):
+    for lr in [1e-5, 2e-5, 3e-5, 4e-5, 5e-5, 6e-5, 7e-5, 8e-5, 9e-5, 1e-4]:
+        for bs in [8, 16, 32]:
+            for sched in ["cosine", "constant"]:
+                build_single_experiment(
+                    exp_root,
+                    lr=lr,
+                    bs=bs,
+                    sched=sched,
+                    epochs=1,
+                    warmup_steps=0,
+                    train_data=Path("racket_10k_train.jsonl"),
+                    test_data=Path("humaneval_10_racket.jsonl"),
+                )
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--exp-root", type=str, default="experiments")
+    parser.add_argument("--test", action="store_true")
+    args = parser.parse_args()
+    if args.test:
+        build_single_experiment(
+            Path(args.exp_root),
+            lr=1e-5,
+            bs=8,
+            sched="cosine",
+            epochs=1,
+            warmup_steps=0,
+            train_data=Path("racket_10k_train.jsonl"),
+            test_data=Path("humaneval_10_racket.jsonl"),
+        )
+        exit(0)
+    all_build_experiments(Path(args.exp_root)) 
