@@ -85,10 +85,10 @@ if __name__ == "__main__":
                 )
                 for m in masks:
                     all_masks.append(m)
-            for j in len(chunk):
+            for j in range(len(chunk)):
                 isset = False
                 for mask in all_masks: 
-                    if not m[j]:
+                    if not mask[j]:
                         keep_mask.append(False)
                         break
                 if not isset: 
