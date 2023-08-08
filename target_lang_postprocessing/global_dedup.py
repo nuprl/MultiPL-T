@@ -71,7 +71,7 @@ if __name__ == "__main__":
             chunk_slice = chunks[i:min(i+args.nthreads, len(chunks))]
             dedup = pool.map(
                 functools.partial(dedup_chunk, scorer, args.dedup_threshold),
-                chunks
+                chunk_slice
             )
             for dchunk in dedup:
                 dedup_chunks.append(dchunk)
