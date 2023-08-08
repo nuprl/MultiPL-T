@@ -40,7 +40,8 @@ def simple_train(
     train_data: datasets.Dataset,
     test_data: list,
     dataset_limit: int,
-    log_dir: Union[str, Path]
+    log_dir: Union[str, Path],
+    schedule: str = "cosine",
 ):
     # accelerator = Accelerator(project_dir=log_dir, log_with="tensorboard")
     per_device_batch_size = 1  # TODO(arjun): parameterize
@@ -77,7 +78,7 @@ def simple_train(
         starcoder_params_for_scheduler(model), lr=learning_rate
     )
     lr_scheduler = get_scheduler(
-        name="cosine",
+        name=schedule,
         optimizer=optim,
         num_warmup_steps=warmup_steps,
         num_training_steps=max_steps * 1,

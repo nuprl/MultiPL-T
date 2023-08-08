@@ -4,7 +4,7 @@ import datasets
 
 raw_data = datasets.load_dataset(
     "json", 
-    data_files={{train_data}},
+    data_files="{{train_data}}",
     split="train"
 )
 sds = raw_data.train_test_split(test_size=0.05)
@@ -12,7 +12,7 @@ sds["train"] = sds["train"].map(
     lambda x: {"content": "\n".join(x["content"].split("\n")[1:])}
 )
 train_data = datasets.concatenate_datasets([sds["train"], sds["test"]]).shuffle()
-test_data = {{test_data}}
+test_data = "{{test_data}}"
 
 # The name of the directory in which this file is located. E.g., if the file is
 # called "/home/arjun/experiment1/train.py", then THIS_DIRECTORY_NAME is "experiment1".

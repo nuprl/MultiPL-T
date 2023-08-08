@@ -64,8 +64,8 @@ if __name__ == "__main__":
             sched="cosine",
             epochs=1,
             warmup_steps=10,
-            train_data=Path("racket_10k_train.jsonl"),
-            test_data=Path("humaneval_10_racket.jsonl"),
+            train_data=Path("racket_10k_train.jsonl").absolute(),
+            test_data=Path("humaneval_10_racket.jsonl").absolute(),
         )
         exit(0)
     all_build_experiments(Path(args.exp_root)) 
