@@ -46,8 +46,8 @@ def all_build_experiments(exp_root: Path):
                     sched=sched,
                     epochs=1,
                     warmup_steps=0,
-                    train_data=Path("racket_10k_train.jsonl"),
-                    test_data=Path("humaneval_10_racket.jsonl"),
+                    train_data=Path("racket_10k_train.jsonl").absolute(),
+                    test_data=Path("humaneval_10_racket.jsonl").absolute(),
                 )
 
 if __name__ == "__main__":
