@@ -15,11 +15,11 @@ import functools
 
 def check_single_function(
     scorer,
-    base_chunk: list[str],
+    base_chunk: list[tuple[int, str]],
     dedup_threshold: float,
     new_solution: str,
 ) -> bool:
-    for sol in base_chunk:
+    for (_, sol) in base_chunk:
         scores = scorer.score(new_solution, sol)
         rouge_score = scores['rougeLsum'].fmeasure
         if rouge_score > dedup_threshold:
@@ -27,16 +27,16 @@ def check_single_function(
     return True
 
 
-def dedup_chunk_mask(scorer, dedup_threshold: float, chunk: list[str]):
+def dedup_chunk_mask(scorer, dedup_threshold: float, chunk: list[tuple[int, str]]):
     keep_mask = [True for _ in chunk]
-    for i, sol in enumerate(chunk):
+    for i, (j, sol) in enumerate(chunk):
         ind = min(i+1, len(chunk)-1)
         keep_mask[i] = check_single_function(
             scorer, chunk[ind:], dedup_threshold, sol)
     return keep_mask
 
 
-def dedup_chunk(scorer, dedup_threshold: float, chunk: list[str]):
+def dedup_chunk(scorer, dedup_threshold: float, chunk: list[tuple[int, str]]):
     keep_mask = dedup_chunk_mask(scorer, dedup_threshold, chunk)
     return [chunk[i] for i in range(len(chunk)) if keep_mask[i]]
 
@@ -58,11 +58,12 @@ if __name__ == "__main__":
 
     ds = datasets.load_dataset(
         "json", data_files=args.input_dataset, split="train")
-    stripped_content = [strip_comments(
-        code, args.lang, args.strip_parens) for code in ds["content"]]
+    stripped_content = [(i, strip_comments(
+        code, args.lang, args.strip_parens)) for (i, code) in enumerate(ds["content"])]
     chunks = [stripped_content[i:min(i+args.chunk_size, len(stripped_content))]
               for i in range(0, len(stripped_content), args.chunk_size)]
     scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
+    final_dedup = []
     with multiprocessing.Pool(args.nthreads) as pool:
         dedup_chunks = []
         print(f"Deduping withinin chunks: {len(chunks)}")
@@ -74,25 +75,22 @@ if __name__ == "__main__":
             )
             for dchunk in dedup:
                 dedup_chunks.append(dchunk)
-        keep_mask = []
-        print(f"Deduped within chunks. Now deduping across chunks")
+        print(f"Now comparing across chunks: {len(dedup_chunks)}")
         for i, chunk in tqdm(enumerate(dedup_chunks), total=len(dedup_chunks)):
-            all_masks = []
-            for j in range(i+1, len(dedup_chunks), args.nthreads):
-                masks = pool.map(
-                    functools.partial(compare_chunk, scorer, args.dedup_threshold, chunk),
-                    dedup_chunks[j:min(i+1+args.nthreads, len(dedup_chunks))]
-                )
-                for m in masks:
-                    all_masks.append(m)
-            for j in range(len(chunk)):
-                isset = False
-                for mask in all_masks: 
-                    if not mask[j]:
-                        keep_mask.append(False)
-                        break
-                if not isset: 
-                    keep_mask.append(True)
-                
-    dedup_ds = ds.select([i for i, b in enumerate(keep_mask) if b])
+            comp_chunks = dedup_chunks[i+1:]
+            keep_mask = [True for _ in chunk]
+            nested_masks = pool.map(
+                functools.partial(compare_chunk, scorer, args.dedup_threshold, chunk),
+                comp_chunks
+            )
+            for i in range(len(chunk)): 
+                keep_mask[i] = all([m[i] for m in nested_masks])
+            for i, c in enumerate(chunk):
+                if keep_mask[i]:
+                    final_dedup.append(c)
+    dedup_ds = ds.select([i for (i, _) in final_dedup])
     dedup_ds.to_json(args.output_dataset)
+                         
+            
+                
+                
