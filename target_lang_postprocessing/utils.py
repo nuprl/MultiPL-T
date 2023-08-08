@@ -1,4 +1,4 @@
-from src.clean_training_data import clean_lua, clean_racket, clean_ml
+from clean_training_data import clean_lua, clean_racket, clean_ml
 
 def clean_sol_prompt(lang, sol):
     if lang == "lua":
