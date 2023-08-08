@@ -4,6 +4,7 @@
 # ROOT
 #   multipl-t/
 #   MultiPL-E/
+# TODO: use MultiPL-E as a submodule
 
 if [ $# -lt 3 ]; then
   echo "Usage: gen_prompts.sh <lang> <root (probably home dir)> <out> [optional: num gpus] [optional: stages to run]"
