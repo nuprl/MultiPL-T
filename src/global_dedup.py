@@ -104,8 +104,8 @@ if __name__ == "__main__":
     with multiprocessing.Pool(args.nthreads) as pool:
         dedup_chunks = []
         print(f"Deduping withinin chunks: {len(chunks)}")
-        for i in tqdm(range(0, len(chunks), args.num_threads)): 
-            chunk_slice = chunks[i:min(i+args.num_threads, len(chunks))]
+        for i in tqdm(range(0, len(chunks), args.nthreads)): 
+            chunk_slice = chunks[i:min(i+args.nthreads, len(chunks))]
             dedup = pool.map(
                 functools.partial(dedup_chunk, args.dedup_threshold),
                 chunks
