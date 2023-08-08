@@ -77,12 +77,22 @@ if __name__ == "__main__":
         keep_mask = []
         print(f"Deduped within chunks. Now deduping across chunks")
         for i, chunk in tqdm(enumerate(dedup_chunks), total=len(dedup_chunks)):
-            mask = pool.map(
-                functools.partial(compare_chunk, scorer,
-                                  args.dedup_threshold, chunk),
-                dedup_chunks[i+1:]
-            )
-            for blist in mask:
-                keep_mask.append(all(blist))
+            all_masks = []
+            for j in range(i+1, len(dedup_chunks), args.nthreads):
+                masks = pool.map(
+                    functools.partial(compare_chunk, scorer, args.dedup_threshold, chunk),
+                    dedup_chunks[j:min(i+1+args.nthreads, len(dedup_chunks))]
+                )
+                for m in masks:
+                    all_masks.append(m)
+            for j in len(chunk):
+                isset = False
+                for mask in all_masks: 
+                    if not m[j]:
+                        keep_mask.append(False)
+                        break
+                if not isset: 
+                    keep_mask.append(True)
+                
     dedup_ds = ds.select([i for i, b in enumerate(keep_mask) if b])
     dedup_ds.to_json(args.output_dataset)
