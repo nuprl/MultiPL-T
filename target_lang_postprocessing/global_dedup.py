@@ -60,10 +60,13 @@ if __name__ == "__main__":
     dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
                        * args.global_dedup_factor)
     for i in tqdm(range(dedup_rounds)):
+        print(
+            f" #### global dedup round {i+1}/{dedup_rounds}. current num solutions: {len(solutions)} ####")
         random.shuffle(stripped_content)
         chunks = [] 
-        for i in range(0, len(stripped_content), dedup_group_size):
-            chunks.append(stripped_content[i:i+dedup_group_size]) 
+        for j in range(0, len(stripped_content), dedup_group_size):
+            chunks.append(stripped_content[j:j+dedup_group_size]) 
+            print(f"    # deduping {len(chunks)} groups with {dedup_group_size} solutions each #")
             with multiprocessing.Pool(args.nthreads) as pool:
                 chunks = pool.map(functools.partial(dedup_chunk, args.dedup_threshold), chunks)
         stripped_content = []
