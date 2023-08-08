@@ -17,6 +17,10 @@ OUT=$3
 NUM_GPUS=${4:-1}
 STAGES=${5:-"convert,translate,generate"}
 
+# cd to directory of this script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+pushd $SCRIPT_DIR
+
 # This generates the programs in a MultiPL-E compatible style, 
 # already completed and compressed as clean-py-programs.tar.gz
 if [[ $STAGES == *"convert"* ]]; then
@@ -89,3 +93,4 @@ if [[ $STAGES == *"generate"* ]]; then
   wait # wait for all background processes to finish
   popd
 fi
+popd
