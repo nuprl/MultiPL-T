@@ -13,7 +13,8 @@ def build_single_experiment(
     test_data: Path, 
     train_data: Path,
     ):
-    exp_dir = exp_root / Path(f"lr_{lr}_bs_{bs}_sched_{sched}_epochs_{epochs}_warmup_{warmup_steps}")
+    exp_dir = exp_root / Path(f"lr_{lr:.0e}_bs_{bs}_sched_{sched}_epochs_{epochs}_warmup_{warmup_steps}")
+    exp_dir.mkdir(parents=True, exist_ok=True)
     with open("train-py.mustache", "r") as f:
         py_text = chevron.render(
             f, 
@@ -54,9 +55,10 @@ if __name__ == "__main__":
     parser.add_argument("--exp-root", type=str, default="experiments")
     parser.add_argument("--test", action="store_true")
     args = parser.parse_args()
+    exp_root = Path(args.exp_root).absolute()
     if args.test:
         build_single_experiment(
-            Path(args.exp_root),
+            exp_root,
             lr=1e-5,
             bs=8,
             sched="cosine",
