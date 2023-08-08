@@ -3,15 +3,15 @@ This script takes a dataset of completions and deduplicates (in parallel) them u
 ROGUE score. 
 Cli provided in __main__.
 '''
-import numpy as np
+import random
 from rouge_score import rouge_scorer
 from dedup_solutions import strip_comments
 import datasets
 import argparse
 from tqdm import tqdm
+import math
 import multiprocessing
 import functools
-
 
 def check_single_function(
     scorer,
@@ -26,7 +26,6 @@ def check_single_function(
             return False
     return True
 
-
 def dedup_chunk_mask(scorer, dedup_threshold: float, chunk: list[tuple[int, str]]):
     keep_mask = [True for _ in chunk]
     for i, (j, sol) in enumerate(chunk):
@@ -36,14 +35,10 @@ def dedup_chunk_mask(scorer, dedup_threshold: float, chunk: list[tuple[int, str]
     return keep_mask
 
 
-def dedup_chunk(scorer, dedup_threshold: float, chunk: list[tuple[int, str]]):
+def dedup_chunk(dedup_threshold: float, chunk: list[tuple[int, str]]):
+    scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
     keep_mask = dedup_chunk_mask(scorer, dedup_threshold, chunk)
     return [chunk[i] for i in range(len(chunk)) if keep_mask[i]]
-
-
-def compare_chunk(scorer, dedup_threshold, comp_chunk, base_chunk):
-    return [check_single_function(scorer, base_chunk, dedup_threshold, fn) for (_, fn) in comp_chunk]
-
 
 if __name__ == "__main__":
     cli = argparse.ArgumentParser()
@@ -60,37 +55,20 @@ if __name__ == "__main__":
         "json", data_files=args.input_dataset, split="train")
     stripped_content = [(i, strip_comments(
         code, args.lang, args.strip_parens)) for (i, code) in enumerate(ds["content"])]
-    chunks = [stripped_content[i:min(i+args.chunk_size, len(stripped_content))]
-              for i in range(0, len(stripped_content), args.chunk_size)]
-    scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
-    final_dedup = []
-    with multiprocessing.Pool(args.nthreads) as pool:
-        dedup_chunks = []
-        print(f"Deduping withinin chunks: {len(chunks)}")
-        for i in tqdm(range(0, len(chunks), args.nthreads)):
-            chunk_slice = chunks[i:min(i+args.nthreads, len(chunks))]
-            dedup = pool.map(
-                functools.partial(dedup_chunk, scorer, args.dedup_threshold),
-                chunk_slice
-            )
-            for dchunk in dedup:
-                dedup_chunks.append(dchunk)
-        print(f"Now comparing across chunks: {len(dedup_chunks)}")
-        for i, chunk in tqdm(enumerate(dedup_chunks), total=len(dedup_chunks)):
-            comp_chunks = dedup_chunks[i+1:]
-            keep_mask = [True for _ in chunk]
-            nested_masks = pool.map(
-                functools.partial(compare_chunk, scorer, args.dedup_threshold, chunk),
-                comp_chunks
-            )
-            for i in range(len(chunk)): 
-                keep_mask[i] = all([m[i] for m in nested_masks])
-            for i, c in enumerate(chunk):
-                if keep_mask[i]:
-                    final_dedup.append(c)
-    dedup_ds = ds.select([i for (i, _) in final_dedup])
+    dedup_group_size = min(len(stripped_content) // args.nthreads, args.chunk_size) 
+    dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
+                       * args.global_dedup_factor)
+    for i in tqdm(range(dedup_rounds)):
+        random.shuffle(stripped_content)
+        chunks = [] 
+        for i in range(0, len(stripped_content), dedup_group_size):
+            chunks.append(stripped_content[i:i+dedup_group_size]) 
+            with multiprocessing.Pool(args.nthreads) as pool:
+                chunks = pool.map(functools.partial(dedup_chunk, args.dedup_threshold), chunks)
+        stripped_content = []
+        for chunk in chunks:
+            stripped_content.extend(chunk)
+        dedup_group_size = min(len(stripped_content) // args.nthreads, args.chunk_size)
+    dedup_indices = [i for (i, _) in stripped_content]
+    dedup_ds = ds.select(dedup_indices)
     dedup_ds.to_json(args.output_dataset)
-                         
-            
-                
-                
