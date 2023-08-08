@@ -4,7 +4,7 @@ import datasets
 
 raw_data = datasets.load_dataset(
     "json", 
-    data_files={{train_file}},
+    data_files={{train_data}},
     split="train"
 )
 sds = raw_data.train_test_split(test_size=0.05)

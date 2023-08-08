@@ -32,7 +32,7 @@ def build_single_experiment(
         f.write(py_text)
     shutil.copy("train.sbatch", exp_dir / Path("train.sbatch"))
     shutil.copy("eval_checkpoint.sbatch", exp_dir / Path("eval_checkpoint.sbatch"))
-    shutil.copy("executions.sbatch", exp_dir / Path("eval_final.sbatch"))
+    shutil.copy("executions.sbatch", exp_dir / Path("executions.sbatch"))
     shutil.copy("launch.sh", exp_dir / Path("launch.sh"))
 
 def all_build_experiments(exp_root: Path):
@@ -45,7 +45,7 @@ def all_build_experiments(exp_root: Path):
                     bs=bs,
                     sched=sched,
                     epochs=1,
-                    warmup_steps=0,
+                    warmup_steps=10,
                     train_data=Path("racket_10k_train.jsonl").absolute(),
                     test_data=Path("humaneval_10_racket.jsonl").absolute(),
                 )
@@ -63,7 +63,7 @@ if __name__ == "__main__":
             bs=8,
             sched="cosine",
             epochs=1,
-            warmup_steps=0,
+            warmup_steps=10,
             train_data=Path("racket_10k_train.jsonl"),
             test_data=Path("humaneval_10_racket.jsonl"),
         )

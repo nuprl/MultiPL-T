@@ -6,6 +6,6 @@ for dir in $EXP_ROOT/*; do
     echo "Launching experiment $dir"
     cd $dir
     ./launch.sh
-    cd ..
+    cd ../..
   fi
 done
