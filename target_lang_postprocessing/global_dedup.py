@@ -61,7 +61,7 @@ if __name__ == "__main__":
                        * args.global_dedup_factor)
     for i in tqdm(range(dedup_rounds)):
         print(
-            f" #### global dedup round {i+1}/{dedup_rounds}. current num solutions: {len(solutions)} ####")
+            f" #### global dedup round {i+1}/{dedup_rounds}. current num solutions: {len(stripped_content)} ####")
         random.shuffle(stripped_content)
         chunks = [] 
         for j in range(0, len(stripped_content), dedup_group_size):
