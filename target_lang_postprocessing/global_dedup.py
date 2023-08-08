@@ -48,6 +48,7 @@ if __name__ == "__main__":
     cli.add_argument("--lang", type=str)
     cli.add_argument("--nthreads", type=int, default=1)
     cli.add_argument("--dedup-threshold", type=float, default=0.6)
+    cli.add_argument("--global-dedup-factor", type=float, default=1.0)
     cli.add_argument("--strip-parens", action="store_true")
     args = cli.parse_args()
 
