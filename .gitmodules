@@ -7,3 +7,6 @@
 [submodule "source_lang_processing/tree-sitter-python"]
 	path = source_lang_processing/tree-sitter-python
 	url = https://github.com/tree-sitter/tree-sitter-python
+[submodule "target_lang_postprocessing/code_scorer"]
+	path = target_lang_postprocessing/code_scorer
+	url = https://github.com/cassanof/code-scorer
