@@ -1,4 +1,3 @@
-
 """data to filter out of the dataset"""
 import json
 import itertools
