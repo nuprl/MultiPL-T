@@ -42,7 +42,7 @@ def dedup_chunk(scorer, dedup_threshold: float, chunk: list[tuple[int, str]]):
 
 
 def compare_chunk(scorer, dedup_threshold, comp_chunk, base_chunk):
-    return [check_single_function(scorer, base_chunk, dedup_threshold, fn) for fn in comp_chunk]
+    return [check_single_function(scorer, base_chunk, dedup_threshold, fn) for (_, fn) in comp_chunk]
 
 
 if __name__ == "__main__":
