@@ -1,3 +1,4 @@
+#!/bin/bash
 # Usage: gen_prompts.sh <lang> <root>
 # This works best if your directory structure is like this:
 # ROOT
@@ -20,7 +21,7 @@ STAGES=${5:-"convert,translate,generate"}
 if [[ $STAGES == *"convert"* ]]; then
     echo "Converting programs..."
     rm -fr ./stack-clean-python
-    python3 $ROOT/multipl-t/src/dirty_proc_dataset.py 
+    python3 $ROOT/multipl-t/target_lang_processing/dirty_proc_dataset.py 
 fi
 
 # MultiPL-E relies a bunch on relative pathes, so it's often easier to just
@@ -32,7 +33,7 @@ if [[ $STAGES == *"translate"* ]]; then
     python3 prepare_prompts_json.py \
       --lang humaneval_to_$LANG.py\
       --output ../../multipl-t/$LANG-prompts.jsonl \
-      --originals ../../multipl-t/stack-clean-python/ \
+      --originals ../../multipl-t/target_lang_processing/stack-clean-python/ \
       --add-canonical-to-prompt
     popd
 fi
