@@ -84,6 +84,7 @@ class HFCodeGen(CodeGen):
                 do_sample=True,
                 top_p=0.95,
                 temperature=temp,
+                use_cache=True,
                 pad_token_id=self.tokenizer.eos_token_id
             )
             return self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
