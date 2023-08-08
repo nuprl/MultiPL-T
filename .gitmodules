@@ -1,0 +1,6 @@
+[submodule "source_lang_processing/testright"]
+	path = source_lang_processing/testright
+	url = git@github.com:cassanof/testright
+[submodule "source_lang_processing/code_exec_server"]
+	path = source_lang_processing/code_exec_server
+	url = git@github.com:cassanof/code_exec_server
