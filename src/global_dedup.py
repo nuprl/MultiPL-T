@@ -91,23 +91,29 @@ if __name__ == "__main__":
     cli = argparse.ArgumentParser()
     cli.add_argument("--input-dataset", type=str)
     cli.add_argument("--output-dataset", type=str)
-    cli.add_argument("--dedup-threshold", type=float, default=0.6)
-    cli.add_argument("--nthreads", type=int, default=1)
+    cli.add_argument("--chunk-size", type=int)
     cli.add_argument("--lang", type=str)
+    cli.add_argument("--nthreads", type=int, default=1)
+    cli.add_argument("--dedup-threshold", type=float, default=0.6)
     cli.add_argument("--strip-parens", action="store_true")
     args = cli.parse_args()
 
     ds = datasets.load_dataset("json", data_files=args.input_dataset, split="train")
     stripped_content = [ strip_comments(code, args.lang, args.strip_parens) for code in ds["content"] ]
-    chunk_size = len(stripped_content) // args.nthreads
-    chunks = [stripped_content[i:i+max(chunk_size, len(stripped_content))] for i in range(0, len(stripped_content), chunk_size)]
+    chunks = [stripped_content[i:min(i+args.chunk_size, len(stripped_content))] for i in range(0, len(stripped_content), args.chunk_size)]
     with multiprocessing.Pool(args.nthreads) as pool:
-        dedup_chunks = pool.map(
-            functools.partial(dedup_chunk, args.dedup_threshold),
-            chunks
-        )
+        dedup_chunks = []
+        print(f"Deduping withinin chunks: {len(chunks)}")
+        for i in tqdm(range(0, len(chunks), args.num_threads)): 
+            chunk_slice = chunks[i:min(i+args.num_threads, len(chunks))]
+            dedup = pool.map(
+                functools.partial(dedup_chunk, args.dedup_threshold),
+                chunks
+            )
+            for dchunk in dedup: 
+                dedup_chunks.append(dchunk)
         keep_mask = [True for _ in stripped_content]
-        print(f"Deduped within chunks. Chunk size:{chunk_size}. Now deduping across chunks")
+        print(f"Deduped within chunks. Now deduping across chunks")
         for i, chunk in tqdm(enumerate(dedup_chunks), total=len(dedup_chunks)):
             for bchunk in dedup_chunks[i+1:]:
                 is_dup = pool.map(
