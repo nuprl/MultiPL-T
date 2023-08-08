@@ -66,9 +66,9 @@ if __name__ == "__main__":
         chunks = [] 
         for j in range(0, len(stripped_content), dedup_group_size):
             chunks.append(stripped_content[j:j+dedup_group_size]) 
-            print(f"    # deduping {len(chunks)} groups with {dedup_group_size} solutions each #")
-            with multiprocessing.Pool(args.nthreads) as pool:
-                chunks = pool.map(functools.partial(dedup_chunk, args.dedup_threshold), chunks)
+        print(f"    # deduping {len(chunks)} groups with {dedup_group_size} solutions each #")
+        with multiprocessing.Pool(args.nthreads) as pool:
+            chunks = pool.map(functools.partial(dedup_chunk, args.dedup_threshold), chunks)
         stripped_content = []
         for chunk in chunks:
             stripped_content.extend(chunk)
