@@ -65,7 +65,8 @@ if __name__ == "__main__":
     cli.add_argument("--id-column", type=str, default="original_id")
     cli.add_argument("--lang", type=str)
     cli.add_argument("--nthreads", type=int, default=1)
-    cli.add_argument("--dedup-threshold", type=float, default=0.6)
+    cli.add_argument("--same-dedup-threshold", type=float, default=0.6)
+    cli.add_argument("--diff-dedup-threshold", type=float, default=0.7)
     cli.add_argument("--global-dedup-factor", type=float, default=1.0)
     cli.add_argument("--strip-parens", action="store_true")
     args = cli.parse_args()
@@ -79,7 +80,7 @@ if __name__ == "__main__":
     stripped_content = []
     print(f" #### deduping {len(grouped_stripped_content)} groups of same problem ####")
     with multiprocessing.Pool(args.nthreads) as pool:
-        grouped_stripped_content = pool.map(functools.partial(dedup_chunk, args.dedup_threshold), grouped_stripped_content) 
+        grouped_stripped_content = pool.map(functools.partial(dedup_chunk, args.same_dedup_threshold), grouped_stripped_content) 
     for group in grouped_stripped_content:
         stripped_content.extend(group)
     
@@ -95,11 +96,11 @@ if __name__ == "__main__":
             chunks.append(stripped_content[j:j+dedup_group_size]) 
         print(f"    # deduping {len(chunks)} groups with {dedup_group_size} solutions each #")
         with multiprocessing.Pool(args.nthreads) as pool:
-            chunks = pool.map(functools.partial(dedup_chunk, args.dedup_threshold), chunks)
+            chunks = pool.map(functools.partial(dedup_chunk, args.diff_dedup_threshold), chunks)
         stripped_content = []
         for chunk in chunks:
             stripped_content.extend(chunk)
         dedup_group_size = min(len(stripped_content) // args.nthreads, args.chunk_size)
-    dedup_indices = [i for (i, _) in stripped_content]
+    dedup_indices = [i for (i, _, _) in stripped_content]
     dedup_ds = ds.select(dedup_indices)
     dedup_ds.to_json(args.output_dataset)
