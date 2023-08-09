@@ -27,7 +27,7 @@ def check_single_function(
     dedup_threshold: float,
     new_solution: str,
 ) -> bool:
-    for (_, sol) in base_chunk:
+    for (_, sol, _) in base_chunk:
         scores = scorer.score(new_solution, sol)
         rouge_score = scores['rougeLsum'].fmeasure
         if rouge_score > dedup_threshold:
