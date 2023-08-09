@@ -36,7 +36,7 @@ def check_single_function(
 
 def dedup_chunk_mask(scorer, dedup_threshold: float, chunk: list[tuple[int, str]]):
     keep_mask = [True for _ in chunk]
-    for i, (j, (sol, _)) in enumerate(chunk):
+    for i, (j, sol, _) in enumerate(chunk):
         ind = min(i+1, len(chunk)-1)
         keep_mask[i] = check_single_function(
             scorer, chunk[ind:], dedup_threshold, sol)
