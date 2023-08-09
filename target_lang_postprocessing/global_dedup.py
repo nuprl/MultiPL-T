@@ -13,9 +13,17 @@ import math
 import multiprocessing
 import functools
 
+def get_id_from_col(id, col):
+    if col == "original_id":
+        return id
+    elif col == "path":
+        return int(id.split("/")[-1].split("_")[1])
+    else:
+        raise ValueError(f"Unknown id column {col}")
+
 def check_single_function(
     scorer,
-    base_chunk: list[tuple[int, str]],
+    base_chunk: list[tuple[int, str, int]],
     dedup_threshold: float,
     new_solution: str,
 ) -> bool:
@@ -35,16 +43,26 @@ def dedup_chunk_mask(scorer, dedup_threshold: float, chunk: list[tuple[int, str]
     return keep_mask
 
 
-def dedup_chunk(dedup_threshold: float, chunk: list[tuple[int, str]]):
+def dedup_chunk(dedup_threshold: float, chunk: list[tuple[int, str, int]]):
     scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
     keep_mask = dedup_chunk_mask(scorer, dedup_threshold, chunk)
     return [chunk[i] for i in range(len(chunk)) if keep_mask[i]]
+
+def group_solns_by_id(solns: list[tuple[int, str, int]]): 
+    solns_by_id = {}
+    for (i, sol, id) in solns:
+        if id not in solns_by_id:
+            solns_by_id[id] = []
+        solns_by_id[id].append((i, sol))
+    return [solns for solns in solns_by_id.values()]
+
 
 if __name__ == "__main__":
     cli = argparse.ArgumentParser()
     cli.add_argument("--input-dataset", type=str)
     cli.add_argument("--output-dataset", type=str)
     cli.add_argument("--chunk-size", type=int)
+    cli.add_argument("--id-column", type=str, default="original_id")
     cli.add_argument("--lang", type=str)
     cli.add_argument("--nthreads", type=int, default=1)
     cli.add_argument("--dedup-threshold", type=float, default=0.6)
@@ -52,10 +70,20 @@ if __name__ == "__main__":
     cli.add_argument("--strip-parens", action="store_true")
     args = cli.parse_args()
 
-    ds = datasets.load_dataset(
-        "json", data_files=args.input_dataset, split="train")
-    stripped_content = [(i, strip_comments(
-        code, args.lang, args.strip_parens)) for (i, code) in enumerate(ds["content"])]
+    ds = datasets.load_dataset("json", data_files=args.input_dataset, split="train")
+    stripped_content = []
+    for (i, (code, id) ) in enumerate(zip(ds["content"], ds[args.id_column])):
+       soln = (i, strip_comments(code, args.lang, args.strip_parens), get_id_from_col(id, args.id_column))
+       stripped_content.append(soln)
+    grouped_stripped_content = group_solns_by_id(stripped_content)
+    stripped_content = []
+    print(f" #### deduping {len(grouped_stripped_content)} groups of same problem ####")
+    with multiprocessing.Pool(args.nthreads) as pool:
+        grouped_stripped_content = pool.map(
+            functools.partial(dedup_chunk, args.dedup_threshold), grouped_stripped_content) 
+    for group in grouped_stripped_content:
+        stripped_content.extend(group)
+    
     dedup_group_size = min(len(stripped_content) // args.nthreads, args.chunk_size) 
     dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
                        * args.global_dedup_factor)
