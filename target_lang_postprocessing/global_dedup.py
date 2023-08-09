@@ -48,7 +48,7 @@ def dedup_chunk(dedup_threshold: float, chunk: list[tuple[int, str, int]]):
     keep_mask = dedup_chunk_mask(scorer, dedup_threshold, chunk)
     return [chunk[i] for i in range(len(chunk)) if keep_mask[i]]
 
-def group_solns_by_id(solns: list[tuple[int, str, int]]): 
+def group_solns_by_id(solns: list[tuple[int, str, int]]) -> list[list[tuple[int, str, int]]]: 
     solns_by_id = {}
     for (i, sol, id) in solns:
         if id not in solns_by_id:
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     args = cli.parse_args()
 
     ds = datasets.load_dataset("json", data_files=args.input_dataset, split="train")
-    stripped_content = []
+    stripped_content : list[list[tuple[int, str, int]]]= []
     for (i, (code, id) ) in enumerate(zip(ds["content"], ds[args.id_column])):
        soln = (i, strip_comments(code, args.lang, args.strip_parens), get_id_from_col(id, args.id_column))
        stripped_content.append(soln)
@@ -79,8 +79,7 @@ if __name__ == "__main__":
     stripped_content = []
     print(f" #### deduping {len(grouped_stripped_content)} groups of same problem ####")
     with multiprocessing.Pool(args.nthreads) as pool:
-        grouped_stripped_content = pool.map(
-            functools.partial(dedup_chunk, args.dedup_threshold), grouped_stripped_content) 
+        grouped_stripped_content = pool.map(functools.partial(dedup_chunk, args.dedup_threshold), grouped_stripped_content) 
     for group in grouped_stripped_content:
         stripped_content.extend(group)
     
