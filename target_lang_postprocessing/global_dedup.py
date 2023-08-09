@@ -53,7 +53,7 @@ def group_solns_by_id(solns: list[tuple[int, str, int]]):
     for (i, sol, id) in solns:
         if id not in solns_by_id:
             solns_by_id[id] = []
-        solns_by_id[id].append((i, sol))
+        solns_by_id[id].append((i, sol, id))
     return [solns for solns in solns_by_id.values()]
 
 
