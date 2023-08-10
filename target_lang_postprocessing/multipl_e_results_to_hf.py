@@ -149,9 +149,10 @@ for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size)
 
 
 if args.global_dedup:
-    dedup_group_size = min(len(solutions) // THREADS, 200)
+    dedup_group_size = min(len(solutions), 200)
     dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
                        * args.global_dedup_factor)
+    prev_num_sols = len(solutions)
     for rnd in progressbar(range(dedup_rounds)):
         print(
             f" #### global dedup round {rnd+1}/{dedup_rounds}. current num solutions: {len(solutions)} ####")
@@ -162,7 +163,7 @@ if args.global_dedup:
             group = solutions[i: i + dedup_group_size]
             groups.append((group, args.lang, args.dedup_threshold))
         print(
-            f"    # deduping {len(groups)} groups with {dedup_group_size} solutions each #")
+            f"   # deduping {len(groups)} groups with {dedup_group_size} solutions each #")
         # dedup each group
         deduped_groups = pool.map(process_dedup, groups)
         # flatten
@@ -170,7 +171,13 @@ if args.global_dedup:
         for group in deduped_groups:
             solutions.extend(group)
 
-        dedup_group_size = min(len(solutions) // THREADS, 200)
+        dedup_group_size = min(len(solutions), 200)
+        dedup_rate = 1 - (len(solutions) / prev_num_sols)
+        print(
+            f"   # dedup round {rnd+1} complete. current num solutions: {len(solutions)}. dedup rate: {dedup_rate} #"
+        )
+        prev_num_sols = len(solutions)
+
 
 pool.close()
 pool.join()
