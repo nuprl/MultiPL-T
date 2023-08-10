@@ -93,7 +93,7 @@ def process_path(path):
     edu_scores = []
     if len(sols) > 0:
         if args.strategy == "dedup":
-            sols = rouge_dedup(sols, args.lang, args.dedup_threshold)
+            sols = rouge_dedup(sols, args.lang, args.dedup_threshold, trim_top_comments=False)
             edu_scores.extend([0] * len(sols))
         elif args.strategy == "dedup_best":
             # IDEA: sort the solutions by score, then dedup, so higher scoring solutions are more likely to be kept
@@ -103,7 +103,7 @@ def process_path(path):
             sols_to_score = {sol: score for score, sol in score_sols}
             score_sols.sort(key=lambda x: x[0], reverse=True)
             sols = [x[1] for x in score_sols]
-            sols = rouge_dedup(sols, args.lang, args.dedup_threshold)
+            sols = rouge_dedup(sols, args.lang, args.dedup_threshold, trim_top_comments=False)
             scores = [sols_to_score[sol] for sol in sols]
             edu_scores.extend(scores)
         elif args.strategy == "best":
