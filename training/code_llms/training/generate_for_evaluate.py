@@ -59,7 +59,7 @@ class GenerateForEvaluate:
         if checkpoint_dir is None:
             return
         self.model.eval()
-        eval_dir = (checkpoint_dir / "eval")
+        eval_dir = (checkpoint_dir / f"eval_{step}")
         eval_dir.mkdir(exist_ok=True, parents=True)
         for batch in tqdm(self.test_dataloader):
             for i in range(len(batch["prompt"])):
