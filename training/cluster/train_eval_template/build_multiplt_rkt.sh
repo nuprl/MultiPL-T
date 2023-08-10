@@ -23,12 +23,10 @@ $BASE_CMD --exp-name rkt_35k --training-items 35000
 $BASE_CMD --exp-name rkt_full --training-items 40510
 
 # Copy run_exp.sh to each experiment directory
-cp run_exp.sh $EXP_ROOT/rkt_5k
-cp run_exp.sh $EXP_ROOT/rkt_10k
-cp run_exp.sh $EXP_ROOT/rkt_15k
-cp run_exp.sh $EXP_ROOT/rkt_20k
-cp run_exp.sh $EXP_ROOT/rkt_25k
-cp run_exp.sh $EXP_ROOT/rkt_30k
-cp run_exp.sh $EXP_ROOT/rkt_35k
-cp run_exp.sh $EXP_ROOT/rkt_full
+for exp in $EXP_ROOT/*; do
+    if [ ! -d $exp ]; then
+        continue
+    fi
+    cp run_exp.sh $exp
+done
 
