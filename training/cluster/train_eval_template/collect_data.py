@@ -21,11 +21,11 @@ if __name__ == "__main__":
     for d in exp_root.iterdir():
         if d.is_dir():
             pak = -1.0 
-            with open(d / "passk_checkpoint_final.csv", "r") as f:
+            for f in d.glob("*.csv"):
                 reader = csv.DictReader(f)
                 for row in reader:
                     pak = float(row["Estimate"])
-            output.append((d.name, pak))
+                output.append((d.name, f.name, pak))
     output.sort(key=(lambda p: p[1]), reverse=True)
     with open(outfile, "w") as f:
         for (name, pak) in output:
