@@ -4,7 +4,7 @@ DATA_DIR="/home/johngouwar/data/multiplt-training"
 BASE_CMD="python3 build_train_experiment.py \
     --train-template rkt-train-py.mustache \
     --train-data $DATA_DIR/racket_full_train_40510.jsonl \
-    --test-data $DATA_DIR/humaneval_rkt_reworded.jsonl \
+    --test-data $DATA_DIR/humaneval-rkt-reworded.jsonl \
     --exp-root $EXP_ROOT \
     --learning-rate 3e-5 \
     --batch-size 8 \
