@@ -11,7 +11,7 @@ THIS_DIRECTORY_NAME = Path(".").absolute().name
 simple_train(
     model="bigcode/starcoderbase-1b",
     batch_size=8,
-    epochs=7,
+    epochs=3,
     learning_rate=3e-5,
     warmup_steps=10,
     train_data=train_data,
