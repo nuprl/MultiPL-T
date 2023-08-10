@@ -1,4 +1,4 @@
-$PASS_K=/home/johngouwar/repos/MultiPL-E/pass_k.py
+PASS_K=/home/johngouwar/repos/MultiPL-E/pass_k.py
 
 CUDA_VISIBLE_DEVICES=0 python3 train.py 
 

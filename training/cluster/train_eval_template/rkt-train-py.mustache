@@ -12,7 +12,7 @@ sds["train"] = sds["train"].map(
     lambda x: {"content": "\n".join(x["content"].split("\n")[1:])}
 )
 full_train_data = datasets.concatenate_datasets([sds["train"], sds["test"]]).shuffle()
-train_data = full_train_data.shuffle()[:{{training_items}}]
+train_data = datasets.Dataset.from_dict(full_train_data.shuffle()[:{{training_items}}])
 test_data = "{{test_data}}"
 
 # The name of the directory in which this file is located. E.g., if the file is
@@ -27,7 +27,7 @@ if test_data is None:
 
 
 simple_train(
-    model="/work/arjunguha-research-group/arjun/models/starcoderbase-1b",
+    model="/home/arjun/models/starcoderbase-1b",
     batch_size={{batch_size}},
     epochs={{epochs}} ,
     learning_rate={{learning_rate}},

@@ -1,5 +1,5 @@
 #!/bin/bash
-EXP_ROOT="8_10_multiplt_training"
+EXP_ROOT="/home/johngouwar/experiments/8_10_multiplt_training"
 BASE_CMD="python3 build_train_experiment.py \
     --train-template rkt-train-py.mustache \
     --train-data racket_full_train_40510.jsonl \
