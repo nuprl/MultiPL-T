@@ -10,3 +10,7 @@
 [submodule "target_lang_postprocessing/code_scorer"]
 	path = target_lang_postprocessing/code_scorer
 	url = https://github.com/cassanof/code-scorer
+[submodule "MultiPL-E"]
+	path = MultiPL-E
+	url = https://github.com/nuprl/MultiPL-E
+	branch = dev

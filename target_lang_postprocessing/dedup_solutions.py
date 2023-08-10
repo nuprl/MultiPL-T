@@ -1,6 +1,7 @@
 import numpy as np
 from rouge_score import rouge_scorer
 
+
 def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=True):
     comment_prefix = {
         "lua": "--",
@@ -46,7 +47,8 @@ def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=T
             start = code_trim.find(comment_start)
             end = code_trim.find(comment_end, start + len(comment_start))
             if start != -1 and end != -1:  # Ensure both comment start and end are found
-                code_trim = code_trim[:start] + code_trim[end + len(comment_end):]
+                code_trim = code_trim[:start] + \
+                    code_trim[end + len(comment_end):]
             else:
                 break
     else:
@@ -63,7 +65,9 @@ def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=T
 def rouge_dedup(solutions: list[str], lang="lua", dedup_threshold=0.6, trim_top_comments=True):
     scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
     keep_mask = np.ones(len(solutions), dtype=bool)
-    solutions_stripped = [strip_comments(sol, lang) for sol in solutions]
+    solutions_stripped = [
+        strip_comments(sol, lang, trim_top_comments=trim_top_comments)
+        for sol in solutions]
 
     for i in range(len(solutions)):
         stripped_i = solutions_stripped[i]
