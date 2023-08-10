@@ -21,7 +21,7 @@ for path in pathlib.Path(args.dir).rglob("checkpoint_*"):
 
 dir_name = pathlib.Path(args.dir).name
 
-checkpoints.sort()
+checkpoints.sort(key=lambda x: int(x.split("_")[1]))
 for epoch, checkpoint in enumerate(checkpoints):
     print(f"Pushing {checkpoint} (epoch {epoch}) to {args.base_repo}")
     #  m = AutoModelForCausalLM.from_pretrained(
