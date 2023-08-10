@@ -2,11 +2,12 @@ from code_llms.training import simple_train
 from pathlib import Path
 import datasets
 
-train_data = datasets.load_dataset(
+full_train_data = datasets.load_dataset(
     "json", 
     data_files="{{train_data}}",
     split="train"
 )
+train_data = full_train_data.shuffle()[:{{training_items}}]
 test_data = "{{test_data}}"
 
 # The name of the directory in which this file is located. E.g., if the file is
