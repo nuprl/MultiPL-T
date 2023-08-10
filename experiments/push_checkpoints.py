@@ -23,10 +23,11 @@ dir_name = pathlib.Path(args.dir).name
 
 checkpoints.sort(key=lambda x: int(x.split("_")[1]))
 for epoch, checkpoint in enumerate(checkpoints):
-    epoch += 1 # 1-indexed
+    epoch += 1  # 1-indexed
     commit = f"{dir_name}-epoch{epoch}"
-    print(f"Pushing {checkpoint} (epoch {epoch}) to {args.base_repo} - {commit}")
-    #  m = AutoModelForCausalLM.from_pretrained(
-        #  checkpoint, torch_dtype=torch.bfloat16)
-    #  m.push_to_hub(args.base_repo, private=True,
-                  #  commit_message=commit)
+    print(
+        f"Pushing {checkpoint} (epoch {epoch}) to {args.base_repo} - {commit}")
+    m = AutoModelForCausalLM.from_pretrained(
+        checkpoint, torch_dtype=torch.bfloat16)
+    m.push_to_hub(args.base_repo, private=True,
+                  commit_message=commit)
