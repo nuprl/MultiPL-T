@@ -16,7 +16,7 @@ args = arg_parser.parse_args()
 # find all checkpoints in dir
 checkpoints = []
 for path in pathlib.Path(args.dir).rglob("checkpoint_*"):
-    checkpoints.append(path)
+    checkpoints.append(path.name)
 
 print("Found checkpoints:")
 print(checkpoints)
