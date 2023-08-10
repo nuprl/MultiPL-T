@@ -1,20 +1,15 @@
 from transformers import AutoTokenizer, get_scheduler
 from transformers import AutoModelForCausalLM
 from torch.utils.data.dataloader import DataLoader
-from .starcoder import starcoder_lora, starcoder_params_for_scheduler
-from tqdm import tqdm
+from .starcoder import starcoder_params_for_scheduler
 from torch.optim import AdamW
 from pathlib import Path
 from .packed_strings_dataset import PackedStringsDataset
 from .generate_for_evaluate import GenerateForEvaluate
 from .trainer import train
 import datasets
-from typing import Union, Optional
+from typing import Union
 import torch
-import sys
-
-from .util import read_jsonl
-
 
 def print_trainable_parameters(model):
     """
@@ -67,10 +62,11 @@ def simple_train(
     )
     dataset = PackedStringsDataset(train_data, 2048, tokenizer.eos_token_id, epochs=epochs)
 
+    print("Calculating exact dataset length. This can take some time...")
     # This is the number of training steps executed on each device.
     max_steps = dataset.set_length_with_exact_count() // per_device_batch_size
-    max_steps = max_steps // 1 # single gpu
     
+    print("Loading model. This can take some time...")
     # We load the model after the dataset so that dataset preparation errors happen immediately.
     model = AutoModelForCausalLM.from_pretrained(model, torch_dtype=torch.bfloat16, use_cache=False).cuda()
     

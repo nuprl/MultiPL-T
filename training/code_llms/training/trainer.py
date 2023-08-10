@@ -7,6 +7,12 @@ import torch
 from pathlib import Path
 from tqdm import tqdm
 from collections.abc import Mapping
+import json
+from torch.utils.tensorboard import SummaryWriter
+import sys
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def save_checkpoint(model, path):
     # NOTE(arjun): This does not save the optimizer state, so it is not suitable
@@ -30,6 +36,8 @@ def is_approx_end_of_epoch(max_steps: int, epochs: int, current_step: int) -> bo
 def train(model, evaluate, train_dataloader, gradient_accumulation_steps, epochs, max_steps, optim, lr_scheduler):
     model.train()
     evaluate(checkpoint_dir=None, step=0)
+
+    writer = SummaryWriter()
     
     for step, batch in tqdm(
         enumerate(train_dataloader),
@@ -57,7 +65,6 @@ def train(model, evaluate, train_dataloader, gradient_accumulation_steps, epochs
         inputs = _prepare_input(batch)
         outputs = model(**inputs, use_cache=False)
         loss = outputs["loss"] if isinstance(outputs, dict) else outputs[0]
-        # TODO: add this: https://github.com/huggingface/transformers/blob/main/examples/research_projects/codeparrot/scripts/codeparrot_training.py#L277
         loss.backward()
         global_mean_loss = loss.mean().item()
         
@@ -72,10 +79,18 @@ def train(model, evaluate, train_dataloader, gradient_accumulation_steps, epochs
             evaluate(checkpoint_dir, step)
             save_checkpoint(model, checkpoint_dir)
 
+            evaluate(checkpoint_dir, step)
+
+        # Log metrics to both stderr and TensorBoard.
         metrics = {
             "train/loss": global_mean_loss,
             "train/lr": optim.param_groups[0]["lr"],
+            "train/loss": global_mean_loss,
         }
+        eprint(json.dumps(metrics))
+        for k, v in metrics.items():
+            writer.add_scalar(k, v, step)
+
         
     checkpoint_dir = Path(f"checkpoint_final")
     evaluate(checkpoint_dir, step)
