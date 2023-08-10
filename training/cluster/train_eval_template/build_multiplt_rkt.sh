@@ -1,9 +1,10 @@
 #!/bin/bash
 EXP_ROOT="/home/johngouwar/experiments/8_10_multiplt_training"
+DATA_DIR="/home/johngouwar/data/multiplt-training"
 BASE_CMD="python3 build_train_experiment.py \
     --train-template rkt-train-py.mustache \
-    --train-data racket_full_train_40510.jsonl \
-    --test-data humaneval_rkt_reworded.jsonl \
+    --train-data $DATA_DIR/racket_full_train_40510.jsonl \
+    --test-data $DATA_DIR/humaneval_rkt_reworded.jsonl \
     --exp-root $EXP_ROOT \
     --learning-rate 3e-5 \
     --batch-size 8 \
