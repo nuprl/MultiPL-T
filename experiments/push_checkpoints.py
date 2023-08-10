@@ -1,4 +1,5 @@
 from transformers import AutoModelForCausalLM
+import torch
 import pathlib
 import argparse
 
@@ -18,5 +19,12 @@ checkpoints = []
 for path in pathlib.Path(args.dir).rglob("checkpoint_*"):
     checkpoints.append(path.name)
 
-print("Found checkpoints:")
-print(checkpoints)
+dir_name = pathlib.Path(args.dir).name
+
+checkpoints.sort()
+for epoch, checkpoint in enumerate(checkpoints):
+    print(f"Pushing {checkpoint} (epoch {epoch}) to {args.base_repo}")
+    #  m = AutoModelForCausalLM.from_pretrained(
+        #  checkpoint, torch_dtype=torch.bfloat16)
+    #  m.push_to_hub(args.base_repo, private=True,
+                  #  commit_message=f"{dir_name}-epoch{epoch}")
