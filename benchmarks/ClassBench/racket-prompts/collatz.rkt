@@ -1,25 +1,18 @@
 #lang racket
 (require rackunit)
 
-;; collatz-n: Number Number -> Number
-;; Apply the Collatz conjecture to the first number
-;; n times. Divide by 2 if its even, otherwise
-;; multiply by 3 and add 1. Solve this with Recursion.
-(define (collatz num n)
+;; collatz: Number ->  Number
+;; Counts how many steps it takes a number to converge
+;; to 1 through the collatz sequence. The collatz sequence
+;; divides by 2 if the number is even, otherwise if the number
+;; is odd, it multiplies by 3 and adds 1
+(define (collatz num)
 ;; <solution>
-    (if (= n 0) 
-        num
-        (collatz 
-            (if (odd? num) 
-                (+ (* 3 num) 1)
-                (/ num 2)) (- n 1))))
-
+    (if (= num 1) 0
+        (+ 1 (collatz (if (odd? num) (+ (* num 3) 1) (/ num 2))))))
 ;; <tests>
-(check-equal? (collatz 5 0) 5)
-(check-equal? (collatz 5 1) 16)
-(check-equal? (collatz 5 2) 8)
-(check-equal? (collatz 5 3) 4)
-(check-equal? (collatz 6 0) 6)
-(check-equal? (collatz 6 1) 3)
-(check-equal? (collatz 6 2) 10)
-(check-equal? (collatz 6 3) 5)
+(check-equal? (collatz 1) 0)
+(check-equal? (collatz 2) 1)
+(check-equal? (collatz 4) 2)
+(check-equal? (collatz 3) 7)
+(check-equal? (collatz 12) 9)
