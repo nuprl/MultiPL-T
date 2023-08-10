@@ -1,7 +1,8 @@
 import numpy as np
 from rouge_score import rouge_scorer
 
-def strip_comments(code: str, lang: str, strip_parens=False):
+
+def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=True):
     comment_prefix = {
         "lua": "--",
         "python": "#",
@@ -16,40 +17,57 @@ def strip_comments(code: str, lang: str, strip_parens=False):
         "racket": "",
         "ml": "*)",
     }
+    func_start = {
+        "lua": "local function",
+        "python": "def",
+        "javascript": "function",
+        "racket": "define",
+        "ml": "let",
+    }
 
-    # Get comment prefix and postfix for given language
     prefix = comment_prefix.get(lang)
     postfix = comment_postfix.get(lang)
+    func = func_start.get(lang)
 
     if not prefix:
         raise ValueError(f"Language {lang} not supported")
 
-    # If comment postfix is not empty, handle multi-line comments (like OCaml)
+    func_start = code.find(func)
+    top_comments = ""
+    if trim_top_comments or func_start == -1:
+        top_comments = code[:func_start]
+        code_trim = code[func_start:]
+    else:
+        code_trim = code
+
     if postfix:
         comment_start = prefix
         comment_end = postfix
-        while comment_start in code and comment_end in code:
-            start = code.find(comment_start)
-            end = code.find(comment_end, start + len(comment_start))
+        while comment_start in code_trim and comment_end in code_trim:
+            start = code_trim.find(comment_start)
+            end = code_trim.find(comment_end, start + len(comment_start))
             if start != -1 and end != -1:  # Ensure both comment start and end are found
-                code = code[:start] + code[end + len(comment_end):]
+                code_trim = code_trim[:start] + \
+                    code_trim[end + len(comment_end):]
             else:
                 break
     else:
         # If comment postfix is empty, handle single-line comments
-        lines = code.split("\n")
+        lines = code_trim.split("\n")
         lines = [line for line in lines if not line.lstrip().startswith(prefix)]
         if strip_parens:
             lines = [line.replace("(", "").replace(")", "") for line in lines]
-        code = "\n".join(lines)
+        code_trim = "\n".join(lines)
 
-    return code
+    return top_comments + code_trim
 
 
-def rouge_dedup(solutions: list[str], lang="lua", dedup_threshold=0.6):
+def rouge_dedup(solutions: list[str], lang="lua", dedup_threshold=0.6, trim_top_comments=True):
     scorer = rouge_scorer.RougeScorer(['rougeLsum'], use_stemmer=True)
     keep_mask = np.ones(len(solutions), dtype=bool)
-    solutions_stripped = [strip_comments(sol, lang) for sol in solutions]
+    solutions_stripped = [
+        strip_comments(sol, lang, trim_top_comments=trim_top_comments)
+        for sol in solutions]
 
     for i in range(len(solutions)):
         stripped_i = solutions_stripped[i]
