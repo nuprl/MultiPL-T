@@ -1,0 +1,8 @@
+batch_size: 8
+epochs: 7
+gradient_accumulation_steps: 8
+learning_rate: 3.0e-05
+max_steps: 13762
+num_processes: 1
+per_device_batch_size: 1
+warmup_steps: 10
