@@ -28,6 +28,8 @@ for epoch, checkpoint in enumerate(checkpoints):
     print(
         f"Pushing {checkpoint} (epoch {epoch}) to {args.base_repo} - {commit}")
     m = AutoModelForCausalLM.from_pretrained(
-        checkpoint, torch_dtype=torch.bfloat16)
+        dir_name + "/" + checkpoint,
+        torch_dtype=torch.bfloat16
+    )
     m.push_to_hub(args.base_repo, private=True,
                   commit_message=commit)
