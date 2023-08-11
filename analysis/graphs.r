@@ -32,7 +32,9 @@ data_files <- c(
     "../experiments/ocaml_subset_1b/results.csv",
     "../experiments/ocaml_full_1b/results.csv",
     "../experiments/rkt_full_1b/results.csv",
-    "../experiments/rkt_subset_1b/results.csv"
+    "../experiments/rkt_subset_1b/results.csv",
+    "../experiments/lua_full_1b/results.csv",
+    "../experiments/lua_subset_1b/results.csv"
 )
 
 
@@ -67,15 +69,21 @@ base_ocaml <- data.frame(
     passk = 0.015, # TODO(john): this number is approximate from my memory
     epoch = 0
 )
+base_lua <- data.frame(
+    language = "lua",
+    passk = 0.10, # TODO(john): this number is approximate from my memory
+    epoch = 0
+)
+
 subset_ds <- raw_ds %>%
     dplyr::filter(num_examples == "subset") %>%
     dplyr::select(language, passk, epoch) %>%
-    rbind(base_rkt, base_ocaml, .)
+    rbind(base_rkt, base_ocaml, base_lua, .)
 
 full_res_ds <- raw_ds %>%
     dplyr::filter(num_examples == "full") %>%
     dplyr::select(language, passk, epoch) %>%
-    rbind(base_rkt, base_ocaml, .)
+    rbind(base_rkt, base_ocaml, base_lua, .)
 
 subset_plot <- ggplot(subset_ds, aes(x = epoch, y = passk, color = language)) +
     geom_line() +
