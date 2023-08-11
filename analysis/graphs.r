@@ -62,33 +62,36 @@ raw_ds <- purrr::map(data_files, read_with_path) %>%
 base_rkt <- data.frame(
     language = "rkt",
     passk = 0.047, 
-    epoch = 0
+    epoch = 0, 
+    step_num = 0
 )
 base_ocaml <- data.frame(
     language = "ocaml",
     passk = 0.015, 
-    epoch = 0
+    epoch = 0,
+    step_num = 0
 )
 base_lua <- data.frame(
     language = "lua",
     passk = 0.121,  
-    epoch = 0
+    epoch = 0,
+    step_num = 0
 )
+
 
 subset_ds <- raw_ds %>%
     dplyr::filter(num_examples == "subset") %>%
-    dplyr::select(language, passk, epoch) %>%
+    dplyr::select(language, passk, epoch, step_num) %>%
     rbind(base_rkt, base_ocaml, base_lua, .)
 
 full_res_ds <- raw_ds %>%
     dplyr::filter(num_examples == "full") %>%
-    dplyr::select(language, passk, epoch) %>%
+    dplyr::select(language, passk, epoch, step_num) %>%
     rbind(base_rkt, base_ocaml, base_lua, .)
 
-subset_plot <- ggplot(subset_ds, aes(x = epoch, y = passk, color = language)) +
+subset_plot <- ggplot(subset_ds, aes(x = step_num, y = passk, color = language)) +
     geom_line() +
     geom_point() +
-    scale_x_continuous("Epoch", breaks = subset_ds$epoch) +
     theme(legend.position = "bottom")
 
 ggsave("subset.png", plot = subset_plot, device = "png", width = 10)
