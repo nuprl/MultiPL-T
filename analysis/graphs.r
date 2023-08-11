@@ -2,13 +2,6 @@ library(ggplot2)
 library(purrr)
 library(stringr)
 
-data_files <- c(
-    "../experiments/ocaml_subset_1b/results.csv",
-    "../experiments/ocaml_full_1b/results.csv",
-    "../experiments/rkt_full_1b/results.csv",
-    "../experiments/rkt_subset_1b/results.csv"
-)
-
 read_with_path <- function(csvpath) { 
     df <- read.csv(csvpath, header = TRUE)
     df["path"] <- csvpath
@@ -35,6 +28,14 @@ parse_dataset_name <- function(ds_name) {
     strtoi(step_num)
 }
 
+data_files <- c(
+    "../experiments/ocaml_subset_1b/results.csv",
+    "../experiments/ocaml_full_1b/results.csv",
+    "../experiments/rkt_full_1b/results.csv",
+    "../experiments/rkt_subset_1b/results.csv"
+)
+
+
 raw_ds <- purrr::map(data_files, read_with_path) %>%
     purrr::reduce(rbind) %>%
     dplyr::group_by(path) %>%
@@ -56,7 +57,30 @@ raw_ds <- purrr::map(data_files, read_with_path) %>%
     dplyr::mutate(epoch = dplyr::row_number()) %>%
     dplyr::ungroup()
 
+base_rkt <- data.frame(
+    language = "rkt",
+    passk = 0.024, # TODO(john): this number is approximate from my memory
+    epoch = 0
+)
+base_ocaml <- data.frame(
+    language = "ocaml",
+    passk = 0.015, # TODO(john): this number is approximate from my memory
+    epoch = 0
+)
 subset_ds <- raw_ds %>%
-    dplyr::filter(num_examples == "subset")
+    dplyr::filter(num_examples == "subset") %>%
+    dplyr::select(language, passk, epoch) %>%
+    rbind(base_rkt, base_ocaml, .)
+
 full_res_ds <- raw_ds %>%
-    dplyr::filter(num_examples == "full")
+    dplyr::filter(num_examples == "full") %>%
+    dplyr::select(language, passk, epoch) %>%
+    rbind(base_rkt, base_ocaml, .)
+
+subset_plot <- ggplot(subset_ds, aes(x = epoch, y = passk, color = language)) +
+    geom_line() +
+    geom_point() +
+    scale_x_continuous("Epoch", breaks = subset_ds$epoch) +
+    theme(legend.position = "bottom")
+
+ggsave("subset.png", plot = subset_plot, device = "png", width = 10)
