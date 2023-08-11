@@ -2,11 +2,14 @@
 #SBATCH --nodes=1
 #SBATCH --job-name=spawn_executions
 #SBATCH --partition=express 
-#SBATCH --output=spawn_%j
+#SBATCH --output=spawn_%j.out
 MULTIPLE_IMAGE=$1
-PASS_K=$2
+MULTIPLE_REPO=$2
+VENV_ACTIVATE=$3
+DATASET_PATH=$4
 for check in ./checkpoint_*; do
   #remove ./ from beginning of checkpoint name
-  check=${check:2}
-  sbatch eval_checkpoint.sbatch $check $MULTIPLE_IMAGE $PASS_K
+  check_name=${check:2}
+  CID=$(sbatch --parsable run_completions.sbatch $VENV_ACTIVATE $MULTIPLE_REPO $DATASET_PATH $check_name)
+  sbatch --dependency=afterok:$CID eval_checkpoint.sbatch $check_name $MULTIPLE_IMAGE $MULTIPLE_REPO
 done

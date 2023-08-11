@@ -40,6 +40,7 @@ def build_single_experiment(
         shutil.copy("slurm/train.sbatch", exp_dir / Path("train.sbatch"))
         shutil.copy("slurm/eval_checkpoint.sbatch", exp_dir / Path("eval_checkpoint.sbatch"))
         shutil.copy("slurm/executions.sbatch", exp_dir / Path("executions.sbatch"))
+        shutil.copy("slurm/run_completions.sbatch", exp_dir / Path("run_completions.sbatch"))
         shutil.copy("slurm/launch.sh", exp_dir / Path("launch.sh"))
 
 def grid_build_experiments(
