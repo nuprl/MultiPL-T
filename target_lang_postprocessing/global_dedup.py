@@ -69,6 +69,7 @@ if __name__ == "__main__":
     cli.add_argument("--same-dedup-threshold", type=float, default=0.6)
     cli.add_argument("--diff-dedup-threshold", type=float, default=0.7)
     cli.add_argument("--global-dedup-factor", type=float, default=1.0)
+    cli.add_argument("--one-per-problem", action="store_true")
     cli.add_argument("--strip-parens", action="store_true")
     args = cli.parse_args()
 
@@ -79,29 +80,34 @@ if __name__ == "__main__":
        stripped_content.append(soln)
     grouped_stripped_content = group_solns_by_id(stripped_content)
     stripped_content = []
-    print(f" #### deduping {len(grouped_stripped_content)} groups of same problem ####")
-    with multiprocessing.Pool(args.nthreads) as pool:
-        grouped_stripped_content = pool.map(functools.partial(dedup_chunk, args.same_dedup_threshold), grouped_stripped_content) 
-    for group in grouped_stripped_content:
-        stripped_content.extend(group)
-    
-    dedup_group_size = min(len(stripped_content) // args.nthreads, args.chunk_size) 
-    dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
-                       * args.global_dedup_factor)
-    for i in tqdm(range(dedup_rounds)):
-        print(
-            f" #### global dedup round {i+1}/{dedup_rounds}. current num solutions: {len(stripped_content)} ####")
-        random.shuffle(stripped_content)
-        chunks = [] 
-        for j in range(0, len(stripped_content), dedup_group_size):
-            chunks.append(stripped_content[j:j+dedup_group_size]) 
-        print(f"    # deduping {len(chunks)} groups with {dedup_group_size} solutions each #")
+    if args.one_per_problem:
+        for group in grouped_stripped_content:
+            group.sort(key=lambda x: len(x[2]))
+            stripped_content.append(group[0])
+    else:
+        print(f" #### deduping {len(grouped_stripped_content)} groups of same problem ####")
         with multiprocessing.Pool(args.nthreads) as pool:
-            chunks = pool.map(functools.partial(dedup_chunk, args.diff_dedup_threshold), chunks)
-        stripped_content = []
-        for chunk in chunks:
-            stripped_content.extend(chunk)
-        dedup_group_size = min(len(stripped_content) // args.nthreads, args.chunk_size)
+            grouped_stripped_content = pool.map(functools.partial(dedup_chunk, args.same_dedup_threshold), grouped_stripped_content) 
+        for group in grouped_stripped_content:
+            stripped_content.extend(group)
+        
+        dedup_group_size = min(len(stripped_content) // args.nthreads, args.chunk_size) 
+        dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
+                        * args.global_dedup_factor)
+        for i in tqdm(range(dedup_rounds)):
+            print(
+                f" #### global dedup round {i+1}/{dedup_rounds}. current num solutions: {len(stripped_content)} ####")
+            random.shuffle(stripped_content)
+            chunks = [] 
+            for j in range(0, len(stripped_content), dedup_group_size):
+                chunks.append(stripped_content[j:j+dedup_group_size]) 
+            print(f"    # deduping {len(chunks)} groups with {dedup_group_size} solutions each #")
+            with multiprocessing.Pool(args.nthreads) as pool:
+                chunks = pool.map(functools.partial(dedup_chunk, args.diff_dedup_threshold), chunks)
+            stripped_content = []
+            for chunk in chunks:
+                stripped_content.extend(chunk)
+            dedup_group_size = min(len(stripped_content) // args.nthreads, args.chunk_size)
     dedup_indices = [i for (i, _, _) in stripped_content]
     dedup_ds = ds.select(dedup_indices)
     dedup_ds.to_json(args.output_dataset)
