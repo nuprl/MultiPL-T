@@ -1,2 +1,0 @@
-Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
-eval_8090,1,0.08269230769230769,156,20,20
