@@ -61,17 +61,17 @@ raw_ds <- purrr::map(data_files, read_with_path) %>%
 
 base_rkt <- data.frame(
     language = "rkt",
-    passk = 0.024, # TODO(john): this number is approximate from my memory
+    passk = 0.047, 
     epoch = 0
 )
 base_ocaml <- data.frame(
     language = "ocaml",
-    passk = 0.015, # TODO(john): this number is approximate from my memory
+    passk = 0.015, 
     epoch = 0
 )
 base_lua <- data.frame(
     language = "lua",
-    passk = 0.10, # TODO(john): this number is approximate from my memory
+    passk = 0.121,  
     epoch = 0
 )
 
