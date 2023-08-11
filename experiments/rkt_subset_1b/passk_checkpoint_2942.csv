@@ -1,0 +1,2 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+eval_2942,1,0.10683229813664596,161,20,20
