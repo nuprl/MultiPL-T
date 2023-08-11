@@ -7,6 +7,8 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--dir", type=str, required=True)
 arg_parser.add_argument("--base_repo", type=str,
                         default="nuprl/MultiPLCoder-1b")
+arg_parser.add_argument("--checkpoint_sep", type=str,
+                        default="_", help="separator between checkpoint name and epoch number")
 args = arg_parser.parse_args()
 
 #  >>> m = AutoModelForCausalLM.from_pretrained("checkpoint_11796", torch_dtype=torch.bfloat16)
@@ -16,12 +18,12 @@ args = arg_parser.parse_args()
 
 # find all checkpoints in dir
 checkpoints = []
-for path in pathlib.Path(args.dir).rglob("checkpoint_*"):
+for path in pathlib.Path(args.dir).rglob(f"checkpoint{args.checkpoint_sep}*"):
     checkpoints.append(path.name)
 
 dir_name = pathlib.Path(args.dir).name
 
-checkpoints.sort(key=lambda x: int(x.split("_")[1]))
+checkpoints.sort(key=lambda x: int(x.split(args.checkpoint_sep)[1]))
 for epoch, checkpoint in enumerate(checkpoints):
     epoch += 1  # 1-indexed
     commit = f"{dir_name}-epoch{epoch}"
