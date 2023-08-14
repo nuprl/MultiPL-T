@@ -6,7 +6,7 @@ import datasets
 train_data = datasets.load_dataset("nuprl/multipl-t_ocaml_paper_aug", split="train")
 
 simple_train(
-    model="/home/arjun/models/starcoderbase-1b",
+    model="bigcode/starcoderbase-1b",
     batch_size=8,
     epochs=7,
     learning_rate=3e-5,
