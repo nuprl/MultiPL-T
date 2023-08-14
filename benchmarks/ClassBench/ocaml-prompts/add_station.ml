@@ -22,6 +22,7 @@ let add_edge_to_station (str: string) (stat: station) : station =
 (* add_edge : adds a connection to the subway, if it does not
 already exist. Assumes that both from and to stations in the Subway. *)
 let rec add_edge (from: string) (towards: string) (sub: station list) : station list = 
+  (* <solution> *)
   match sub with 
   | [] -> sub 
   | x::xs -> let Station(name, _) = x 

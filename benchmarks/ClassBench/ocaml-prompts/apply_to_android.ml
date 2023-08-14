@@ -12,6 +12,7 @@ type phone =
 (* apply_to_android:
 Applies a func to the androids in the list of phones *)
 let rec apply_to_android (f: 'a -> 'b) (p: phone list) : phone list = 
+    (* <solution> *)
     match p with
     | [] -> []
     | Android(s) :: xs -> f(Android(s)) :: apply_to_android f xs

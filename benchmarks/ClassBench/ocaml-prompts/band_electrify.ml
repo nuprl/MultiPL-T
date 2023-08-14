@@ -71,6 +71,7 @@ let electrify_instrument (i : instrument) : instrument =
 
 (* electrify-band : Makes this an electric band! *)
 let electrify_band (b : band) : band =
+  (* <solution> *)
   match b with
   | OnePieceBand i -> OnePieceBand (electrify_instrument i)
   | TwoPieceBand (i1, i2) -> TwoPieceBand (electrify_instrument i1, electrify_instrument i2)
