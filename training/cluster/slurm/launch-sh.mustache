@@ -1,0 +1,17 @@
+#!/bin/bash 
+
+MULTIPLE_IMAGE="{{multiple_image}}"
+MULTIPLE_REPO="{{multiple_repo}}" 
+VENV_ACTIVATE="{{venv_activate}}" 
+HF_CACHE="{{hf_cache}}"
+DATASET_PATH="{{dataset}}"
+TOKENIZER_PATH="{{tokenizer}}"
+TID=$(sbatch --parsable train.sbatch $VENV_ACTIVATE $HF_CACHE)
+sbatch --dependency=afterok:$TID executions.sbatch \
+  $MULTIPLE_IMAGE \
+  $MULTIPLE_REPO \
+  $VENV_ACTIVATE \
+  $DATASET_PATH \ 
+  $TOKENIZER_PATH
+
+

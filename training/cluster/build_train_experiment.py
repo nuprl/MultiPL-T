@@ -15,7 +15,8 @@ def build_single_experiment(
     warmup_steps: int, 
     test_data: Path, 
     train_data: Path,
-    slurm: bool = True
+    slurm: bool = False,
+    slurm_args: dict = {}
     ):
     exp_dir = exp_root / Path(f"{exp_name}_lr_{lr:.0e}_bs_{bs}_sched_{sched}_epochs_{epochs}_warmup_{warmup_steps}_items_{training_items}")
     exp_dir.mkdir(parents=True, exist_ok=True)
@@ -37,11 +38,14 @@ def build_single_experiment(
         f.write(py_text)
 
     if slurm:
+        with open("slurm/launch-sh.mustache", "r") as f:
+            launch_text = chevron.render(f, slurm_args)
+        with open(exp_dir / Path("launch.sh"), "w") as f:
+            f.write(launch_text)
         shutil.copy("slurm/train.sbatch", exp_dir / Path("train.sbatch"))
         shutil.copy("slurm/eval_checkpoint.sbatch", exp_dir / Path("eval_checkpoint.sbatch"))
         shutil.copy("slurm/executions.sbatch", exp_dir / Path("executions.sbatch"))
         shutil.copy("slurm/run_completions.sbatch", exp_dir / Path("run_completions.sbatch"))
-        shutil.copy("slurm/launch.sh", exp_dir / Path("launch.sh"))
 
 def grid_build_experiments(
     exp_root: Path, 
@@ -90,7 +94,14 @@ if __name__ == "__main__":
     parser.add_argument("--schedule", type=str, default="cosine")
     parser.add_argument("--epochs", type=int, default=1)
     parser.add_argument("--warmup-steps", type=int, default=10)
+    # Slurm args
     parser.add_argument("--slurm", action="store_true")
+    parser.add_argument("--slurm-multiple-repo", type=str)
+    parser.add_argument("--slurm-multiple-singularity", type=str)
+    parser.add_argument("--slurm-venv-activate", type=str)
+    parser.add_argument("--slurm-hf-cache", type=str, default="./cache/")
+    parser.add_argument("--slurm-eval-dataset", type=str)
+    parser.add_argument("--slurm-tokenizer", type=str)
 
     args = parser.parse_args()
     exp_root = Path(args.exp_root).absolute()
@@ -98,6 +109,28 @@ if __name__ == "__main__":
         raise ValueError("Cannot specify both single and grid")
     if not (args.single or args.grid): 
         raise ValueError("Must specify either single or grid")
+    if args.slurm:
+        # Check that all slurm args are specified
+        if args.slurm_multiple_repo is None:
+            raise ValueError("Must specify --slurm-multiple-repo")
+        if args.slurm_multiple_singularity is None:
+            raise ValueError("Must specify --slurm-multiple-singularity")
+        if args.slurm_venv_activate is None:
+            raise ValueError("Must specify --slurm-venv-activate")
+        if args.slurm_eval_dataset is None:
+            raise ValueError("Must specify --slurm-eval-dataset")
+        if args.slurm_tokenizer is None:
+            raise ValueError("Must specify --slurm-tokenizer")
+        slurm_args = {
+            "multiple_repo": args.slurm_multiple_repo,
+            "multiple_image": args.slurm_multiple_singularity,
+            "venv_activate": args.slurm_venv_activate,
+            "hf_cache": args.slurm_hf_cache,
+            "dataset": args.slurm_eval_dataset,
+            "tokenizer": args.slurm_tokenizer
+        }
+    else:
+        slurm_args = {}
     if args.single:
         build_single_experiment(
             exp_root,
@@ -111,7 +144,8 @@ if __name__ == "__main__":
             warmup_steps=args.warmup_steps,
             train_data=Path(args.train_data).absolute(),
             test_data=Path(args.test_data).absolute(),
-            slurm=args.slurm
+            slurm=args.slurm,
+            slurm_args=slurm_args
         ) 
     elif args.grid:
         lrs = [float(lr) for lr in args.learning_rate.split(",")]
@@ -129,5 +163,6 @@ if __name__ == "__main__":
             warmup_steps=args.warmup_steps,
             train_data=Path(args.train_data).absolute(),
             test_data=Path(args.test_data).absolute(),
-            slurm=args.slurm
+            slurm=args.slurm,
+            slurm_args=slurm_args
         )
