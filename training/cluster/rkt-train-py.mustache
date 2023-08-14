@@ -7,7 +7,7 @@ raw_data = datasets.load_dataset(
     data_files="{{train_data}}",
     split="train"
 )
-subset_data = raw_data.shuffle().select(range({{training_items}}))
+subset_data = raw_data.select(range({{training_items}}))
 sds = subset_data.train_test_split(test_size=0.05)
 sds["train"] = sds["train"].map(
     lambda x: {"content": "\n".join(x["content"].split("\n")[1:])}
