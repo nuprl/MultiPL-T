@@ -15,7 +15,7 @@ simple_train(
     learning_rate=3e-5,
     warmup_steps=10,
     train_data=train_data,
-    test_data="./humaneval-ml.jsonl",
+    test_data="../../datasets/humaneval-ml.jsonl",
     dataset_limit=None,
     schedule="cosine",
     log_dir="log",
