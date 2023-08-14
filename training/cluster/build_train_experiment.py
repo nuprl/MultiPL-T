@@ -140,6 +140,7 @@ if __name__ == "__main__":
         build_single_experiment(
             exp_root,
             exp_name=args.exp_name,
+            model=args.model,
             template=Path(args.train_template).absolute(),
             lr=float(args.learning_rate),
             bs=int(args.batch_size),
