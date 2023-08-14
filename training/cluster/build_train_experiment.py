@@ -81,6 +81,7 @@ def grid_build_experiments(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--model", type=str, required=True, help="Model name/path")
     parser.add_argument("--train-template", type=str, required=True, help="Path to train.py template")
     parser.add_argument("--train-data", type=str, required=True, help="Path to train data")
     parser.add_argument("--test-data", type=str, required=True, help="Path to test data")
