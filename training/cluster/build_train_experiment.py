@@ -7,6 +7,7 @@ def build_single_experiment(
     exp_root: Path,    
     exp_name: str,
     template: Path,
+    model: str,
     training_items: int,
     lr: float,
     bs: int,
@@ -24,6 +25,7 @@ def build_single_experiment(
         py_text = chevron.render(
             f, 
             {
+                "model": model,
                 "learning_rate": lr,
                 "batch_size": bs,
                 "schedule": sched,
@@ -51,6 +53,7 @@ def grid_build_experiments(
     exp_root: Path, 
     exp_name: str,
     template: Path,
+    model: str,
     training_items: int,
     lrs, 
     bss, 
@@ -67,6 +70,7 @@ def grid_build_experiments(
                 build_single_experiment(
                     exp_root,
                     exp_name=exp_name,
+                    model=model,
                     training_items=training_items,
                     template=template,
                     lr=lr,
