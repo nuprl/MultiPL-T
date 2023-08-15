@@ -1,0 +1,10 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+eval_ml_checkpoint-285,1,0.14679487179487177,156,20,20
+eval_ml_checkpoint-570,1,0.175,156,20,20
+eval_ml_checkpoint-1140,1,0.17500000000000002,156,20,20
+eval_ml_checkpoint-1425,1,0.18814102564102564,156,20,20
+eval_ml_checkpoint-1710,1,0.19999999999999998,156,20,20
+eval_ml_checkpoint-1995,1,0.19999999999999998,156,20,20
+eval_ml_checkpoint-2280,1,0.19166666666666665,156,20,20
+eval_ml_checkpoint-2565,1,0.22756410256410256,156,20,20
+eval_ml_checkpoint-2850,1,0.18621794871794872,156,20,20
