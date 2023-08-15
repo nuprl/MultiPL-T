@@ -28,6 +28,18 @@ parse_dataset_name <- function(ds_name) {
     strtoi(step_num)
 }
 
+remap_languae <- function(lang) { 
+    if (lang == "ocaml") { 
+        "OCaml"
+    } else if (lang == "rkt") { 
+        "Racket"
+    } else if (lang == "lua") { 
+        "Lua"
+    } else { 
+        stop("Invalid language")
+    }
+}
+
 data_files <- c(
     "../experiments/ocaml_subset_1b/results.csv",
     "../experiments/ocaml_full_1b/results.csv",
@@ -42,7 +54,7 @@ raw_ds <- purrr::map(data_files, read_with_path) %>%
     purrr::reduce(rbind) %>%
     dplyr::group_by(path) %>%
     dplyr::mutate(
-        language = map(path, function(path) { parse_path(path, "lang") }),
+        language = map(path, function(path) { remap_languae(parse_path(path, "lang")) }),
         num_examples = map(path, function(path) { parse_path(path, "size") }),
         step_num = map(Dataset, parse_dataset_name),
         passk = Estimate
@@ -54,44 +66,55 @@ raw_ds <- purrr::map(data_files, read_with_path) %>%
         num_examples = unlist(num_examples),
         step_num = unlist(step_num)
     ) %>%
+    dplyr::mutate(num_tokens = 2048 * step_num) %>%
     dplyr::group_by(language, num_examples) %>%
     dplyr::arrange(step_num, .by_group = TRUE) %>%
     dplyr::mutate(epoch = dplyr::row_number()) %>%
     dplyr::ungroup()
 
 base_rkt <- data.frame(
-    language = "rkt",
+    language = "Racket",
     passk = 0.047, 
     epoch = 0, 
-    step_num = 0
+    step_num = 0,
+    num_tokens = 0
 )
 base_ocaml <- data.frame(
-    language = "ocaml",
+    language = "OCaml",
     passk = 0.015, 
     epoch = 0,
-    step_num = 0
+    step_num = 0,
+    num_tokens = 0
 )
 base_lua <- data.frame(
-    language = "lua",
+    language = "Lua",
     passk = 0.121,  
     epoch = 0,
-    step_num = 0
+    step_num = 0,
+    num_tokens = 0
 )
 
 
 subset_ds <- raw_ds %>%
     dplyr::filter(num_examples == "subset") %>%
-    dplyr::select(language, passk, epoch, step_num) %>%
+    dplyr::select(language, passk, epoch, step_num, num_tokens) %>%
     rbind(base_rkt, base_ocaml, base_lua, .)
 
 full_res_ds <- raw_ds %>%
     dplyr::filter(num_examples == "full") %>%
-    dplyr::select(language, passk, epoch, step_num) %>%
+    dplyr::select(language, passk, epoch, step_num, num_tokens) %>%
     rbind(base_rkt, base_ocaml, base_lua, .)
 
 subset_plot <- ggplot(subset_ds, aes(x = step_num, y = passk, color = language)) +
     geom_line() +
-    geom_point() +
-    theme(legend.position = "bottom")
+    geom_point() +    
+    geom_text(aes(label = step_num), hjust = 0, vjust = 0, size = 3, color="black") +
+    ggtitle("Fine-tuning with MultiPL-T for 25k training items") +
+    theme(legend.position = "bottom") + 
+    xlab("Number of training tokens") + 
+    ylab("Pass@1") +
+    labs(color = "Language") +
+    theme_classic()
+
 
 ggsave("subset.png", plot = subset_plot, device = "png", width = 10)
