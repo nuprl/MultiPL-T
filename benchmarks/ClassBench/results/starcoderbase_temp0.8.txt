@@ -1,0 +1,3 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+starcoderbase_hw_rkt,10,0.7243373457558903,11,200,200
+starcoderbase_hw_rkt,100,0.9935446390521097,11,200,200
