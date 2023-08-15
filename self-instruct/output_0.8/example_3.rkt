@@ -1,2 +1,7 @@
-(define (is-palindrome? num)
-    (string=? (number->string num) (reverse (number->string num))))
+;; add-pair: [Pair of Numbers] -> Number
+;; Adds the two numbers in a pair
+(define (add-pair p)
+    (+ (car p) (cdr p)))
+
+
+--------------------

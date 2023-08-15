@@ -4,7 +4,7 @@ from pathlib import Path
 import torch
 
 MODEL = "/home/arjun/models/starcoderbase"
-MAX_TOKENS = 512
+MAX_TOKENS = 1024
 DIVIDER = "\n\n" + "-" * 20 + "\n\n"
 STOP_TOKENS = ["\n(define ", "\n#|", "\n;","\n(", "#lang", DIVIDER]
 TOP_P = 0.95
@@ -120,7 +120,7 @@ def generate_functions(model, context, batch_size, temperature):
 def main():
     args = ArgumentParser()
     args.add_argument("num_problems", type=int)
-    args.add_argument("--temperature", type=int, default=0.8)
+    args.add_argument("--temperature", type=float, default=0.8)
     args.add_argument("--batch_size", type=int, default=25)
     args.add_argument("--output_dir", type=Path, default=Path("./output"))
     args = args.parse_args()
