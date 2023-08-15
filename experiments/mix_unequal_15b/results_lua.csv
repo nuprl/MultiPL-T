@@ -1,0 +1,10 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+eval_lua_checkpoint-285,1,0.26149068322981367,161,20,20
+eval_lua_checkpoint-570,1,0.2891304347826087,161,20,20
+eval_lua_checkpoint-1140,1,0.293167701863354,161,20,20
+eval_lua_checkpoint-1425,1,0.25093167701863356,161,20,20
+eval_lua_checkpoint-1710,1,0.2760869565217391,161,20,20
+eval_lua_checkpoint-1995,1,0.3024844720496895,161,20,20
+eval_lua_checkpoint-2280,1,0.26925465838509316,161,20,20
+eval_lua_checkpoint-2565,1,0.28478260869565214,161,20,20
+eval_lua_checkpoint-2850,1,0.2937888198757764,161,20,20
