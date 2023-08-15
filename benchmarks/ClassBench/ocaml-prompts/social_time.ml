@@ -38,6 +38,7 @@ let social_event_time (e : event) : int =
 
 (* social-time : how much time was spent on calls and meetings? *)
 let social_time (events: event list) : int = 
+  (* <solution> *)
   List.fold_right (+) (List.map social_event_time events) 0;;
 
 (* <tests> *)
