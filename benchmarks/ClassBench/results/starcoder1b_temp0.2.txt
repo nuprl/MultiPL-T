@@ -1,0 +1,3 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+rkt_0.0,1,0.24727272727272726,11,50,50
+rkt_john_unequal_mixin4,1,0.23636363636363636,11,50,50
