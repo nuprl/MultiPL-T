@@ -4,11 +4,10 @@ from pathlib import Path
 import torch
 
 MODEL = "/home/arjun/models/starcoderbase"
-MAX_TOKENS = 1024
+MAX_TOKENS = 512
 DIVIDER = "\n\n" + "-" * 20 + "\n\n"
 STOP_TOKENS = ["\n(define ", "\n#|", "\n;","\n(", "#lang", DIVIDER]
 TOP_P = 0.95
-PROMPT = "(define ("
 
 def collect_context():
     context = ""
@@ -84,6 +83,39 @@ def stop_at_stop_token(decoded_string, stop_tokens):
             min_stop_index = stop_index
     return decoded_string[:min_stop_index]
 
+def generate_functions(model, context, batch_size, temperature):
+    prefixes = [";;"] * batch_size
+
+    signatures = model.completions(
+        [context + prefix for prefix in prefixes],
+        max_tokens=MAX_TOKENS, 
+        temperature=temperature, 
+        top_p=TOP_P, 
+        stop=["\n", "\n(define"]
+    )
+
+    prefixes = [prefix + signature + "\n;;" for prefix, signature in zip(prefixes, signatures)]
+
+    descriptions = model.completions(
+        [context + prefix for prefix in prefixes],
+        max_tokens=MAX_TOKENS, 
+        temperature=temperature, 
+        top_p=TOP_P, 
+        stop=["\n(define"]
+    )
+
+    prefixes = [prefix + description + "\n(define (" for prefix, description in zip(prefixes, descriptions)]
+
+    functions = model.completions(
+        [context + prefix for prefix in prefixes],
+        max_tokens=MAX_TOKENS, 
+        temperature=temperature, 
+        top_p=TOP_P, 
+        stop=STOP_TOKENS
+    )
+
+    return [prefix + func for prefix, func in zip(prefixes, functions)]
+    
 
 def main():
     args = ArgumentParser()
@@ -102,15 +134,7 @@ def main():
     functions = []
 
     while len(functions) < args.num_problems:
-        functions.extend(model.completions(
-            [context + PROMPT] * args.batch_size, 
-            max_tokens=MAX_TOKENS, 
-            temperature=args.temperature, 
-            top_p=TOP_P, 
-            stop=STOP_TOKENS
-        ))
-
-    functions = [PROMPT + f for f in functions]
+        functions.extend(generate_functions(model, context, args.batch_size, args.temperature))
 
     for i, func in enumerate(functions):
         with open(args.output_dir.joinpath(f"example_{i}.rkt"), "wt+") as f:
