@@ -8,7 +8,7 @@ type numtree =
 
 (* mirror: NumTree -> NumTree
 Mirrors the tree around the center point *)
-let rec mirror tree =
+let rec mirror (tree : numtree) : numtree =
   (* <solution> *)
   match tree with
   | Leaf num -> Leaf num

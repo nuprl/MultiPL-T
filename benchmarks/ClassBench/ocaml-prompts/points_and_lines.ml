@@ -11,7 +11,7 @@
  (* manhattan_distance: line -> int
   * Computes the manhattan distance that a line covers
   * manhattan distance = |x_1 - x_2| + |y_1 - y_2| *)
- let manhattan_distance l =
+ let manhattan_distance (l : line) : int =
    (* <solution> *)
    let dx = abs (l.start.x - l.end_.x) in
    let dy = abs (l.start.y - l.end_.y) in

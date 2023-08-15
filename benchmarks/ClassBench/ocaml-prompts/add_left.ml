@@ -8,7 +8,7 @@ type numtree =
 
 (* add_left: NumTree -> Number
 Adds only the numbers on the leftmost side of the tree. *)
-let rec add_left tree =
+let rec add_left (tree : numtree) : int =
   (* <solution> *)
   match tree with
   | Leaf num -> num

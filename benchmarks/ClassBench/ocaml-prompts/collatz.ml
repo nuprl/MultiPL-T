@@ -3,7 +3,7 @@ Counts how many steps it takes a number to converge
 to 1 through the collatz sequence. The collatz sequence
 divides by 2 if the number is even, otherwise if the number
 is odd, it multiplies by 3 and adds 1 *)
-let rec collatz num =
+let rec collatz (num : int) : int =
   (* <solution> *)
   if num = 1 then
     0

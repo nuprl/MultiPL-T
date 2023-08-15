@@ -25,7 +25,7 @@ let triangle_perimeter t =
 
 (* shape_perimeter: shape -> float *)
 (* Computes the perimeter of any Shape *)
-let shape_perimeter s =
+let shape_perimeter (s : shape) : float =
  (* <solution> *)
  match s with
  | Circle r -> circle_perimeter r
