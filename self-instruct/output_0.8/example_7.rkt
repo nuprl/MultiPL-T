@@ -1,5 +1,9 @@
-;; A list of lists, where each inner list contains one number of each 0-9.
-;; The inner lists are the same length and all the numbers in the inner lists are unique.
-(define (all-digits-1-9)
-    (list
-        (list 0 1 
+;; palindrome-substrings: String -> [List-of Strings]
+;; Returns all the palindrome substrings
+(define (palindrome-substrings str)
+    (let ((s (string->list str)) (ret '()))
+        (let pal-helper ((i 0) (j 0) (c '()))
+            (if (= i (length s)) (append ret (list (list->string c)))
+            (if (= i j) (pal-helper (+ i 1) (+ i 1) (append c (list (list-ref s i))))
+            (if (equal? (list-ref s i) (list-ref s j)) (pal-helper i (+ j 1) (append c (list (list-ref s i))))
+            (pal-helper i (+ j 1) (append c (list (list-ref s i))))))))))

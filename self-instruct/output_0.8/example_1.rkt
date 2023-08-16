@@ -1,10 +1,4 @@
-;; https://github.com/racket-tw/code/blob/master/racket/sum-lists.rkt
-;; https://github.com/racket-tw/code/blob/master/racket/sum-lists.rkt
-;; https://github.com/racket-tw/code/blob/master/racket/sum-lists.rkt
-
-#lang racket
-
-;; sum-lists: [List-of Lists-of Numbers] -> [List-of Numbers]
-;; Adds all the numbers in the lists together
-(define (sum-lists lls)
-    (map (lambda (l) (foldr + 
+;; add-rev-nums: [List-of Numbers] -> Number
+;; Adds the reverse of all the numbers in a list
+(define (add-rev-nums lon)
+    (foldr + 0 (map (lambda (n) (string->number (list->string (reverse (string->list (number->string n)))))) lon)))
