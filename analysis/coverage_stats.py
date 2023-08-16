@@ -6,6 +6,8 @@ import numpy as np
 ds = datasets.load_dataset(
     "nuprl/stack-dedup-python-testgen-starcoder-filter-v2", split="train").to_pandas()
 
+plt.rcParams.update({'font.size': 20})
+
 # Coverage stats
 sorted_coverage = ds["coverage"].sort_values()
 percentiles = np.arange(1, len(sorted_coverage) + 1) / len(sorted_coverage)
@@ -33,8 +35,8 @@ plt.ylabel('Percentile in Dataset')
 plt.yticks(np.arange(0, 1.1, 0.1))
 # zoom in outliers
 plt.xlim(0, test_lengths.quantile(0.99))
+# increase font size
 xticks = np.arange(0, test_lengths.quantile(0.99), 5)
-xticks = np.arange(0, 10, 2).tolist() + xticks.tolist()[2:]
 plt.xticks(xticks)
 plt.grid(True, which="both", ls="--", c='0.7')
 plt.savefig('./figures/test_lengths_cdf.png')
