@@ -1,10 +1,5 @@
 from tree_sitter_parser import LANGUAGE, global_parser, make_parser, node_to_string
 import datasets
-    (expression_statement 
-        (string 
-            (string_start) @docstring.start
-            (string_content)
-            (string_end) @docstring.end)))) @function.def
 import signal
 import sys
 from multiprocessing import Pool
