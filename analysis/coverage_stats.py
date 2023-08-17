@@ -21,6 +21,9 @@ plt.yticks(np.arange(0, 1.1, 0.1))
 plt.grid(True, which="both", ls="--", c='0.7')
 plt.savefig('./figures/coverage_cdf.png')
 plt.savefig('./figures/coverage_cdf.pdf')
+# print stats
+print("Coverage stats:")
+print(ds["coverage"].describe())
 
 # Test length stats
 test_lengths = ds["tests"].apply(len)
@@ -41,3 +44,7 @@ plt.xticks(xticks)
 plt.grid(True, which="both", ls="--", c='0.7')
 plt.savefig('./figures/test_lengths_cdf.png')
 plt.savefig('./figures/test_lengths_cdf.pdf')
+
+# print stats
+print("Test length stats:")
+print(test_lengths.describe())
