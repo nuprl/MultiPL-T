@@ -52,7 +52,7 @@ for i, bar in enumerate(bars):
         loss_start = yval + losses[i]
         ax.plot([bar.get_x(), bar.get_x() + bar.get_width()],
                 [loss_start, loss_start], color='red', linewidth=2)
-        ax.text(bar.get_x() + bar.get_width()/2, loss_start + (0.02 * y_limit),
+        ax.text(bar.get_x() + bar.get_width()/2, loss_start + (0.03 * y_limit),
                 f"-{losses[i]}", ha='center', va='center', color='red')
 
 ax.set_ylim(0, y_limit)
