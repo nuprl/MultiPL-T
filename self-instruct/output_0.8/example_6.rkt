@@ -1,4 +1,4 @@
-;; Problem #2
-;; 1. Define a function that takes a string and returns the string reversed
-(define (reverse-string str)
-    (foldl string-append "" (reverse (string->list
+;; get-last-digit: Number -> Number
+;; Gets the last digit of a number
+(define (get-last-digit num)
+    (remainder num 10))

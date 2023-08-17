@@ -14,7 +14,7 @@ def collect_context():
     for p in Path("./examples").glob("*.rkt"):
         with open(p) as f:
             func = f.read()
-            func = func[:func.find("<tests>")].rsplit("\n", 1)[0]
+            func = func[func.find("#lang racket\n\n")+14:func.find("<tests>")].rsplit("\n", 1)[0]
         context += func
         context += DIVIDER
     return context

@@ -1,0 +1,5 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+starcoderbase_15b_equal_mix_epoch_3,1,0.5363636363636364,11,50,50
+starcoderbase_15b_no_training,1,0.62,11,50,50
+starcoderbase_1b_equal_mix_epoch_4,1,0.5163636363636364,11,50,50
+starcoderbase_1b_no_training,1,0.3418181818181818,11,50,50
