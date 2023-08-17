@@ -1,3 +1,4 @@
+#!/bin/bash
 python3 proc.py \
     --bench="humaneval" \
     --model="bigcode_15b_1000m" \

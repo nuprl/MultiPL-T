@@ -1,8 +1,11 @@
 library(ggplot2)
 library(purrr)
+library(optparse)
+cli <- OptionParser(usage = "usage: %prog [options]")
+add_option(cli, c("--data"), dest="data", type="character", default="starcoderbase_0p2_reworded.csv", help="Path to data file")
+add_option(cli, c("--plot"), dest="plot", type="character", default="starcoderbase_0p2_reworded_pass_matrix.pdf", help="Path to plot file")
 data_file <- "starcoderbase_0p2_reworded.csv"
 plot_file <- "starcoderbase_0p2_reworded_pass_matrix.pdf"
-plot_title <- "StarCoderBase MultiPL-E Success Ratio Matrix"
 
 pass_matrix <- function(csvfile, plotfile, title) { 
     df <- read.csv(csvfile, header=TRUE)
@@ -17,7 +20,6 @@ pass_matrix <- function(csvfile, plotfile, title) {
             axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
             plot.title = element_text(hjust = 0.5)
         ) + 
-        ggtitle(title) +
         xlab("HumanEval Problem") + 
         ylab("Programming Language") + 
         guides(fill = guide_colorbar(title = "Success Ratio"))
