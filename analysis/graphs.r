@@ -112,14 +112,21 @@ subset_plot <- ggplot(subset_ds, aes(x = step_num, y = passk, color = language))
             aes(label = step_num), 
             data = dplyr::filter(subset_ds, step_num != 0),
             hjust = 0, vjust = 0, size = 3, nudge_x = 1, color="black") +
+    theme_classic() +
     ylim(0, 0.18) + 
     scale_y_continuous(breaks = seq(0, 0.18, 0.01)) +
     expand_limits(x=0, y=0) +
-    theme(legend.position = "bottom") + 
+    theme(
+        legend.position = c(.95, .90),
+        legend.justification = c("right", "top"),
+        legend.box.just = "right",
+        legend.margin = margin(6, 6, 6, 6),
+        text=element_text(size=14),
+        legend.background = element_blank(),
+        legend.box.background = element_rect(colour = "black")) + 
     xlab("Number of training tokens") + 
     ylab("Pass@1") +
-    labs(color = "Language") +
-    theme_classic()
+    labs(color = "Language") 
 
 
 ggsave("subset.png", plot = subset_plot, device = "png", width = 10)
