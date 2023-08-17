@@ -2,6 +2,15 @@ import datasets
 import pandas as pd
 import argparse
 from pathlib import Path
+import numpy as np
+
+def pass_k(n: int, c: int, k: int) -> float:
+    """
+    Calculates 1 - comb(n - c, k) / comb(n, k).
+    """
+    if n - c < k:
+        return 1.0
+    return 1.0 - np.prod(1.0 - k / np.arange(n - c + 1, n + 1))
 
 def parse_experiment_name(name):
     splitname = name.split("-")
@@ -81,7 +90,9 @@ def remap_language(lang):
         raise ValueError(f"Unknown language {lang}")
         
 
-def proc_dataset(raw_ds, bench, model, temp, config):
+def proc_dataset(raw_ds, bench, model, temp, config, languages=None):
+    if languages  is not None:
+        languages = languages.split(",")
     proc_ds = raw_ds.filter(lambda x: test_experiment_name(x["experiment"], bench, model, temp, config))
     proc_ds = proc_ds.map(add_success_ratio)
     proc_ds = proc_ds.map(lambda x: {"problem" : trim_problem_name(x["problem"]),
@@ -92,6 +103,9 @@ def proc_dataset(raw_ds, bench, model, temp, config):
     for ds in valid:
         problems = ds["problem"]
         langs = ds["language"]
+        if languages is not None:
+            if langs[0] not in languages:
+                continue
         success_ratios = ds["success_ratio"]
         for (prob, lang, sr) in zip(problems, langs, success_ratios):
             if prob not in prob_dict:
@@ -111,6 +125,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, required=True, help="The model to process")
     parser.add_argument("--temp", type=str, required=True, help="The temperature to process")
     parser.add_argument("--config", type=str, required=True, help="The config to process (e.g. reworded)")
+    parser.add_argument("--languages", type=str, default=None, help="The languages to process, comman separated")
     parser.add_argument("--output-csv", type=str, required=True, help="The output file to write to")
 
     args = parser.parse_args()

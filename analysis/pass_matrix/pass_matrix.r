@@ -2,12 +2,13 @@ library(ggplot2)
 library(purrr)
 library(optparse)
 cli <- OptionParser(usage = "usage: %prog [options]")
-add_option(cli, c("--data"), dest="data", type="character", default="starcoderbase_0p2_reworded.csv", help="Path to data file")
-add_option(cli, c("--plot"), dest="plot", type="character", default="starcoderbase_0p2_reworded_pass_matrix.pdf", help="Path to plot file")
+cli <- add_option(cli, c("--data"), dest="data", type="character", default="starcoderbase_0p2_reworded.csv", help="Path to data file")
+cli <- add_option(cli, c("--plot"), dest="plot", type="character", default="starcoderbase_0p2_reworded_pass_matrix.pdf", help="Path to plot file")
+args <- parse_args(cli)
 data_file <- "starcoderbase_0p2_reworded.csv"
 plot_file <- "starcoderbase_0p2_reworded_pass_matrix.pdf"
 
-pass_matrix <- function(csvfile, plotfile, title) { 
+pass_matrix <- function(csvfile, plotfile) { 
     df <- read.csv(csvfile, header=TRUE)
     plt <- ggplot(df, aes(x = problem, y = language, fill = success_ratio)) + 
         geom_tile() +
@@ -28,4 +29,4 @@ pass_matrix <- function(csvfile, plotfile, title) {
 }
 
 
-pass_matrix(data_file, plot_file, plot_title)
+pass_matrix(args$data_file, args$plot_file)
