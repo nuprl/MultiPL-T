@@ -108,8 +108,13 @@ full_res_ds <- raw_ds %>%
 subset_plot <- ggplot(subset_ds, aes(x = step_num, y = passk, color = language)) +
     geom_line() +
     geom_point() +    
-    geom_text(aes(label = step_num), hjust = 0, vjust = 0, size = 3, color="black") +
-    ggtitle("Fine-tuning with MultiPL-T for 25k training items") +
+    geom_text(
+            aes(label = step_num), 
+            data = dplyr::filter(subset_ds, step_num != 0),
+            hjust = 0, vjust = 0, size = 3, nudge_x = 1, color="black") +
+    ylim(0, 0.18) + 
+    scale_y_continuous(breaks = seq(0, 0.18, 0.01)) +
+    expand_limits(x=0, y=0) +
     theme(legend.position = "bottom") + 
     xlab("Number of training tokens") + 
     ylab("Pass@1") +
