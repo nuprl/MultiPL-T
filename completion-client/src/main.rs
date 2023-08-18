@@ -6,7 +6,7 @@ mod repr;
 mod runner;
 mod writer;
 
-use std::{path::PathBuf, sync::Arc};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use clap::Parser;
 use repr::Program;
@@ -53,7 +53,7 @@ async fn main() {
         log_file,
     } = Cli::parse();
     let server_url: Url = Url::parse(&server_url).expect("Server URL should be valid");
-    let _ = completions::handshake(&server_url).await;
+    let _ = tokio::time::timeout(Duration::from_secs(60), completions::handshake(&server_url)).await.unwrap();
     let seen_ids = reader::read_output_jsonl(&output_file);
     let channel_size = 2 * usize::max(num_connections, num_runners);  
     let (readtoks_send, readtoks_recv) = channel::<()>(channel_size);

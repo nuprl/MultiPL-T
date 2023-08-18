@@ -16,8 +16,12 @@ enum ComplError {
 pub async fn handshake(server_url: &Url) {
     let client = reqwest::Client::new();
     let info_endpoint = server_url.join("info").expect("Info endpoint should succeed");
-    let _ = client.get(info_endpoint).send().await.expect("Info message should succeed");
-    ()
+    loop { 
+        match client.get(info_endpoint.clone()).send().await { 
+            Ok(_) => return,
+            Err(_) => tokio::time::sleep(Duration::from_secs(5)).await
+        }
+    }
 }
 
 pub async fn spawn_connections(
