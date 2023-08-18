@@ -105,23 +105,22 @@ full_res_ds <- raw_ds %>%
     dplyr::select(language, passk, epoch, step_num, num_tokens) %>%
     rbind(base_rkt, base_ocaml, base_lua, .)
 
-subset_plot <- ggplot(subset_ds, aes(x = step_num, y = passk, color = language)) +
+subset_plot <- ggplot(subset_ds, aes(x = num_tokens, y = passk, color = language)) +
     geom_line() +
     geom_point() +    
     geom_text(
             aes(label = step_num), 
             data = dplyr::filter(subset_ds, step_num != 0),
-            hjust = 0, vjust = 0, size = 3, nudge_x = 1, color="black") +
+            hjust = 1, vjust = 0, size = 4, color="black") +
     theme_classic() +
-    ylim(0, 0.18) + 
     scale_y_continuous(breaks = seq(0, 0.18, 0.01)) +
     expand_limits(x=0, y=0) +
     theme(
-        legend.position = c(.95, .90),
+        legend.position = c(.95, .60),
         legend.justification = c("right", "top"),
         legend.box.just = "right",
         legend.margin = margin(6, 6, 6, 6),
-        text=element_text(size=14),
+        text=element_text(size=20),
         legend.background = element_blank(),
         legend.box.background = element_rect(colour = "black")) + 
     xlab("Number of training tokens") + 

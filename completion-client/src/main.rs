@@ -14,6 +14,7 @@ use tokio::{
     join, spawn,
     sync::{mpsc::channel, Mutex},
 };
+use url::Url;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -28,7 +29,7 @@ struct Cli {
     log_file: PathBuf,
 
     #[arg(long)]
-    endpoint_url: String,
+    server_url: String,
 
     #[arg(long)]
     num_connections: usize,
@@ -45,13 +46,14 @@ async fn main() {
     let Cli {
         prompt_file,
         output_file,
-        endpoint_url,
+        server_url,
         num_connections,
         attempt_limit,
         num_runners,
         log_file,
     } = Cli::parse();
-    let endpoint_url: &'static str = Box::leak(endpoint_url.into_boxed_str());
+    let server_url: Url = Url::parse(&server_url).expect("Server URL should be valid");
+    let _ = completions::handshake(&server_url).await;
     let seen_ids = reader::read_output_jsonl(&output_file);
     let channel_size = 2 * usize::max(num_connections, num_runners);  
     let (readtoks_send, readtoks_recv) = channel::<()>(channel_size);
@@ -74,7 +76,7 @@ async fn main() {
         Arc::new(Mutex::new(complq_recv)),
         runq_send.clone(),
         logq_send.clone(),
-        endpoint_url,
+        server_url,
     ));
     let rn_hdl = spawn(runner::spawn_runners(
         Arc::new(Mutex::new(runq_recv)),

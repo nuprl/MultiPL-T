@@ -12,7 +12,7 @@ podman run --rm -it \
     --prompt-file /data/$PROMPT_FILE \
     --output-file /output/$OUT_FILE \
     --log-file /output/$LOG_FILE \
-    --endpoint-url http://127.0.0.1:8080/generate \
+    --server-url http://127.0.0.1:8080/ \
     --num-connections 100 \
     --attempt-limit 20 \
     --num-runners 50
