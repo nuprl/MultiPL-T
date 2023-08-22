@@ -56,15 +56,17 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str,
-                        default="nuprl/stack-dedup-python-testgen-starcoder-filter-v2", 
+                        default="nuprl/stack-dedup-python-testgen-starcoder-filter-v2",
                         help="Dataset of functions with tests to process")
-    parser.add_argument("--min_coverage", type=float, default=90, help="Minimum coverage of tests")
-    parser.add_argument("--content_col", type=str, default="content", help="Column name of content")
+    parser.add_argument("--min_coverage", type=float,
+                        default=90, help="Minimum coverage of tests")
+    parser.add_argument("--content_col", type=str,
+                        default="content", help="Column name of content")
     args = parser.parse_args()
     ds = datasets.load_dataset(args.dataset, split="train")
     dir_of_this_script = os.path.dirname(os.path.realpath(__file__))
-    up = os.path.dirname(dir_of_this_script)
     ds = ds.filter(lambda x: x["coverage"] >= args.min_coverage)
-    print(f"Writing {len(ds)} rows to {up}/stack-clean-python")
-    ds.map(write_row_to_file(f"{up}/stack-clean-python", args.content_col),
+    path = f"{dir_of_this_script}/stack-clean-python"
+    print(f"Writing {len(ds)} rows to {path}")
+    ds.map(write_row_to_file(path, args.content_col),
            load_from_cache_file=False)
