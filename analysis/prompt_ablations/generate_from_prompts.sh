@@ -26,10 +26,10 @@ for lang in $LANGS; do
   python3 automodel.py \
   --name "bigcode/starcoderbase" \
   --use-local \
-  --dataset $BASE_PROMPTPATH \
+  --dataset $PROMPT_PROMPTPATH \
   --completion-limit 50 \
   --batch-size 50 \
   --temperature 0.8 \
-  --output-dir $BASE_LANGDIR
+  --output-dir $PROMPT_LANGDIR
 done
 popd
