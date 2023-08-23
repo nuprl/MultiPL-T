@@ -2,34 +2,35 @@ import argparse
 import csv
 from pathlib import Path
 
-def parse_params(name):
-    parsed = name.split("_")
-    lr = float(parsed[1])
-    bs = int(parsed[3])
-    sched = parsed[5]
-    return lr, bs, sched
+def get_items(name):
+    # returns the number of training items
+    split_name = name.split("_")
+    return split_name[1]
 
 if __name__ == "__main__": 
     cli = argparse.ArgumentParser()
     cli.add_argument("--exp-root", type=str, default="experiments")
-    cli.add_argument("--outfile", type=str, default="all_results.csv")
+    cli.add_argument("--out-dir", type=str, default="all_results.csv")
     args = cli.parse_args()
 
     exp_root = Path(args.exp_root)
-    outfile = Path(args.outfile)
-    output = []
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(exist_ok=True, parents=True)
     for d in exp_root.iterdir():
         if d.is_dir():
-            pak = -1.0 
+            exp_name = d.name
+            training_items = get_items(exp_name)
+            output = []
             for f in d.glob("*.csv"):
-                reader = csv.DictReader(f)
-                for row in reader:
-                    pak = float(row["Estimate"])
-                output.append((d.name, f.name, pak))
-    output.sort(key=(lambda p: p[1]), reverse=True)
-    with open(outfile, "w") as f:
-        for (name, pak) in output:
-            lr, bs, sched = parse_params(name)
-            f.write(f"{lr},{bs},{sched},{pak}\n") 
+                with open(f, "r") as fp:
+                    for (i, row) in enumerate(fp):
+                        if i == 1:
+                            output[training_items].append(row.strip())
+            with open(out_dir / f"rkt_{training_items}", "w") as fp:
+                writer = csv.writer(fp)
+                writer.writerow(["Dataset", "Pass@k", "Estimate", "NumProblems", "MinCompletions", "MaxCompletions"])
+                for row in output:
+                    writer.writerow(row.split(","))
     
-    
+
+
