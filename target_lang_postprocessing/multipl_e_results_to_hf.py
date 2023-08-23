@@ -25,6 +25,7 @@ pa.add_argument("--score_batch", type=int, default=32)
 pa.add_argument("--processing_batch", type=int, default=512)
 pa.add_argument("--score_device", type=str, default="cpu")
 pa.add_argument("--no_score", action="store_true")
+pa.add_argument("--no_threading", action="store_true")
 args = pa.parse_args()
 
 possible_strategies = ["dedup", "dedup_best", "best"]
@@ -93,7 +94,8 @@ def process_path(path):
     edu_scores = []
     if len(sols) > 0:
         if args.strategy == "dedup":
-            sols = rouge_dedup(sols, args.lang, args.dedup_threshold, trim_top_comments=False)
+            sols = rouge_dedup(
+                sols, args.lang, args.dedup_threshold, trim_top_comments=False)
             edu_scores.extend([0] * len(sols))
         elif args.strategy == "dedup_best":
             # IDEA: sort the solutions by score, then dedup, so higher scoring solutions are more likely to be kept
@@ -103,7 +105,8 @@ def process_path(path):
             sols_to_score = {sol: score for score, sol in score_sols}
             score_sols.sort(key=lambda x: x[0], reverse=True)
             sols = [x[1] for x in score_sols]
-            sols = rouge_dedup(sols, args.lang, args.dedup_threshold, trim_top_comments=False)
+            sols = rouge_dedup(
+                sols, args.lang, args.dedup_threshold, trim_top_comments=False)
             scores = [sols_to_score[sol] for sol in sols]
             edu_scores.extend(scores)
         elif args.strategy == "best":
@@ -133,19 +136,27 @@ def process_dedup(tpl: Tuple[List[Solution], str, float]) -> List[Solution]:
     return [code_to_sol[sol] for sol in sols_code]
 
 
-THREADS = os.cpu_count() - 1  # type: ignore
-pool = multiprocessing.Pool(THREADS)
-batch = []
-iter_size = len(list(make_path_iterator()))
-for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
-    batch.append(path)
-    if len(batch) >= args.processing_batch or i == iter_size - 1:
-        solns = pool.map(process_path, batch)
-        for soln, has_at_least_one_passing in solns:
-            solutions.extend(soln)
-            if has_at_least_one_passing:
-                num_has_at_least_one_passing += 1
-        batch = []
+if args.no_threading:
+    for path in progressbar(make_path_iterator()):
+        solns, has_at_least_one_passing = process_path(path)
+        solutions.extend(solns)
+        if has_at_least_one_passing:
+            num_has_at_least_one_passing += 1
+else:
+    assert scorer is None, "scorer not supported with threading"
+    THREADS = os.cpu_count() - 1  # type: ignore
+    pool = multiprocessing.Pool(THREADS)
+    batch = []
+    iter_size = len(list(make_path_iterator()))
+    for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
+        batch.append(path)
+        if len(batch) >= args.processing_batch or i == iter_size - 1:
+            solns = pool.map(process_path, batch)
+            for soln, has_at_least_one_passing in solns:
+                solutions.extend(soln)
+                if has_at_least_one_passing:
+                    num_has_at_least_one_passing += 1
+            batch = []
 
 
 if args.global_dedup:
