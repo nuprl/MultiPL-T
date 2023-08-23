@@ -1,15 +1,16 @@
 #!/bin/bash
-EXP_ROOT="/home/johngouwar/experiments/8_10_multiplt_training"
-DATA_DIR="/home/johngouwar/data/multiplt-training"
+EXP_ROOT="/home/johngouwar/experiments/8_23_racket_size_ablation"
+DATA_DIR="/home/johngouwar/data/8_23_racket_size_ablation"
 BASE_CMD="python3 build_train_experiment.py \
-    --train-template rkt-train-py.mustache \
-    --train-data $DATA_DIR/racket_full_train_40510.jsonl \
+    --model /home/arjun/models/starcoderbase-1b \
+    --train-template simple-train-py.mustache \
+    --train-data $DATA_DIR/racket-train-40510.jsonl \
     --test-data $DATA_DIR/humaneval-rkt-reworded.jsonl \
     --exp-root $EXP_ROOT \
     --learning-rate 3e-5 \
     --batch-size 8 \
     --schedule cosine \
-    --epochs 6 \
+    --epochs 7 \
     --warmup-steps 10 \
     --single" 
 
