@@ -11,7 +11,17 @@ for lang in $LANGS; do
     python3 prepare_prompts_json.py \
       --lang humaneval_to_$lang.py\
       --output ../../analysis/prompt_ablations/canonical_comment_prompts/$lang-prompts.jsonl \
-      --originals ../../stack-clean-python/ \
+      --originals ../../multipl_e_target_adaptor/stack-clean-python/ \
       --add-canonical-to-prompt
 done
+
+for lang in $LANGS; do
+    echo "Translating $lang"
+    python3 prepare_prompts_json.py \
+      --lang humaneval_to_$lang.py\
+      --output ../../analysis/prompt_ablations/base_prompts/$lang-prompts.jsonl \
+      --originals ../../multipl_e_target_adaptor/stack-clean-python/
+done
+
+
 popd
