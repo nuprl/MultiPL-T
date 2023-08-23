@@ -137,7 +137,8 @@ def process_dedup(tpl: Tuple[List[Solution], str, float]) -> List[Solution]:
 
 
 if args.no_threading:
-    for path in progressbar(make_path_iterator()):
+    iter_size = len(list(make_path_iterator()))
+    for path in progressbar(make_path_iterator(), max_value=iter_size):
         solns, has_at_least_one_passing = process_path(path)
         solutions.extend(solns)
         if has_at_least_one_passing:
