@@ -12,6 +12,7 @@ from dedup_solutions import rouge_dedup
 from code_scorer.inference import CodeScorer
 from utils import clean_sol_prompt
 from argparse import ArgumentParser
+import gc
 
 pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
@@ -144,7 +145,7 @@ if args.no_threading:
         if has_at_least_one_passing:
             num_has_at_least_one_passing += 1
 else:
-    assert scorer is None, "scorer not supported with threading"
+    assert scorer is None and not args.strategy == "dedup", "scorer not supported with threading"
     THREADS = os.cpu_count() - 1  # type: ignore
     pool = multiprocessing.Pool(THREADS)
     batch = []
