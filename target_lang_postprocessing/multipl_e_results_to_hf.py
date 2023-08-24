@@ -12,7 +12,6 @@ from dedup_solutions import rouge_dedup
 from code_scorer.inference import CodeScorer
 from utils import clean_sol_prompt
 from argparse import ArgumentParser
-import gc
 
 pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
@@ -137,6 +136,8 @@ def process_dedup(tpl: Tuple[List[Solution], str, float]) -> List[Solution]:
     return [code_to_sol[sol] for sol in sols_code]
 
 
+THREADS = os.cpu_count() - 1  # type: ignore
+pool = multiprocessing.Pool(THREADS)
 if args.no_threading:
     iter_size = len(list(make_path_iterator()))
     for path in progressbar(make_path_iterator(), max_value=iter_size):
@@ -146,8 +147,6 @@ if args.no_threading:
             num_has_at_least_one_passing += 1
 else:
     assert scorer is None and not args.strategy == "dedup", "scorer not supported with threading"
-    THREADS = os.cpu_count() - 1  # type: ignore
-    pool = multiprocessing.Pool(THREADS)
     batch = []
     iter_size = len(list(make_path_iterator()))
     for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
