@@ -1,0 +1,167 @@
+[
+  {
+    "name": "add_left",
+    "language": "py",
+    "prompt": "# Using dictionaries to represent the NumTree\n# A Leaf is represented as {\"type\": \"Leaf\", \"value\": <number>}\n# A Node is represented as {\"type\": \"Node\", \"value\": <number>, \"left\": <leftTree>, \"right\": <rightTree>}\n\n# add_left: NumTree -> Number\n# Adds only the numbers on the leftmost side of the tree.\ndef add_left(tree):",
+    "doctests": "original",
+    "original": "python-prompts\\add_left.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def tests():\n    assert add_left({\"type\": \"Leaf\", \"value\": 4}) == 4\n    assert add_left({\"type\": \"Node\", \"value\": 5, \"left\": {\"type\": \"Leaf\", \"value\": 6}, \"right\": {type: \"Leaf\", \"value\": 7}}) == 11\n    assert add_left({\n        \"type\": \"Node\", \"value\": -3, \n        \"left\": {\"type\": \"Node\", \"value\": 3, \"left\": {\"type\": \"Leaf\", \"value\": 0}, \"right\": {\"type\": \"Leaf\", \"value\": 9}},\n        \"right\": {\"type\": \"Node\", \"value\": 4, \"left\": {\"type\": \"Leaf\", \"value\": 9}, \"right\": {\"type\": \"Leaf\", \"value\": 10}}\n    }) == 0\n\ntests()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "add_station",
+    "language": "py",
+    "prompt": "# Using dictionaries to represent the Station\n# A Station is represented as {\"name\": <name>, \"connections\": <set of connections>}\n# A Subway is a list of stations\n\n# has_connection: checks if a station has a connection to some other station name.\ndef has_connection(str, stat):\n    for connection in stat[\"connections\"]:\n        if connection == str:\n            return True\n    \n    return False\n\n\n# add_edge_to_station: Adds a single edge to a station.\ndef add_edge_to_station(str, stat):\n    if has_connection(str, stat):\n        return stat\n    else:\n        stat[\"connections\"].add(str)\n        return stat\n    \n\n# add_edge: adds a connection to the subway, if it does not\n# already exist. Assumes that both from and to stations in the Subway.\ndef add_edge(fr, towards, sub):",
+    "doctests": "original",
+    "original": "python-prompts\\add_station.py",
+    "prompt_terminology": "verbatim",
+    "tests": "ex_station_1 = {\"name\":\"Newton Centre\", \"connections\":{\"Fenway\", \"Kenmore\"}}\nex_station_2 = {\"name\":\"Fenway\", \"connections\":{\"Newton Highlands\", \"Newton Centre\"}}\nex_station_3 = {\"name\":\"Kenmore\", \"connections\":{\"Newton Centre\"}}\nex_station_4 = {\"name\":\"Newton Highlands\", \"connections\":{\"Fenway\"}}\n\nex_subway_1 = [ex_station_1, ex_station_2, ex_station_3, ex_station_4]\nex_subway_2 = []\nex_subway_3 = [\n    {\"name\":\"A\", \"connections\":{\"B\", \"D\"}},\n    {\"name\":\"B\", \"connections\":{\"C\", \"A\"}},\n    {\"name\":\"C\", \"connections\":{\"D\", \"B\"}},\n    {\"name\":\"D\", \"connections\":{\"A\", \"C\"}}\n]\n\ndef tests():\n    assert(add_edge(\"Fenway\", \"Kenmore\", ex_subway_2) == ex_subway_2)\n    assert(add_edge(\"Fenway\", \"Kenmore\", ex_subway_1) == [\n        ex_station_1,\n        {\"name\":\"Fenway\", \"connections\":{\"Newton Highlands\", \"Newton Centre\", \"Kenmore\"}}, # Adjusted the expected order\n        ex_station_3,\n        ex_station_4\n    ])\n    assert(add_edge(\"Kenmore\", \"Newton Centre\", ex_subway_1) == ex_subway_1)\n    assert(add_edge(\"A\", \"C\", ex_subway_3) == [\n        {\"name\":\"A\", \"connections\":{\"B\", \"D\", \"C\"}}, # Adjusted the expected order\n        {\"name\":\"B\", \"connections\":{\"C\", \"A\"}},\n        {\"name\":\"C\", \"connections\":{\"D\", \"B\"}},\n        {\"name\":\"D\", \"connections\":{\"A\", \"C\"}}\n    ])\n\n\ntests()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "apply_to_android",
+    "language": "py",
+    "prompt": "# Phone type representation using dictionaries\ndef Iphone(version):\n    return { \"tag\":  \"Iphone\", \"version\": version }\n\n\ndef Android(version):\n    return { \"tag\":  \"Android\", \"version\": version }\n\n\ndef Pixel(version):\n    return { \"tag\":  \"Pixel\", \"version\": version }\n\n\n# apply_to_android: Applies a def to the androids in the list of phones\ndef apply_to_android(f, pList):",
+    "doctests": "original",
+    "original": "python-prompts\\apply_to_android.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def uppercase_android(p):\n    if p[\"tag\"] == \"Android\":\n        return Android(p[\"version\"].upper())\n    else:\n        return p\n    \n\n\ndef reverse_android(p):\n    if p[\"tag\"] == \"Android\":\n        return Android(p[\"version\"][::-1])\n    else:\n        return p\n    \n\n\ndef version_android(p):\n    if p[\"tag\"] == \"Android\":\n        return Android(p[\"version\"] + \"-v2\")\n    else:\n        return p\n    \ndef tests():\n    assert (apply_to_android(uppercase_android, []) == [])\n    assert (\n        apply_to_android(uppercase_android, [Iphone(5), Pixel(3), Android(\"Cupcake\"), Pixel(7), Android(\"Grape\"), Iphone(10), Android(\"Orange\")]) ==\n        [Iphone(5), Pixel(3), Android(\"CUPCAKE\"), Pixel(7), Android(\"GRAPE\"), Iphone(10), Android(\"ORANGE\")]\n    )\n    assert (apply_to_android(reverse_android, [Iphone(5), Pixel(3), Android(\"Cupcake\")]) == [Iphone(5), Pixel(3), Android(\"ekacpuC\")])\n    assert (apply_to_android(version_android, [Iphone(5), Pixel(3)]) == [Iphone(5), Pixel(3)])\n\ntests()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "band_electrify",
+    "language": "py",
+    "prompt": "# Guitar representation using dictionaries\ndef Guitar(brand_name, color, electric):\n    return { \"tag\":  \"Guitar\", \"brand_name\":  brand_name, \"color\":  color, \"electric\":  electric }\n\n\n# DrumKit representation using dictionaries\ndef DrumKit(brand_name, electric):\n    return { \"tag\":  \"DrumKit\", \"brand_name\":  brand_name, \"electric\":  electric }\n\n\n# Saxophone representation using dictionaries\ndef Saxophone(brand_name):\n    return { \"tag\":  \"Saxophone\", \"brand_name\":  brand_name }\n\n\n# Piano representation using dictionaries\ndef Piano(brand_name):\n    return { \"tag\":  \"Piano\", \"brand_name\":  brand_name }\n\n\n# electrify_guitar: Makes this an electric guitar!\ndef electrify_guitar(g):\n    if g[\"tag\"] == \"Guitar\":\n        return Guitar(g[\"brand_name\"], g[\"color\"], True)\n    else:\n        return g\n    \n# electrify_drum_kit: Makes this an electric drum kit!\ndef electrify_drum_kit(d):\n    if d[\"tag\"] == \"DrumKit\":\n        return DrumKit(d[\"brand_name\"], True)\n    else:\n        return d\n\n# electrify_instrument: Makes this an electric instrument!\ndef electrify_instrument(i):\n    if i[\"tag\"] == \"Guitar\":\n        e_guitar = electrify_guitar(i)\n        return { \"tag\":  \"Guitar\", \"brand_name\":  e_guitar[\"brand_name\"], \"color\":  e_guitar[\"color\"], \"electric\":  e_guitar[\"electric\"] }\n    elif i[\"tag\"] == \"DrumKit\":\n        e_drum_kit = electrify_drum_kit(i)\n        return { \"tag\":  \"DrumKit\", \"brand_name\":  e_drum_kit[\"brand_name\"], \"electric\":  e_drum_kit[\"electric\"] }\n    else:\n        return i\n    \n# A band is either a OnePieceBand, a TwoPieceBand, or a ThreePieceBand\n# A OnePieceBand can be represented as a {\"tag\": \"OnePieceBand\", \"instrument\": <instrument>}\n# A TwoPieceBand can be represented as a {\"tag\": \"TwoPieceBand\", \"instrument1\": <instrument>, \"instrument2\": <instrument>}\n# A ThreePieceBand can be represented as a {\"tag\": \"ThreePieceBand\", \"instrument1\": <instrument>, \"instrument2\": <instrument>, \"instrument3\": <instrument>}\n\n# electrify_band: Makes this an electric band!\ndef electrify_band(b):",
+    "doctests": "original",
+    "original": "python-prompts\\band_electrify.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def test():\n    assert electrify_band({ \"tag\":  \"OnePieceBand\", \"instrument\": Guitar(\"Stratocaster\", \"red\", True) })[\"instrument\"][\"electric\"]\n    \n    assert electrify_band({ \"tag\":  \"TwoPieceBand\", \"instrument1\" : DrumKit(\"Korg\", True), \"instrument2\" : DrumKit(\"Korg\", False) })[\"instrument2\"][\"electric\"]\n    \n    assert electrify_band({ \"tag\":  \"ThreePieceBand\", \"instrument1\" : Guitar(\"Stratocaster\", \"red\", True), \"instrument2\" : DrumKit(\"Korg\", False), \"instrument3\": Saxophone(\"Yamaha\") })[\"instrument2\"][\"electric\"]\n        \ntest()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "collatz",
+    "language": "py",
+    "prompt": "# Collatz: Number ->  Number\n# Counts how many steps it takes a number to converge\n# to 1 through the collatz sequence. The collatz sequence\n# divides by 2 if the number is even, otherwise if the number\n# is odd, it multiplies by 3 and adds 1\n\ndef collatz(num):",
+    "doctests": "original",
+    "original": "python-prompts\\collatz.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def test():\n    assert (collatz(1) == 0)\n    assert (collatz(2) == 1)\n    assert (collatz(4) == 2)\n    assert (collatz(3) == 7)\n    assert (collatz(12) == 9)\n\ntest()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "flip_tree",
+    "language": "py",
+    "prompt": "# A NumTree is either a Leaf or a Node\n# A Leaf can be represented as {\"type\": \"Leaf\", \"value\": <Number>}\n# A Node can be represented as {\"type\": \"Node\", \"value\": <Number>, \"left\": <NumTree>, \"right\": <NumTree>}\n\n# mirror: NumTree -> NumTree\n# Mirrors the tree around the center point\ndef mirror(tree):",
+    "doctests": "original",
+    "original": "python-prompts\\flip_tree.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def assertions():\n    assert (mirror({\"type\": \"Leaf\", \"value\": 5}) == {\"type\": \"Leaf\", \"value\": 5})\n    assert (mirror({\"type\": \"Node\", \"value\": 5, \"left\": {\"type\": \"Leaf\", \"value\": 6}, \"right\": {\"type\": \"Leaf\", \"value\": 7}}) ==\n                    {\"type\": \"Node\", \"value\": 5, \"left\": {\"type\": \"Leaf\", \"value\": 7}, \"right\": {\"type\": \"Leaf\", \"value\": 6}})\n    assert (mirror({\"type\": \"Node\", \"value\": 5, \"left\": {\"type\": \"Node\", \"value\": 8, \"left\": {\"type\": \"Leaf\", \"value\": 9}, \"right\": {\"type\": \"Leaf\", \"value\": 10}}, \"right\": {\"type\": \"Node\", \"value\": 4, \"left\": {\"type\": \"Leaf\", \"value\": 3}, \"right\": {\"type\": \"Leaf\", \"value\": 2}}}) ==\n                    {\"type\": \"Node\", \"value\": 5, \"left\": {\"type\": \"Node\", \"value\": 4, \"left\": {\"type\": \"Leaf\", \"value\": 2}, \"right\": {\"type\": \"Leaf\", \"value\": 3}}, \"right\": {\"type\": \"Node\", \"value\": 8, \"left\": {\"type\": \"Leaf\", \"value\": 10}, \"right\": {\"type\": \"Leaf\", \"value\": 9}}})\n\nassertions()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "hello_goodbye",
+    "language": "py",
+    "prompt": "# hello : String -> String\n# Greets you hello!\ndef hello(s):\n    return \"Hello \" + s + \"!\"\n\n\n# goodbye : String -> String \n# Greets you goodbye!\ndef goodbye(s):\n    return \"Goodbye \" + s + \"!\"\n\n# hello_goodbye : [List-of String] -> [List-of String]\n# Greets everyone hello and goodbye.\ndef hello_goodbye(l):\n    return double_do_it(hello, goodbye, l)\n\n# double_do_it : helper for hello_goodbye. Applies both defs to each item in the list \n# and returns a new list with the output of both defs.\ndef double_do_it(f, g, l):",
+    "doctests": "original",
+    "original": "python-prompts\\hello_goodbye.py",
+    "prompt_terminology": "verbatim",
+    "tests": "import math\ndef test():\n    assert (hello_goodbye([]) == [])\n    assert (hello_goodbye([\"Alice\", \"Bob\"]) == [\"Hello Alice!\", \"Goodbye Alice!\", \"Hello Bob!\", \"Goodbye Bob!\"])\n    assert (double_do_it(goodbye, hello, [\"Alice\", \"Bob\"]) == [\"Goodbye Alice!\", \"Hello Alice!\", \"Goodbye Bob!\", \"Hello Bob!\"])\n    assert(double_do_it(lambda x: math.sqrt(x), lambda x: math.pow(x, 2), [4, 9, 16]) == [2, 16, 3, 81, 4, 256])\n\ntest()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "points_and_lines",
+    "language": "py",
+    "prompt": "import math\n\n# A Point on a cartesian plane\n# It is represented by a {\"type\": \"Points\", \"x\": <Number>,  \"y\": <Number>}\ndef Point(x, y):\n    return {\"type\": \"Point\", \"x\": x, \"y\": y}\n\n\n# A Line between two points\n# It is represented by a {\"type\": \"Line\", \"start\": <Point>,  \"end\": <Point>}\ndef Line(start, end):\n    return {\"type\": \"Line\", \"start\": start, \"end\": end}\n\n\n# Computes the manhattan distance that a line covers\n# manhattan distance = |x_1 - x_2| + |y_1 - y_2|\ndef manhattan_distance(l):",
+    "doctests": "original",
+    "original": "python-prompts\\points_and_lines.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def test():    \n    assert (manhattan_distance(Line(Point(0, 0), Point(4, 3))) == 7)\n    assert (manhattan_distance(Line(Point(1, 3), Point(4, 3))) == 3)\n    assert (manhattan_distance(Line(Point(4, 2), Point(4, 3))) == 1)\n    assert (manhattan_distance(Line(Point(5, 8), Point(4, 3))) == 6)\n    assert (manhattan_distance(Line(Point(7, 0), Point(7, -5))) == 5)\n    assert (manhattan_distance(Line(Point(4, 0), Point(-4, 0))) == 8)\n\ntest()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "series",
+    "language": "py",
+    "prompt": "# A Computable is represented as a dictionary with two fields: 'value' and 'func'\n# It represents: Computable of (X * (X -> X))\ndef createComputable(value, func):\n    return {\n        \"value\":  value,\n        \"func\": func\n    }\n\n\n# update: Runs the computable to make the next computable in the series\ndef update(c):",
+    "doctests": "original",
+    "original": "python-prompts\\series.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def add_one(x):\n    return x + 1\n\n\ndef repeat_string(s):\n    return s + s\n\n\ndef divide_2(x):\n    return x / 2\n\n\n# Test Computables\nzero_add_one = createComputable(5, add_one)\none_add_one = update(zero_add_one)\ntwo_add_one = update(one_add_one)\nzero_repeat_string = createComputable(\"hi\", repeat_string)\none_repeat_string = update(zero_repeat_string)\ntwo_repeat_string = update(one_repeat_string)\nzero_divide_2 = createComputable(40, divide_2)\none_divide_2 = update(zero_divide_2)\ntwo_divide_2 = update(one_divide_2)\n\ndef test():\n    assert (update(zero_add_one)[\"value\"] == 6)\n    assert (update(one_add_one)[\"value\"] == 7)\n    assert (update(two_add_one)[\"value\"] == 8)\n    assert (update(zero_repeat_string)[\"value\"] == \"hihi\")\n    assert (update(one_repeat_string)[\"value\"] == \"hihihihi\")\n    assert (update(two_repeat_string)[\"value\"] == \"hihihihihihihihi\")\n    assert (update(zero_divide_2)[\"value\"] == 20)\n    assert (update(one_divide_2)[\"value\"] == 10)\n    assert (update(two_divide_2)[\"value\"] == 5)\n\n\n# Run tests\ntest()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "shapes",
+    "language": "py",
+    "prompt": "# A Shape can be a table like:\n# Circle: {\"kind\": \"Circle\", \"radius\"=<number>}\n# Rectangle: {\"kind\": Rectangle\", \"width\"=<number>, \"height\": <number>}\n# Triangle: {\"kind\": \"Triangle\", \"side1\"=<number>, \"side2\": <number>, \"side3\": <number>}\n\n# Computes the perimeter of a circle\ndef circle_perimeter(c):\n    return 6.28 * c[\"radius\"]\n\n\n# Computes the perimeter of a rectangle\ndef rectangle_perimeter(r):\n    return 2.0 * r[\"width\"] + 2.0 * r[\"height\"]\n\n\n# Computes the perimeter of a triangle\ndef triangle_perimeter(t):\n    return t[\"side1\"] + t[\"side2\"] + t[\"side3\"]\n\n\n# Computes the perimeter of any Shape\ndef shape_perimeter(s):",
+    "doctests": "original",
+    "original": "python-prompts\\shapes.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def test():\n    assert (shape_perimeter({\"kind\": \"Circle\", \"radius\": 2.0}) == 12.56)\n    assert (shape_perimeter({\"kind\": \"Rectangle\", \"width\": 2.0, \"height\": 4.0}) == 12.0)\n    assert (shape_perimeter({\"kind\": \"Triangle\", \"side1\": 3.0, \"side2\": 3.0, \"side3\": 3.0}) == 9.0)\n\ntest()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "social_time",
+    "language": "py",
+    "prompt": "from enum import Enum\n# A CallType is one of:\n# \"zoom\"\n# \"teams\"\n# \"phone\"\n# Interpretation: a type of call\nCallTypes = Enum(\"CallTypes\", [\"Zoom\", \"Teams\", \"Phone\"])\n\n# An Event is either a Call, Mtg, or Alone\n# An Alone is a {\"type\": \"Alone\", \"duration\": <number>,  \"description\": <string>}\n# A Mtg is a {\"type\": \"Mtg\", \"duration\": <number>,  \"description\": <string>, \"attendees\": <list>}\n# A Call is a {\"type\": \"Call\", \"CallType\": <CallType>, \"duration\": <number>,  \"description\": <string>, \"attendees\": <list>}\n\n# social-time : gets the duration of calls and meetings; 0 for alone\ndef social_event_time(e):\n    if e[\"type\"] == \"Alone\":\n        return 0\n    else:\n        return e[\"duration\"]\n\n# social-time : how much time was spent on calls and meetings?\ndef social_time(events):",
+    "doctests": "original",
+    "original": "python-prompts\\social_time.py",
+    "prompt_terminology": "verbatim",
+    "tests": "ex_zoom_doc = { \"type\": \"Call\", \"CallType\": CallTypes.Zoom, \"description\": \"Doctor appointment\", \"attendees\": [\"Dr. Zoidberg\"], \"duration\": 22 }\nex_teams_office = { \"type\": \"Call\", \"CallType\": CallTypes.Teams, \"description\": \"Office hours\", \"attendees\": [\"Mike\", \"Tajel\"], \"duration\": 7}\nex_phone_spam = { \"type\": \"Call\", \"CallType\": CallTypes.Phone, \"description\": \"Spam\", \"attendees\": [\"unknown\"], \"duration\": 1 }\n\nex_mtg_study = { \"type\": \"Mtg\", \"duration\": 62, \"attendees\": [\"Rachel\", \"Ross\", \"Joey\", \"Phoebe\", \"Chandler\", \"Monica\"], \"description\": \"Study group\" }\nex_mtg_advisor = { \"type\": \"Mtg\", \"duration\": 28, \"attendees\": [\"Ali\"], \"description\": \"Research meeting\" }\n\nex_alone_lunch = { \"type\": \"Alone\", \"duration\": 34, \"description\": \"lunch\" }\nex_alone_reading = { \"type\": \"Alone\", \"duration\": 25, \"description\": \"Reading Infinite Jest\" }\n\ndef test():\n    assert (social_time([]) == 0)\n    assert (social_time([ex_zoom_doc, ex_teams_office, ex_phone_spam, ex_mtg_study, ex_mtg_advisor, ex_alone_lunch, ex_alone_reading]) == 120)\n\ntest()\n",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  }
+]

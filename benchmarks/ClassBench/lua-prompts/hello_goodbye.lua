@@ -10,6 +10,12 @@ local function goodbye(s)
     return "Goodbye " .. s .. "!"
 end
 
+-- hello_goodbye : [List-of String] -> [List-of String]
+-- Greets everyone hello and goodbye.
+local function hello_goodbye(l)
+    return double_do_it(hello, goodbye, l)
+end
+
 -- double_do_it : helper for hello_goodbye. Applies both functions to each item in the list 
 -- and returns a new list with the output of both functions.
 local function double_do_it(f, g, l)
@@ -20,12 +26,6 @@ local function double_do_it(f, g, l)
         table.insert(result, g(v))
     end
     return result
-end
-
--- hello_goodbye : [List-of String] -> [List-of String]
--- Greets everyone hello and goodbye.
-local function hello_goodbye(l)
-    return double_do_it(hello, goodbye, l)
 end
 
 -- <tests>

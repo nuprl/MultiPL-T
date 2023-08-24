@@ -8,7 +8,8 @@ TEST_TOKEN = "<tests>"
 lang_to_stop_tokens = {
     "rkt": ["\n(define ", "\n#|", "\n;","\n("],
     "ocaml": ["\n\n", "\n(*", "\ntype"],
-    "lua":  ["\nlocal", "\nfunction", "\n--", "\n\n"]
+    "lua":  ["\nlocal", "\nfunction", "\n--", "\n\n"],
+    "py": ["\ndef", "\n#", "\nif", "\nclass"]
 }
 
 def get_prompt(code):

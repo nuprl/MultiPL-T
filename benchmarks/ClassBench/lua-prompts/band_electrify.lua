@@ -49,6 +49,11 @@ local function electrify_instrument(i)
     end
 end
 
+-- A band is either a OnePieceBand, a TwoPieceBand, or a ThreePieceBand
+-- A OnePieceBand can be represented as a {tag = "OnePieceBand", instrument = <instrument>}
+-- A TwoPieceBand can be represented as a {tag = "TwoPieceBand", instrument1 = <instrument>, instrument2 = <instrument>}
+-- A ThreePieceBand can be represented as a {tag = "ThreePieceBand", instrument1 = <instrument>, instrument2 = <instrument>, instrument3 = <instrument>}
+
 -- electrify_band: Makes this an electric band!
 local function electrify_band(b)
     -- <solution>
