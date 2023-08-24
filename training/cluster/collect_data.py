@@ -25,7 +25,7 @@ if __name__ == "__main__":
                 with open(f, "r") as fp:
                     for (i, row) in enumerate(fp):
                         if i == 1:
-                            output[training_items].append(row.strip())
+                            output.append(row.strip())
             with open(out_dir / f"rkt_{training_items}", "w") as fp:
                 writer = csv.writer(fp)
                 writer.writerow(["Dataset", "Pass@k", "Estimate", "NumProblems", "MinCompletions", "MaxCompletions"])
