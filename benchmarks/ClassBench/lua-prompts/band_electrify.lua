@@ -69,7 +69,7 @@ local function electrify_band(b)
 end
 
 -- <tests>
-lu = require('luaunit')
+local lu = require('luaunit')
 local function assertions()
     lu.assertEquals(
         electrify_band({ tag = "OnePieceBand", instrument = Guitar("Stratocaster", "red", true) }).instrument.electric,
