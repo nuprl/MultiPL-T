@@ -1,0 +1,82 @@
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-3.4.4
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2023-08-25T14:21:56Z"
+  labels:
+    app: {{name}}
+  name: {{name}}
+spec:
+  containers:
+  - args:
+    - --model-id
+    - /data
+    - --max-total-tokens
+    - {{max_total_tokens}}
+    - --max-concurrent-requests
+    - {{max_concurrent_requests}}
+    image: ghcr.io/huggingface/text-generation-inference:1.0.2
+    name: text-generation-inference
+    ports:
+    - containerPort: 80
+      hostPort: {{host_port}}
+    resources: {}
+    securityContext:
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+    volumeMounts:
+    - mountPath: /data
+      name: model-path
+  - args:
+    - --prompt-file
+    - /data/{{prompt_file}}
+    - --output-file
+    - /data/{{output_file}}
+    - --log-file
+    - /data/log.out
+    - --server-url
+    - http://127.0.0.1:{{host_port}}/
+    - --num-connections
+    - {{num_connections}}
+    - --attempt-limit
+    - {{attempt_limit}}
+    - --num-runners
+    - {{num_runners}}
+    image: localhost/local/rs-completion-client:latest
+    name: completion-client
+    resources: {}
+    securityContext:
+      capabilities:
+        drop:
+        - CAP_MKNOD
+        - CAP_NET_RAW
+        - CAP_AUDIT_WRITE
+    stdin: true
+    tty: true
+    volumeMounts:
+    - mountPath: /data
+      name: data-dir
+    - mountPath: /tmp
+      name: tmp-dir
+  restartPolicy: Never
+  volumes:
+  - hostPath:
+      path: {{data_dir}}
+      type: Directory
+    name: data-dir
+  - hostPath:
+      path: /tmp
+      type: Directory
+    name: tmp-dir
+  - hostPath:
+      path: {{model_dir}}
+      type: Directory
+    name: model-dir
+status: {}
+
