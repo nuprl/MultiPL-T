@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser.add_argument("--num-connections", help="Number of connections", default=100)
     parser.add_argument("--num-runners", help="Number of runners", default=80)
     parser.add_argument("--attempt-limit", help="Attempt limit", default=20)
+    parser.add_argument("--gpu", help="GPU number", default=0)
 
     args = parser.parse_args()
     with open(args.template) as f:
