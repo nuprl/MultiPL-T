@@ -8,7 +8,7 @@ pushd ../../MultiPL-E
 
 for lang in $LANGS; do
   echo "Translating $lang"
-  BASE_LANGDIR=../analysis/prompt_ablations/base_prompts/$lang
+  BASE_LANGDIR=../analysis/prompt_ablations/base_prompts/base_$lang
   BASE_PROMPTPATH=../analysis/prompt_ablations/base_prompts/$lang-prompts.jsonl
   echo "Base lang dir: $BASE_LANGDIR"
   python3 automodel.py \
@@ -20,7 +20,7 @@ for lang in $LANGS; do
   --temperature 0.8 \
   --output-dir $BASE_LANGDIR
 
-  PROMPT_LANGDIR=../analysis/prompt_ablations/canonical_comment_prompts/$lang
+  PROMPT_LANGDIR=../analysis/prompt_ablations/canonical_comment_prompts/canonical_$lang
   PROMPT_PROMPTPATH=../analysis/prompt_ablations/canonical_comment_prompts/$lang-prompts.jsonl
   echo "Prompt lang dir: $PROMPT_LANGDIR"
   python3 automodel.py \
