@@ -1,5 +1,5 @@
 # THESE PROBABLY DON'T NEED TO BE CHANGED
-NAME=completion-pod # what you want to call the pod
+NAME=completion-pod# what you want to call the pod
 TEMPLATE=completion-pod.yaml.mustache # the template to use for kubernetes file
 MAX_TOTAL_TOKENS=8192 # max total tokens for the model (context size)
 MAX_CONCURRET_REQUESTS=500 # max concurrent requests for the server 
