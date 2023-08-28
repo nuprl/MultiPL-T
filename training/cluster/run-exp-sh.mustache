@@ -1,6 +1,6 @@
-PASS_K=/home/johngouwar/repos/MultiPL-E/pass_k.py
+PASS_K={{pass_k}}
 
-CUDA_VISIBLE_DEVICES=0 python3 train.py 
+CUDA_VISIBLE_DEVICES={{gpu_num}} python3 train.py 
 
 for check in ./checkpoint*; do
     check_name=$(basename $check)
