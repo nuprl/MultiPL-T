@@ -21,7 +21,8 @@ python3 $SCRIPT_PATH \
     --name $MODEL \
     --use-local \
     --dataset $DATASET_PATH \
-    --batch-size 20 \
+    --batch-size 40 \
     --temperature 0.2 \
+    --completion-limit 20 \
     --output-dir "$MODEL/completions"\
     --tokenizer_name $TOKENIZER
