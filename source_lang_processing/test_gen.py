@@ -131,6 +131,7 @@ for i, ex in enumerate(ds):
         total_assertions += len(assertions)
 
         passing_assertions = set(existing_tests[i])
+        base_len = len(passing_assertions)
         for assertion in assertions:
             if exec_test(args.server, code, assertion):
                 passing_assertions.add(assertion)
@@ -138,7 +139,7 @@ for i, ex in enumerate(ds):
         total_passing_assertions += len(passing_assertions)
 
         ex_print(
-            f"Passing assertions (len: {len(passing_assertions)}): {passing_assertions}")
+            f"Passing assertions (len: {len(passing_assertions)}, base len: {base_len}): {passing_assertions}")
 
         if len(passing_assertions) == 0:
             ex_print("Skipping example. No passing assertions...")
