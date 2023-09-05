@@ -66,9 +66,7 @@ while True:
         new_ds["coverage"] = list(dataset["coverage"])
         new_ds["difficulty"] = list(dataset["difficulty"])
         new_ds["problem_name_coded"] = list(dataset["problem_name_coded"])
-        new_ds["problem_name_worded"] = list(dataset["problem_name_worded"])
-        new_ds["full_code"] = list(dataset["full_code"])
-        new_ds["signature"] = list(dataset["signature"])
+        new_ds["topics"] = list(dataset["topics"])
         new_ds["prompt"] = list(dataset["prompt"])
         new_ds["imports"] = list(dataset["imports"])
         new_ds["was_merged"] = list(dataset["was_merged"])
@@ -89,10 +87,8 @@ while True:
         coverage = req["coverage"]
         id_ = req["id"]
         difficulty = req["difficulty"]
+        topics = req["topics"]
         problem_name_coded = req["problem_name_coded"]
-        problem_name_worded = req["problem_name_worded"]
-        full_code = req["full_code"]
-        signature = req["signature"]
         prompt = req["prompt"]
         imports = req["imports"]
         was_merged = req["was_merged"]
@@ -106,9 +102,7 @@ while True:
         new_ds["tests"].append(tests)
         new_ds["difficulty"].append(difficulty)
         new_ds["problem_name_coded"].append(problem_name_coded)
-        new_ds["problem_name_worded"].append(problem_name_worded)
-        new_ds["full_code"].append(full_code)
-        new_ds["signature"].append(signature)
+        new_ds["topics"].append(topics)
         new_ds["prompt"].append(prompt)
         new_ds["imports"].append(imports)
         new_ds["was_merged"].append(was_merged)
