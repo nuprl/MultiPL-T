@@ -92,12 +92,17 @@ for i, ex in enumerate(ds):
 
     prompts = []
     names = []
+    existing_tests = []
 
     for ex in batch:
         code = ex["content"]
+        e_tests = []
+        if "tests" in ex and isinstance(ex["tests"], list):
+            e_tests = ex["tests"]
+        existing_tests.append(e_tests)
         name = get_fn_name(code)
         names.append(name)
-        tests_start = assert_block_start(name)
+        tests_start = assert_block_start(name, existing_tests=e_tests)
         code_with_tests = code + tests_start
         this_prompts = [code_with_tests] * args.num_comps
         prompts.extend(this_prompts)
@@ -125,7 +130,7 @@ for i, ex in enumerate(ds):
 
         total_assertions += len(assertions)
 
-        passing_assertions = set()
+        passing_assertions = set(existing_tests[i])
         for assertion in assertions:
             if exec_test(args.server, code, assertion):
                 passing_assertions.add(assertion)
