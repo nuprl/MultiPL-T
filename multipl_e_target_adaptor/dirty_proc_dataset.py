@@ -58,6 +58,8 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", type=str,
                         default="nuprl/stack-dedup-python-testgen-starcoder-filter-v2",
                         help="Dataset of functions with tests to process")
+
+    parser.add_argument("--output", type=str, default="stack-clean-python", help="Output directory")
     parser.add_argument("--min_coverage", type=float,
                         default=90, help="Minimum coverage of tests")
     parser.add_argument("--content_col", type=str,
@@ -66,7 +68,7 @@ if __name__ == "__main__":
     ds = datasets.load_dataset(args.dataset, split="train")
     dir_of_this_script = os.path.dirname(os.path.realpath(__file__))
     ds = ds.filter(lambda x: x["coverage"] >= args.min_coverage)
-    path = f"{dir_of_this_script}/stack-clean-python"
+    path = f"{dir_of_this_script}/{args.output}"
     print(f"Writing {len(ds)} rows to {path}")
     ds.map(write_row_to_file(path, args.content_col),
            load_from_cache_file=False)
