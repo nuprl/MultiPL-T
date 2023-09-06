@@ -28,5 +28,5 @@ singularity exec --home tmp_home:/home/$USER \
   $MULTIPLE_IMAGE \
   python3 /code/main.py \
   --dir /dataset --output-dir /dataset --recursive
-python3 $PASS_K $CHECKPOINT/eval | tee passk_$CHECKPOINT.csv 
+python3 $PASS_K $CHECKPOINT/completions | tee passk_$CHECKPOINT.csv 
 
