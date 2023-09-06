@@ -172,8 +172,8 @@ for i, ex in enumerate(ds):
         ex_print(
             f"Sent example {ex['id']} to server. "
             + f"Example pass rate: {passing_examples / e_i * 100:.2f}%. "
-            + f"Assertion pass rate: {len(passing_assertions) / len(assertions) * 100:.2f}%. "
-            + f"Overall assertion pass rate: {total_passing_assertions / total_assertions * 100:.2f}%."
+            + f"Assertion pass rate: {len(passing_assertions) / max(1, len(assertions)) * 100:.2f}%. "
+            + f"Overall assertion pass rate: {total_passing_assertions / max(1, total_assertions) * 100:.2f}%."
         )
 
     batch = []
