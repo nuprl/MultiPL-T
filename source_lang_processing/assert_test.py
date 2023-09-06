@@ -28,8 +28,9 @@ def assert_block_start_prelude(func_name):
     return f"\n\n{prompt}"
 
 
-def assert_block_start(func_name):
-    return f"{assert_block_start_prelude(func_name)}assert {func_name}("
+def assert_block_start(func_name, existing_tests=[]):
+    ex_tests_str = "\n".join(existing_tests)
+    return f"{assert_block_start_prelude(func_name)}{ex_tests_str}\nassert {func_name}("
 
 
 if __name__ == "__main__":
@@ -42,6 +43,8 @@ if __name__ == "__main__":
     assert not bleh(1, 2) == 1, "message"
     assert bleh(a=1, 2) == 1
     """
+    # test assert_block_start
+    print(assert_block_start("bleh", ["assert 1 == 1", "assert 2 == 2"]))
     assert_bytes = bytes(assert_code, "utf-8")
     assert_tree = global_parser.parse(assert_bytes)
     print("TREEEEEEE")

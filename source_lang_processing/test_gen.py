@@ -92,12 +92,17 @@ for i, ex in enumerate(ds):
 
     prompts = []
     names = []
+    existing_tests = []
 
     for ex in batch:
         code = ex["content"]
+        e_tests = []
+        if "tests" in ex and isinstance(ex["tests"], list):
+            e_tests = ex["tests"]
+        existing_tests.append(e_tests)
         name = get_fn_name(code)
         names.append(name)
-        tests_start = assert_block_start(name)
+        tests_start = assert_block_start(name, existing_tests=e_tests)
         code_with_tests = code + tests_start
         this_prompts = [code_with_tests] * args.num_comps
         prompts.extend(this_prompts)
@@ -125,7 +130,8 @@ for i, ex in enumerate(ds):
 
         total_assertions += len(assertions)
 
-        passing_assertions = set()
+        passing_assertions = set(existing_tests[i])
+        base_len = len(passing_assertions)
         for assertion in assertions:
             if exec_test(args.server, code, assertion):
                 passing_assertions.add(assertion)
@@ -133,7 +139,7 @@ for i, ex in enumerate(ds):
         total_passing_assertions += len(passing_assertions)
 
         ex_print(
-            f"Passing assertions (len: {len(passing_assertions)}): {passing_assertions}")
+            f"Passing assertions (len: {len(passing_assertions)}, base len: {base_len}): {passing_assertions}")
 
         if len(passing_assertions) == 0:
             ex_print("Skipping example. No passing assertions...")
@@ -166,8 +172,8 @@ for i, ex in enumerate(ds):
         ex_print(
             f"Sent example {ex['id']} to server. "
             + f"Example pass rate: {passing_examples / e_i * 100:.2f}%. "
-            + f"Assertion pass rate: {len(passing_assertions) / len(assertions) * 100:.2f}%. "
-            + f"Overall assertion pass rate: {total_passing_assertions / total_assertions * 100:.2f}%."
+            + f"Assertion pass rate: {len(passing_assertions) / max(1, len(assertions)) * 100:.2f}%. "
+            + f"Overall assertion pass rate: {total_passing_assertions / max(1, total_assertions) * 100:.2f}%."
         )
 
     batch = []
