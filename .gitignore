@@ -163,4 +163,4 @@ cython_debug/
 *.code-workspace 
 
 # project speicifc
-stack-clean-python/
+stack-clean-python*/
