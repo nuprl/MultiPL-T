@@ -14,6 +14,7 @@ for lang in $LANGS; do
       --lang humaneval_to_$lang.py\
       --output $PROMPTPATH \
       --originals ../../multipl_e_target_adaptor/stack-clean-python/ \
+      --skip-failing-tests \
       --add-canonical-to-prompt
 
     mkdir -p $LANGDIR
@@ -24,7 +25,8 @@ for lang in $LANGS; do
     python3 prepare_prompts_json.py \
       --lang humaneval_to_$lang.py\
       --output ../../analysis/prompt_ablations/base_prompts/$lang-prompts.jsonl \
-      --originals ../../multipl_e_target_adaptor/stack-clean-python/
+      --originals ../../multipl_e_target_adaptor/stack-clean-python/ \
+      --skip-failing-tests
     mkdir -p ../../analysis/prompt_ablations/base_prompts/base_$lang
 done
 
