@@ -2,7 +2,7 @@
 # Usage: gen_prompts.sh <lang> <root>
 # This works best if your directory structure is like this:
 # ROOT
-#   multipl-t/
+#   MultiPL-T/
 #   MultiPL-E/
 # TODO: use MultiPL-E as a submodule
 
@@ -26,7 +26,7 @@ pushd $SCRIPT_DIR
 if [[ $STAGES == *"convert"* ]]; then
     echo "Converting programs..."
     rm -fr ./stack-clean-python
-    python3 $ROOT/multipl-t/multipl_e_target_adaptor/dirty_proc_dataset.py 
+    python3 $ROOT/MultiPL-T/multipl_e_target_adaptor/dirty_proc_dataset.py 
 fi
 
 # MultiPL-E relies a bunch on relative pathes, so it's often easier to just
@@ -37,8 +37,8 @@ if [[ $STAGES == *"translate"* ]]; then
     echo "Translating prompts..."
     python3 prepare_prompts_json.py \
       --lang humaneval_to_$LANG.py\
-      --output ../../multipl-t/multipl_e_target_adaptor/$LANG-prompts.jsonl \
-      --originals ../../multipl-t/multipl_e_target_adaptor/stack-clean-python/ \
+      --output ../../MultiPL-T/multipl_e_target_adaptor/$LANG-prompts.jsonl \
+      --originals ../../MultiPL-T/multipl_e_target_adaptor/stack-clean-python/ \
       --skip-failing-tests \
       --add-canonical-to-prompt
     popd
@@ -47,7 +47,7 @@ fi
 # This actually generates the completions 
 if [[ $STAGES == *"generate"* ]]; then
   pushd $ROOT/MultiPL-E/
-  DATASET_LEN=$(wc -l < ../multipl-t/$LANG-prompts.jsonl)
+  DATASET_LEN=$(wc -l < ../MultiPL-T/$LANG-prompts.jsonl)
   ITEMS_PER_GPU=$((DATASET_LEN / NUM_GPUS))
   DATASET_LEN_ROUNDED=$((ITEMS_PER_GPU * NUM_GPUS))
   LEFT_OVER=$((DATASET_LEN - DATASET_LEN_ROUNDED))
@@ -69,7 +69,7 @@ if [[ $STAGES == *"generate"* ]]; then
       NVIDIA_VISIBLE_DEVICES=$i CUDA_VISIBLE_DEVICES=$i python3 automodel.py \
           --name /home/arjun/models/starcoderbase \
           --use-local \
-          --dataset ../multipl-t/multipl_e_target_adaptor/$LANG-prompts.jsonl \
+          --dataset ../MultiPL-T/multipl_e_target_adaptor/$LANG-prompts.jsonl \
           --completion-limit 50 \
           --batch-size 50 \
           --temperature 0.8 \
