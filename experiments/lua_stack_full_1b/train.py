@@ -6,10 +6,10 @@ def gen_from_iterable_dataset(iterable_ds):
     yield from iterable_ds
     
 # yields approx num_steps as lua_full_1b (3782 steps x epoch on 1 gpu)
-split_size = 2800
-scheme_data = load_dataset("bigcode/the-stack", 
+split_size = 3900
+scheme_data = load_dataset("bigcode/starcoderdata", 
                            split="train", 
-                           data_dir=f"data/lua", 
+                           data_dir="lua", 
                            streaming=True)
 scheme_data = scheme_data.take(split_size)
 TRAIN_DATA = Dataset.from_generator(partial(gen_from_iterable_dataset, scheme_data))
@@ -17,9 +17,7 @@ TRAIN_DATA = Dataset.from_generator(partial(gen_from_iterable_dataset, scheme_da
 # save for reproducibility
 TRAIN_DATA.save_to_disk("./lua_train")
 
-open("./null_data.jsonl", "w").close()
-
-TEST_DATA = "./null_data.jsonl"
+TEST_DATA = "../../MultiPL-E/prompts/humaneval-lua-reworded.jsonl"
 MODEL = "bigcode/starcoderbase-1b"
 
 # lr=3e-5, batch_size=8, warmup_steps=10, epochs=6
