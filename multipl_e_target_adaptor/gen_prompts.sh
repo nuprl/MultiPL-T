@@ -39,6 +39,7 @@ if [[ $STAGES == *"translate"* ]]; then
       --lang humaneval_to_$LANG.py\
       --output ../../multipl-t/multipl_e_target_adaptor/$LANG-prompts.jsonl \
       --originals ../../multipl-t/multipl_e_target_adaptor/stack-clean-python/ \
+      --skip-failing-tests \
       --add-canonical-to-prompt
     popd
 fi
