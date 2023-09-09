@@ -47,7 +47,7 @@ fi
 # This actually generates the completions 
 if [[ $STAGES == *"generate"* ]]; then
   pushd $ROOT/MultiPL-E/
-  DATASET_LEN=$(wc -l < ../MultiPL-T/$LANG-prompts.jsonl)
+  DATASET_LEN=$(wc -l < ../MultiPL-T/multipl_e_target_adaptor/$LANG-prompts.jsonl)
   ITEMS_PER_GPU=$((DATASET_LEN / NUM_GPUS))
   DATASET_LEN_ROUNDED=$((ITEMS_PER_GPU * NUM_GPUS))
   LEFT_OVER=$((DATASET_LEN - DATASET_LEN_ROUNDED))
