@@ -7,7 +7,7 @@
 # TODO: use MultiPL-E as a submodule
 
 if [ $# -lt 3 ]; then
-  echo "Usage: gen_prompts.sh <lang> <root (probably home dir)> <out> [optional: num gpus] [optional: stages to run]"
+  echo "Usage: gen_prompts.sh <lang> <root (probably home dir)> <out> [optional: num gpus] [optional: stages to run] [optional: model name]"
     exit 1
 fi
 
@@ -16,6 +16,7 @@ ROOT=$2
 OUT=$3
 NUM_GPUS=${4:-1}
 STAGES=${5:-"convert,translate,generate"}
+MODEL_NAME=${6:-"bigcode/starcoderbase"}
 
 # cd to directory of this script
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -67,7 +68,7 @@ if [[ $STAGES == *"generate"* ]]; then
       fi
       echo "Starting GPU $i at $START_INDEX... Will stop at $((START_INDEX + ITEMS - 1))."
       NVIDIA_VISIBLE_DEVICES=$i CUDA_VISIBLE_DEVICES=$i python3 automodel.py \
-          --name /home/arjun/models/starcoderbase \
+          --name $MODEL_NAME \
           --use-local \
           --dataset ../MultiPL-T/multipl_e_target_adaptor/$LANG-prompts.jsonl \
           --completion-limit 50 \
