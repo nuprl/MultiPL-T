@@ -41,6 +41,8 @@ if [[ $STAGES == *"translate"* ]]; then
       --output ../../MultiPL-T/multipl_e_target_adaptor/$LANG-prompts.jsonl \
       --originals ../../MultiPL-T/multipl_e_target_adaptor/stack-clean-python/ \
       --skip-failing-tests \
+      --prompt-terminology reworded \
+      --doctests transform \
       --add-canonical-to-prompt
     popd
 fi
