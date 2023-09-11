@@ -2,10 +2,11 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
 
-# ensure_source: Bytes Bytes -> Boolean
+# ensure_source: Bytes Bytes Bytes -> Boolean
 # Verifies the identity of an author who sent the message.
 # Returns True if the author did write the message
 def ensure_source(message: bytes, signature: bytes, author_public_key: bytes) -> bool:
+    # <solution>
     verifier = pkcs1_15.new(author_public_key)
     try: 
         verifier.verify(message, signature)
