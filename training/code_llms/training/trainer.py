@@ -76,9 +76,7 @@ def train(model, evaluate, train_dataloader, gradient_accumulation_steps, epochs
 
         if is_approx_end_of_epoch(max_steps, epochs, step):
             checkpoint_dir = Path(f"checkpoint_{step}")
-            evaluate(checkpoint_dir, step)
             save_checkpoint(model, checkpoint_dir)
-
             evaluate(checkpoint_dir, step)
 
         # Log metrics to both stderr and TensorBoard.
