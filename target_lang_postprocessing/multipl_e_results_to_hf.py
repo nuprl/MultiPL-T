@@ -146,7 +146,6 @@ if args.no_threading:
         if has_at_least_one_passing:
             num_has_at_least_one_passing += 1
 else:
-    assert scorer is None and not args.strategy == "dedup", "scorer not supported with threading"
     batch = []
     iter_size = len(list(make_path_iterator()))
     for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
