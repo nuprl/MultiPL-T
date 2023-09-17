@@ -228,7 +228,7 @@ new_ds = datasets.Dataset.from_dict(
         "tests": tests,
         "edu_score": edu_scores
     })
-new_ds.push_to_hub(args.name)
+new_ds.push_to_hub(args.name, private=True)
 
 # stats
 print(" #### stats #### ")
