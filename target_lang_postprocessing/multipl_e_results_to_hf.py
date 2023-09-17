@@ -18,7 +18,8 @@ pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
 pa.add_argument("--strategy", type=str, default="dedup")
 pa.add_argument("--global_dedup", action="store_true")
-pa.add_argument("--global_dedup_factor", type=float, default=1.0)
+pa.add_argument("--global_dedup_prob", type=float, default=0.35,
+                help="the probability that a pair of examples will not be deduplicated, despite being similar. higher results in a more aggressive and slower deduplication.")
 pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
 pa.add_argument("--score_batch", type=int, default=32)
@@ -159,10 +160,16 @@ else:
             batch = []
 
 
+def compute_rounds(n, group_size, wanted_prob):
+    p = (group_size - 1) / (n - 1)
+    k = math.ceil(math.log(1 - wanted_prob) / math.log(1 - p))
+    return k
+
+
 if args.global_dedup:
     dedup_group_size = min(len(solutions), 200)
-    dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
-                       * args.global_dedup_factor)
+    dedup_rounds = compute_rounds(
+        len(solutions), dedup_group_size, args.global_dedup_prob)
     prev_num_sols = len(solutions)
     for rnd in progressbar(range(dedup_rounds)):
         print(
