@@ -37,12 +37,13 @@ num_has_at_least_one_passing = 0
 
 
 class Solution:
-    def __init__(self, code, score, original_id, pass_rate, tests):
+    def __init__(self, code, score, original_id, pass_rate, tests, failing=None):
         self.code = code
         self.score = score
         self.original_id = original_id
         self.pass_rate = pass_rate
         self.tests = tests
+        self.failing = failing
 
 
 solutions: List[Solution] = []
@@ -77,6 +78,7 @@ def process_path(path):
     sols = []
     num_failed = 0
     num_passed = 0
+    failing = None
     for res in results:
         if res["exit_code"] == 0:
             num_passed += 1
@@ -86,6 +88,8 @@ def process_path(path):
             sols.append(sol)
         else:
             num_failed += 1
+            if failing is None:
+                failing = clean_sol_prompt(args.lang, res["program"])
 
     pass_rate = num_passed / (num_passed + num_failed)
 
@@ -121,7 +125,7 @@ def process_path(path):
     obj_sols: List[Solution] = []
     for sol, score in zip(sols, edu_scores):
         obj_sols.append(
-            Solution(sol, score, original_id, pass_rate, func_tests))
+            Solution(sol, score, original_id, pass_rate, func_tests, failing))
 
     return obj_sols, num_passed > 0
 
@@ -213,6 +217,7 @@ if args.strategy == "dedup" and not args.no_score:
 
 
 solution_codes = []
+failing_codes = []
 edu_scores = []
 pass_rates = []
 original_ids = []
@@ -220,6 +225,7 @@ tests = []
 
 for sol in solutions:
     solution_codes.append(sol.code)
+    failing_codes.append(sol.failing)
     edu_scores.append(sol.score)
     pass_rates.append(sol.pass_rate)
     original_ids.append(sol.original_id)
@@ -228,6 +234,7 @@ for sol in solutions:
 new_ds = datasets.Dataset.from_dict(
     {
         "content": solution_codes,
+        "failing_content": failing_codes,
         "pass_rate": pass_rates,
         "id": list(range(len(solutions))),
         "original_id": original_ids,
