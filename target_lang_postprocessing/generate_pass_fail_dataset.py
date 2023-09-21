@@ -43,10 +43,7 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
             passed.append(sol)
         else:
             failed.append(sol)
-            if args.lang == "lua":
-                failed_messages.append(res["stdout"])
-            else:
-                raise NotImplementedError("Only 'lua' is supported for now")
+            failed_messages.append(res["stderr"] + res["stdout"])
 
     _num_tests = None
     if args.lang == "lua":
