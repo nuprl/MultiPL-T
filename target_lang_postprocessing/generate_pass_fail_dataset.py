@@ -15,6 +15,7 @@ args = pa.parse_args()
 
 funcs_pass = []
 funcs_fail = []
+funcs_fail_messages = []
 pass_rates = []
 tests = []
 num_tests = []
@@ -34,6 +35,7 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
 
     passed = []
     failed = []
+    failed_messages = []
 
     for res in results:
         sol = clean_sol_prompt(args.lang, res["program"])
@@ -41,6 +43,10 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
             passed.append(sol)
         else:
             failed.append(sol)
+            if args.lang == "lua":
+                failed_messages.append(res["stdout"])
+            else:
+                raise NotImplementedError("Only 'lua' is supported for now")
 
     _num_tests = None
     if args.lang == "lua":
@@ -53,6 +59,7 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
     pass_rates.append(len(passed) / len(results))
     funcs_pass.append(passed)
     funcs_fail.append(failed)
+    funcs_fail_messages.append(failed_messages)
     ids.append(e_id)
 
 new_ds = datasets.Dataset.from_dict(
@@ -62,7 +69,8 @@ new_ds = datasets.Dataset.from_dict(
         "tests": tests,
         "pass_rate": pass_rates,
         "pass": funcs_pass,
-        "fail": funcs_fail
+        "fail": funcs_fail,
+        "fail_message": funcs_fail_messages,
     }
 )
 new_ds = new_ds.filter(lambda x: x["num_tests"] >= args.min_tests)
