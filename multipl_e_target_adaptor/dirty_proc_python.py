@@ -36,7 +36,7 @@ def write_row_to_file(file, content_col, no_union):
         if start_asserts != -1:
             content = content[:start_asserts]
         fixed_content = proc_content(content)
-        test_body = f"def check(candidate):\n\t{fixed_tests}\ndef test_check():\n\tcheck({entrypoint})\n"
+        test_body = f"def check(candidate):\n\t{fixed_tests}\ndef test_check():\n\tcheck({entrypoint})\ntest_check()\n"
 
         obj = {
             "name": f"{row['id']}_{entrypoint}",
