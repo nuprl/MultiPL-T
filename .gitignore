@@ -164,3 +164,4 @@ cython_debug/
 
 # project speicifc
 stack-clean-python*/
+stack-clean-python.jsonl
