@@ -64,6 +64,13 @@ def clean_luau(sol):
     return "\n".join(sol_lines)
 
 
+def clean_py(sol):
+    sol = sol[:sol.find("\ndef check(candidate)")]
+    sol_lines = sol.split("\n")
+    sol_lines = [line for line in sol_lines if line.rstrip() != ""]
+    return sol
+
+
 def clean_ml(sol):
     sol = sol[:sol.find("\nlet assertions")]
     sol_lines = sol.split("\n")

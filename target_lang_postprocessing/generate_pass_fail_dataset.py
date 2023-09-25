@@ -45,11 +45,12 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
             failed.append(sol)
             failed_messages.append(res["stderr"] + res["stdout"])
 
-    _num_tests = None
     if args.lang == "lua":
         _num_tests = tests_code.count("lu.assertEquals")
+    elif args.lang == "py":
+        _num_tests = tests_code.count("assert")
     else:
-        raise NotImplementedError("Only 'lua' is supported for now")
+        raise NotImplementedError(f"Language {args.lang} not implemented")
 
     num_tests.append(_num_tests)
     tests.append(tests_code)
