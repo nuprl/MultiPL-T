@@ -80,7 +80,7 @@ if __name__ == "__main__":
                         help="Dataset of functions with tests to process")
 
     parser.add_argument("--output", type=str,
-                        default="stack-clean-python.jsonl", help="Output file")
+                        default="py-prompts.jsonl", help="Output file")
     parser.add_argument("--min_coverage", type=float,
                         default=90, help="Minimum coverage of tests")
     parser.add_argument("--content_col", type=str,
