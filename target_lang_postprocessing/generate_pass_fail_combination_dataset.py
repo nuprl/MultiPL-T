@@ -1,6 +1,7 @@
 import datasets
 import json
 import gzip
+import re
 from pathlib import Path
 from argparse import ArgumentParser
 from progressbar import progressbar
@@ -25,11 +26,14 @@ def make_path_iterator(): return Path(args.path).glob("**/*.results.json.gz")
 
 
 r_i = 0
+RE_DIGITS = re.compile(r"\d+")
 for path in progressbar(make_path_iterator(), max_value=len(list(make_path_iterator()))):
     with gzip.open(path, "rt") as f:
         data = json.load(f)
 
-    e_id = int(path.stem.split("_")[1])
+    re_result = RE_DIGITS.search(path.stem)
+    assert re_result is not None, f"Could not find number in {path.stem}"
+    e_id = int(re_result.group(0))
     results = data["results"]
     tests_code = data["tests"]
 
