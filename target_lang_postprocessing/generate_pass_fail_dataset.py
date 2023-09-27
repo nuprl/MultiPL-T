@@ -52,7 +52,7 @@ for path in progressbar(make_path_iterator(), max_value=len(list(make_path_itera
 
     if args.lang == "lua":
         _num_tests = tests_code.count("lu.assertEquals")
-    elif args.lang == "py":
+    elif args.lang == "py" or args.lang == "luau":
         _num_tests = tests_code.count("assert")
     else:
         raise NotImplementedError(f"Language {args.lang} not implemented")
