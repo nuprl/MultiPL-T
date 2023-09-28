@@ -20,7 +20,7 @@
         [(define key (generate-cipher-key MODE))
         (define iv (generate-cipher-iv MODE))
         (define encrypted_message (encrypt MODE key iv message))]
-        (check-equal? message (decode_message key iv encrypted_message))))
+        (check-equal? (decode_message key iv encrypted_message) message)))
 
 (test_message #"A good message")
 (test_message #"A great day to live")
