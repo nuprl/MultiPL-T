@@ -10,7 +10,7 @@ CANNONICAL_LINE = "### Canonical solution below ###"
 UNIT_LINE = "### Unit tests below ###"
 
 
-def write_row_to_file(prefix, content_col):
+def write_row_to_file(prefix, content_col, no_union):
     if not os.path.exists(prefix):
         os.mkdir(prefix)
 
@@ -20,7 +20,7 @@ def write_row_to_file(prefix, content_col):
         fixed_tests = "\n\t".join(
             [t.replace(entrypoint, "candidate") for t in row["tests"]])
         content = row[content_col]
-        if content is None:
+        if content is None or (no_union and "Union" in content):
             content = row["content"]
         start_asserts = content.find("\nassert ")
         if start_asserts != -1:
@@ -64,11 +64,13 @@ if __name__ == "__main__":
                         default=90, help="Minimum coverage of tests")
     parser.add_argument("--content_col", type=str,
                         default="content", help="Column name of content")
+    parser.add_argument("--no-union", action="store_true",
+                        help="Rejects programs that have union types, samples the untyped program instead")
     args = parser.parse_args()
     ds = datasets.load_dataset(args.dataset, split="train")
     dir_of_this_script = os.path.dirname(os.path.realpath(__file__))
     ds = ds.filter(lambda x: x["coverage"] >= args.min_coverage)
     path = f"{dir_of_this_script}/{args.output}"
     print(f"Writing {len(ds)} rows to {path}")
-    ds.map(write_row_to_file(path, args.content_col),
+    ds.map(write_row_to_file(path, args.content_col, args.no_union),
            load_from_cache_file=False)

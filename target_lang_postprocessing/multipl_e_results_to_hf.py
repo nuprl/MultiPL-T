@@ -18,7 +18,8 @@ pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
 pa.add_argument("--strategy", type=str, default="dedup")
 pa.add_argument("--global_dedup", action="store_true")
-pa.add_argument("--global_dedup_factor", type=float, default=1.0)
+pa.add_argument("--global_dedup_prob", type=float, default=0.35,
+                help="the probability that a pair of examples will not be deduplicated, despite being similar. higher results in a more aggressive and slower deduplication.")
 pa.add_argument("--lang", type=str, required=True)
 pa.add_argument("--dedup_threshold", type=float, default=0.6)
 pa.add_argument("--score_batch", type=int, default=32)
@@ -36,12 +37,13 @@ num_has_at_least_one_passing = 0
 
 
 class Solution:
-    def __init__(self, code, score, original_id, pass_rate, tests):
+    def __init__(self, code, score, original_id, pass_rate, tests, failing=None):
         self.code = code
         self.score = score
         self.original_id = original_id
         self.pass_rate = pass_rate
         self.tests = tests
+        self.failing = failing
 
 
 solutions: List[Solution] = []
@@ -76,6 +78,7 @@ def process_path(path):
     sols = []
     num_failed = 0
     num_passed = 0
+    failing = None
     for res in results:
         if res["exit_code"] == 0:
             num_passed += 1
@@ -85,6 +88,8 @@ def process_path(path):
             sols.append(sol)
         else:
             num_failed += 1
+            if failing is None:
+                failing = clean_sol_prompt(args.lang, res["program"])
 
     pass_rate = num_passed / (num_passed + num_failed)
 
@@ -120,7 +125,7 @@ def process_path(path):
     obj_sols: List[Solution] = []
     for sol, score in zip(sols, edu_scores):
         obj_sols.append(
-            Solution(sol, score, original_id, pass_rate, func_tests))
+            Solution(sol, score, original_id, pass_rate, func_tests, failing))
 
     return obj_sols, num_passed > 0
 
@@ -146,7 +151,6 @@ if args.no_threading:
         if has_at_least_one_passing:
             num_has_at_least_one_passing += 1
 else:
-    assert scorer is None and not args.strategy == "dedup", "scorer not supported with threading"
     batch = []
     iter_size = len(list(make_path_iterator()))
     for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
@@ -160,10 +164,16 @@ else:
             batch = []
 
 
+def compute_rounds(n, group_size, wanted_prob):
+    p = (group_size - 1) / (n - 1)
+    k = math.ceil(math.log(1 - wanted_prob) / math.log(1 - p))
+    return k
+
+
 if args.global_dedup:
     dedup_group_size = min(len(solutions), 200)
-    dedup_rounds = int(max(math.log(dedup_group_size, 2), 5)
-                       * args.global_dedup_factor)
+    dedup_rounds = compute_rounds(
+        len(solutions), dedup_group_size, args.global_dedup_prob)
     prev_num_sols = len(solutions)
     for rnd in progressbar(range(dedup_rounds)):
         print(
@@ -207,6 +217,7 @@ if args.strategy == "dedup" and not args.no_score:
 
 
 solution_codes = []
+failing_codes = []
 edu_scores = []
 pass_rates = []
 original_ids = []
@@ -214,6 +225,7 @@ tests = []
 
 for sol in solutions:
     solution_codes.append(sol.code)
+    failing_codes.append(sol.failing)
     edu_scores.append(sol.score)
     pass_rates.append(sol.pass_rate)
     original_ids.append(sol.original_id)
@@ -222,13 +234,14 @@ for sol in solutions:
 new_ds = datasets.Dataset.from_dict(
     {
         "content": solution_codes,
+        "failing_content": failing_codes,
         "pass_rate": pass_rates,
         "id": list(range(len(solutions))),
         "original_id": original_ids,
         "tests": tests,
         "edu_score": edu_scores
     })
-new_ds.push_to_hub(args.name)
+new_ds.push_to_hub(args.name, private=True)
 
 # stats
 print(" #### stats #### ")

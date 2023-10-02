@@ -69,7 +69,7 @@ if [[ $STAGES == *"generate"* ]]; then
           ITEMS=$((ITEMS_PER_GPU + LEFT_OVER))
       fi
       echo "Starting GPU $i at $START_INDEX... Will stop at $((START_INDEX + ITEMS - 1))."
-      NVIDIA_VISIBLE_DEVICES=$i CUDA_VISIBLE_DEVICES=$i python3 automodel.py \
+      NVIDIA_VISIBLE_DEVICES=$i CUDA_VISIBLE_DEVICES=$i python3 automodel_vllm.py \
           --name $MODEL_NAME \
           --use-local \
           --dataset ../MultiPL-T/multipl_e_target_adaptor/$LANG-prompts.jsonl \

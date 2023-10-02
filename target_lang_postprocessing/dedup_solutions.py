@@ -5,6 +5,7 @@ from rouge_score import rouge_scorer
 def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=True):
     comment_prefix = {
         "lua": "--",
+        "luau": "--",
         "python": "#",
         "javascript": "//",
         "racket": ";",
@@ -12,6 +13,7 @@ def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=T
     }
     comment_postfix = {
         "lua": "",
+        "luau": "",
         "python": "",
         "javascript": "",
         "racket": "",
@@ -19,6 +21,7 @@ def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=T
     }
     func_start = {
         "lua": "local function",
+        "luau": "local function",
         "python": "def",
         "javascript": "function",
         "racket": "define",
