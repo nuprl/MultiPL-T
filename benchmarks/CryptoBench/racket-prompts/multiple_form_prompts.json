@@ -1,0 +1,47 @@
+[
+  {
+    "name": "decode_message",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n(require crypto)\n(require crypto/libcrypto)\n(crypto-factories libcrypto-factory)\n\n(define MODE '(aes gcm))\n\n;; decode_message: Bytes Bytes Bytes -> Bytes\n;; Decodes the given message with the given key and iv\n(define (decode_message key iv encrypted_message)",
+    "doctests": "original",
+    "original": "CryptoBench\\racket-prompts\\decode_message.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": ";; test_message Bytes -> _\n;; Tests if a given message is properly decoded\n(define (test_message message)\n    (local \n        [(define key (generate-cipher-key MODE))\n        (define iv (generate-cipher-iv MODE))\n        (define encrypted_message (encrypt MODE key iv message))]\n        (check-equal? (decode_message key iv encrypted_message) message)))\n\n(test_message #\"A good message\")\n(test_message #\"A great day to live\")\n(test_message #\"No time to die\")",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
+    "name": "ensure_source",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n(require crypto)\n(require crypto/libcrypto)\n(crypto-factories libcrypto-factory)\n\n(define signature-mode 'sha256)\n\n;; ensure_source: Bytes Bytes Bytes -> Boolean\n;; Verifies the identity of an author who sent the message.\n;; Returns True if the author did write the message.\n;; Message given is a digest (aka still encrypted)\n(define (ensure_source dgst signature author_public_key)",
+    "doctests": "original",
+    "original": "CryptoBench\\racket-prompts\\ensure_source.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(define rsa-impl (get-pk 'rsa libcrypto-factory))\n(define privkey-a (generate-private-key rsa-impl '((nbits 2048))))\n(define privkey-b (generate-private-key rsa-impl '((nbits 2048))))\n(define pubkey-a (pk-key->public-only-key privkey-a))\n(define pubkey-b (pk-key->public-only-key privkey-b))\n(define dgst (digest signature-mode #\"A great message\"))\n(define sig-a (pk-sign-digest privkey-a signature-mode dgst))\n(define sig-b (pk-sign-digest privkey-b signature-mode dgst))\n\n(check-equal? (ensure_source dgst sig-a pubkey-a) #t)\n(check-equal? (ensure_source dgst sig-b pubkey-a) #f)\n(check-equal? (ensure_source dgst sig-a pubkey-b) #f)\n(check-equal? (ensure_source dgst sig-b pubkey-b) #t)",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  },
+  {
+    "name": "start_aes",
+    "language": "rkt",
+    "prompt": "#lang racket\n(require rackunit)\n(require crypto)\n(require crypto/libcrypto)\n(crypto-factories libcrypto-factory)\n\n(define aes-mode '(aes gcm))\n(define keygen-digest 'sha256)\n\n;; start_aes: Bytes Bytes -> Bytes\n;; Receives a public key and the password and uses the\n;; password to generate an AES key via SHA256 and encrypts\n;; the key to send it back to the user\n(define (start_aes pubkey password)",
+    "doctests": "original",
+    "original": "CryptoBench\\racket-prompts\\start_aes.rkt",
+    "prompt_terminology": "verbatim",
+    "tests": "(define rsa-impl (get-pk 'rsa libcrypto-factory))\n(define (test password)\n    (local\n        [(define privkey (generate-private-key rsa-impl '((nbits 2048))))\n        (define pubkey (pk-key->public-only-key privkey))]\n        (check-equal? (pk-decrypt privkey (start_aes pubkey password)) (digest keygen-digest password))))\n\n(test #\"Hello\")\n(test #\"goodbye\")\n(test #\"a wonderful evening\")",
+    "stop_tokens": [
+      "\n(define ",
+      "\n#|",
+      "\n;",
+      "\n("
+    ]
+  }
+]

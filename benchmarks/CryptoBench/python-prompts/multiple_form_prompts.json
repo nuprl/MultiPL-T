@@ -1,0 +1,47 @@
+[
+  {
+    "name": "decode_message",
+    "language": "py",
+    "prompt": "from Crypto.Cipher import AES\nfrom Crypto.Random import get_random_bytes\n\nMODE = AES.MODE_EAX\n\n# decode_message: Bytes Bytes -> Bytes\n# Decodes the given message with the given key\ndef decode_message(key: bytes, encoded_message: bytes) -> bytes:",
+    "doctests": "original",
+    "original": "CryptoBench\\python-prompts\\decode_message.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def test_message(data: bytes):\n    key = get_random_bytes(32)\n    cipher = AES.new(key, mode=MODE)\n    message = cipher.encrypt(data)\n    assert decode_message(key, message), data\n\ntest_message(b\"A good message\")\ntest_message(b\"A great day to live\")\ntest_message(b\"No time to die\")",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "ensure_source",
+    "language": "py",
+    "prompt": "from Crypto.PublicKey import RSA\nfrom Crypto.Signature import pkcs1_15\nfrom Crypto.Hash import SHA256\n\n# ensure_source: Bytes Bytes Bytes -> Boolean\n# Verifies the identity of an author who sent the message.\n# Returns True if the author did write the message\ndef ensure_source(message: bytes, signature: bytes, author_public_key: bytes) -> bool:",
+    "doctests": "original",
+    "original": "CryptoBench\\python-prompts\\ensure_source.py",
+    "prompt_terminology": "verbatim",
+    "tests": "keypair_a, keypair_b = RSA.generate(2048), RSA.generate(2048)\nprivate_key_a, public_key_a = keypair_a, keypair_a.public_key()\nprivate_key_b, public_key_b = keypair_b, keypair_b.public_key()\n\nmessage = SHA256.new(b'a message')\n\nsigner_a = pkcs1_15.new(private_key_a)\nsigner_b = pkcs1_15.new(private_key_b)\n\nsignature_a = signer_a.sign(message)\nsignature_b = signer_b.sign(message)\n\nassert ensure_source(message, signature_a, public_key_a) == True\nassert ensure_source(message, signature_b, public_key_a) == False\nassert ensure_source(message, signature_b, public_key_b) == True\nassert ensure_source(message, signature_a, public_key_b) == False",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  },
+  {
+    "name": "start_aes",
+    "language": "py",
+    "prompt": "from Crypto.PublicKey import RSA\nfrom Crypto.Hash import SHA256\nfrom Crypto.Cipher import PKCS1_OAEP\n\n# start_aes: Bytes Bytes -> Bytes\n# Receives a public key and the password and uses the\n# password to generate an AES key via SHA256 and encrypts\n# the key to send it back to the user\ndef start_aes(password: bytes, public_key: bytes) -> bytes:",
+    "doctests": "original",
+    "original": "CryptoBench\\python-prompts\\start_aes.py",
+    "prompt_terminology": "verbatim",
+    "tests": "def test(password: bytes):\n    keypair = RSA.generate(2048)\n    cipher_rsa = PKCS1_OAEP.new(keypair)\n    encrypted_key = start_aes(password, keypair.public_key())\n    assert encrypted_key, cipher_rsa.encrypt(SHA256.new(password).digest())\n\ntest(b\"hello\")\ntest(b\"goodbye\")\ntest(b\"a wonderful evening\")",
+    "stop_tokens": [
+      "\ndef",
+      "\n#",
+      "\nif",
+      "\nclass"
+    ]
+  }
+]
