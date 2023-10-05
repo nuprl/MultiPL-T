@@ -1,0 +1,47 @@
+[
+  {
+    "name": "decode_message",
+    "language": "lua",
+    "prompt": "local cipher = require(\"openssl.cipher\")\nlocal rand = require(\"openssl.rand\")\n\nlocal aes_ecb = cipher.new(\"AES-256-ECB\")\n\n-- decode_message: String String -> String\n-- Decodes the given message with the given key\nlocal function decode_message(key, encoded_message)",
+    "doctests": "original",
+    "original": "CryptoBench/lua-prompts/decode_message.lua",
+    "prompt_terminology": "verbatim",
+    "tests": "local function test_message(data)\n    local key = rand.bytes(32)\n\n    aes_ecb:encrypt(key)\n    local message = aes_ecb:update(data) .. aes_ecb:final()\n    local decoded = decode_message(key, message)\n\n    if decoded ~= data then\n        error(\"Decoded message does not match original!\")\n    end\nend\n\ntest_message(\"A good message\")\ntest_message(\"A great day to live\")\ntest_message(\"No time to die\")\n",
+    "stop_tokens": [
+      "\nlocal",
+      "\nfunction",
+      "\n--",
+      "\n\n"
+    ]
+  },
+  {
+    "name": "start_aes",
+    "language": "lua",
+    "prompt": "local pkey = require(\"openssl.pkey\")\nlocal digest = require(\"openssl.digest\")\n\n-- start_aes: String String -> String\n-- Receives a public key and the password and uses the\n-- password to generate an AES key via SHA256 and encrypts\n-- the key to send it back to the user\nlocal function start_aes(password, public_key_pem)",
+    "doctests": "original",
+    "original": "CryptoBench/lua-prompts/start_aes.lua",
+    "prompt_terminology": "verbatim",
+    "tests": "local function test(password)\n    local keypair = pkey.new({bits = 2048, alg = 'RSA'})\n    local public_key_pem = keypair:toPEM('public')\n    \n    local encrypted_key = start_aes(password, public_key_pem)\n    \n    assert(encrypted_key)\n    \n    local decrypted_key = keypair:decrypt(encrypted_key)\n    local sha256 = digest.new('SHA256')\n    local expected_key = sha256:final(password)\n    assert(decrypted_key == expected_key)\nend\n\ntest(\"hello\")\ntest(\"goodbye\")\ntest(\"a wonderful evening\")\n",
+    "stop_tokens": [
+      "\nlocal",
+      "\nfunction",
+      "\n--",
+      "\n\n"
+    ]
+  },
+  {
+    "name": "ensure_source",
+    "language": "lua",
+    "prompt": "local pkey = require('openssl.pkey')\nlocal digest = require('openssl.digest')\n\n-- ensure_source: String String String -> Boolean\n-- Verifies the identity of an author who sent the message.\n-- Returns true if the author did write the message\nlocal function ensure_source(message, signature, author_public_key_pem)",
+    "doctests": "original",
+    "original": "CryptoBench/lua-prompts/ensure_source.lua",
+    "prompt_terminology": "verbatim",
+    "tests": "local keypair_a = pkey.new({bits = 2048, alg = 'RSA'})\nlocal keypair_b = pkey.new({bits = 2048, alg = 'RSA'})\n\nlocal private_key_a, public_key_a = keypair_a:toPEM('private'), keypair_a:toPEM('public')\nlocal private_key_b, public_key_b = keypair_b:toPEM('private'), keypair_b:toPEM('public')\n\nlocal message = digest.new('SHA256'):update('a message')\n\nlocal private_key_a = pkey.new(private_key_a)\nlocal private_key_b = pkey.new(private_key_b)\nlocal signature_a = private_key_a:sign(message)\nlocal signature_b = private_key_b:sign(message)\n\nassert(ensure_source(message, signature_a, public_key_a) == true)\nassert(ensure_source(message, signature_b, public_key_a) == false)\nassert(ensure_source(message, signature_b, public_key_b) == true)\nassert(ensure_source(message, signature_a, public_key_b) == false)\n",
+    "stop_tokens": [
+      "\nlocal",
+      "\nfunction",
+      "\n--",
+      "\n\n"
+    ]
+  }
+]
