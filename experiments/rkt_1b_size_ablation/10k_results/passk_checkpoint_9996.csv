@@ -1,0 +1,2 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+completions,1,0.11428571428571428,161,20,20
