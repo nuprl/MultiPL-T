@@ -34,8 +34,13 @@ def get_results(directory: Path):
 
 def write_results(outfile, results): 
     with open(outfile, "w") as out:
+        HEADER = "StepNum,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions"
+        out.write(HEADER+"\n")
         for row in results:
-            line = ",".join(map(str, row))
+            step = str(row[0])
+            rest = row[1].split(",")[1:]
+            str_row = [step] + rest
+            line = ",".join(str_row)
             out.write(line)
 
 if __name__ == "__main__":
