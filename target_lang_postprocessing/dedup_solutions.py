@@ -6,7 +6,7 @@ def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=T
     comment_prefix = {
         "lua": "--",
         "luau": "--",
-        "python": "#",
+        "py": "\"\"\"",
         "javascript": "//",
         "racket": ";",
         "ml": "(*",
@@ -14,7 +14,7 @@ def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=T
     comment_postfix = {
         "lua": "",
         "luau": "",
-        "python": "",
+        "py": "\"\"\"",
         "javascript": "",
         "racket": "",
         "ml": "*)",
@@ -22,7 +22,7 @@ def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=T
     func_start = {
         "lua": "local function",
         "luau": "local function",
-        "python": "def",
+        "py": "def",
         "javascript": "function",
         "racket": "define",
         "ml": "let",
@@ -90,6 +90,17 @@ def rouge_dedup(solutions: list[str], lang="lua", dedup_threshold=0.6, trim_top_
 
 
 if __name__ == "__main__":
+    PYTHON_CLEANUP = """
+    # some function
+    def sum(list):
+        \"\"\"This is a docstring
+        \"\"\"
+        total = 0
+        for v in list:
+            total += v
+        return total
+    """
+    print(strip_comments(PYTHON_CLEANUP, "py"))
     SOLN_0 = """
     -- Define a local function "sum" that takes one argument: "list".
     local function sum(list) 

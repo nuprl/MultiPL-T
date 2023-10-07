@@ -1,4 +1,5 @@
 from typing import List, Tuple
+import re
 import math
 import datasets
 import json
@@ -67,11 +68,14 @@ def get_best_sol(scores, sols):
 def make_path_iterator(): return Path(args.path).glob("**/*.results.json.gz")
 
 
+RE_DIGITS = re.compile(r"\d+")
 def process_path(path):
     with gzip.open(path, "rt") as f:
         data = json.load(f)
 
-    original_id = int(path.stem.split("_")[1])
+    re_result = RE_DIGITS.search(path.stem)
+    assert re_result is not None, f"Could not find number in {path.stem}"
+    original_id = int(re_result.group(0))
     results = data["results"]
     func_tests = data["tests"]
 
