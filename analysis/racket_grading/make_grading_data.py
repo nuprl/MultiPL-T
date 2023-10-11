@@ -23,7 +23,7 @@ def merge_base_to_tuned_ds(base_ds, tune_ds, seed=42):
     model_A = random.choice([base_ds, tune_ds])
     model_B = base_ds if model_A == tune_ds else tune_ds
     
-    with open("secret_key.md", "w") as f:
+    with open(f"secret_key_{seed}.md", "w") as f:
         # write which is which
         f.write(f"seed: {seed}\n")
         if model_A == base_ds:
@@ -32,7 +32,7 @@ def merge_base_to_tuned_ds(base_ds, tune_ds, seed=42):
             f.write("model_A: tuned_ds\n")
     
     ds = []
-    problems = set(model_A["problem"] + model_B["problem"])
+    problems = model_A["problem"]
     for p in problems:
         ds.append({
             "problem": p,
@@ -47,8 +47,7 @@ if __name__ == "__main__":
     tuned_ds = load_selections("select_for_grading/tuned")
     # some tuned problems are not in base; filter those out
     tuned_ds = tuned_ds.filter(lambda x: x["problem"] in base_ds["problem"])
-    ds = merge_base_to_tuned_ds(base_ds, tuned_ds, seed=4)
+    ds = merge_base_to_tuned_ds(base_ds, tuned_ds, seed=random.randint(0, 1000))
     print(ds)
-    ds.push_to_hub("franlucc/rkt-grading-15b")
     
     
