@@ -121,6 +121,7 @@ def clean_luau_ex(ex): return clean_ex(ex, clean_luau)
 def clean_lua_ex(ex): return clean_ex(ex, clean_lua)
 def clean_racket_ex(ex): return clean_ex(ex, clean_racket)
 def clean_ml_ex(ex): return clean_ex(ex, clean_ml)
+def clean_r_ex(ex): return clean_ex(ex, clean_r)
 
 
 
@@ -148,7 +149,7 @@ if __name__ == "__main__":
     elif args.language == "ml":
         cleaner = clean_ml_ex
     elif args.language == "r":
-        cleaner = clean_r
+        cleaner = clean_r_ex
     else:
         # crash with unimplemented language
         raise NotImplementedError(f"Language {args.language} not implemented")
