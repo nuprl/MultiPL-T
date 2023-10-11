@@ -3,6 +3,8 @@ from rouge_score import rouge_scorer
 
 
 def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=True):
+    if lang == "r":
+        return code
     comment_prefix = {
         "lua": "--",
         "luau": "--",

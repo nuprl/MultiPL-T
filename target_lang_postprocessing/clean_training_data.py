@@ -100,6 +100,17 @@ def clean_julia(sol):
     sol_lines = [line for line in sol_lines if line.rstrip() != ""]
     return "\n".join(sol_lines) + "\nend"  # since end is the stop token
 
+def clean_r(sol):
+    sol_lines = sol.split("\n")
+    if "## Canonical Python Solution ##" in sol_lines[0]:
+        for i, line in enumerate(sol_lines[1:]):
+            r_i = i + 1
+            if not line.strip().startswith("#"):
+                not_canonical_i = r_i
+                break
+        sol_lines = sol_lines[not_canonical_i:]
+    sol_lines = [line for line in sol_lines if line.rstrip() != ""]
+    return "\n".join(sol_lines)   # since end is the stop token
 
 def clean_ex(ex, cleaner):
     ex["content"] = cleaner(ex["content"])
@@ -110,6 +121,7 @@ def clean_luau_ex(ex): return clean_ex(ex, clean_luau)
 def clean_lua_ex(ex): return clean_ex(ex, clean_lua)
 def clean_racket_ex(ex): return clean_ex(ex, clean_racket)
 def clean_ml_ex(ex): return clean_ex(ex, clean_ml)
+
 
 
 if __name__ == "__main__":
@@ -135,6 +147,8 @@ if __name__ == "__main__":
         cleaner = clean_lua_ex
     elif args.language == "ml":
         cleaner = clean_ml_ex
+    elif args.language == "r":
+        cleaner = clean_r
     else:
         # crash with unimplemented language
         raise NotImplementedError(f"Language {args.language} not implemented")
