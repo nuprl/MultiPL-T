@@ -4,29 +4,45 @@ from utils import extract_successful, multiple_results_to_ds, select
 from pathlib import Path
 import json
 import os
+from collections import Counter
 
 def process_row(row):
     """
     Returns a new row with only successful programs.
     """
     new_row = {"problem": row["problem"], 
-               "statuses": [], 
                "programs": []}
     
     for i in range(len(row["programs"])):
         if row["statuses"][i].upper() == "OK":
-            new_row["statuses"].append(row["statuses"][i])
             new_row["programs"].append(row["programs"][i])
+    
+    # for each program, count duplicates
+    c = Counter(new_row["programs"])
+    # add tag for counts
+    new_row["programs"] = [f";; Program count: {c[p]}\n{p}" for p in new_row["programs"]]
+    # deduplicate
+    new_row["programs"] = list(set(new_row["programs"]))
+    new_row["max_count"] = max(c.values()) if len(c) > 0 else 0
     return new_row
 
+                
 def save_subdir(ds, subdir):
     os.makedirs(subdir, exist_ok=True)
     for i in range(len(ds)):
         problem = ds["problem"][i]
+        if len(ds["programs"][i]) == 0:
+            continue
         os.makedirs(f"{subdir}/{problem}", exist_ok=True)
+        max_count = ds["max_count"][i]
         for j in range(len(ds["programs"][i])):
             program = ds["programs"][i][j]
-            with open(f"{subdir}/{problem}/program_{j}.rkt", "w") as f:
+            # to save time, if program has max count, save as "selected_auto_program_{n}.rkt"
+            if f";; Program count: {max_count}" in program:
+                filename = f"{subdir}/{problem}/selected_auto_program_{j}.rkt"
+            else:
+                filename = f"{subdir}/{problem}/program_{j}.rkt"
+            with open(filename, "w") as f:
                 f.write(program)
                 
 def save_for_hand_selection(base_counterparts, tuned):
