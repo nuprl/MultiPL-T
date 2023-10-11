@@ -94,7 +94,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("baseline", type=Path, help="Path to a dir containing .results.json.gz files for baseline model.")
-    parser.add_argument("tuned", type=Path, help="Path to a dir containing .results.json.gz files for tuned model.")
+    parser.add_argument("--baseline", type=Path, help="Path to a dir containing .results.json.gz files for baseline model.")
+    parser.add_argument("--tuned", type=Path, help="Path to a dir containing .results.json.gz files for tuned model.")
     args = parser.parse_args()
     main(args)
