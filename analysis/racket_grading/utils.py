@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import argparse
 import tarfile
+import pandas as pd
 
 def pass_k(n: int, c: int, k: int) -> float:
     """
@@ -71,6 +72,23 @@ def select(ds, num_completions):
     ds = ds.map(lambda x: {"programs": x["programs"][:num_completions], "statuses": x["statuses"][:num_completions]})
     return ds
 
+def make_scoresheet_template(n):
+    """
+    Makes a scoresheet template for n problems.
+    """
+    scoresheet = []
+    for i in range(n):
+        scoresheet.append({
+            "File" : f"prog_{i}.rkt",
+            "Text score" : -1,
+            "Code score" : -1,
+            "Assignment deduction" : False,
+            "Conditional deduction" : False,
+            "Definitions deduction" : False,
+            "Unreadable deduction" : False,
+        })
+    pd.DataFrame(scoresheet).to_csv("grader_scoresheet.csv", index=False)
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("path", type=Path, help="Path to a dir containing .results.json.gz files.")
