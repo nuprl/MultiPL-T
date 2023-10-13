@@ -4,11 +4,10 @@ open Cryptokit
 
 let padding = Cryptokit.Padding.length;;
 
-(** decode_message string string -> string
-* Decrypts an encrypted message provided the aes key.
-* The given message is encoded in aes and padded using
-* the padding constant.
-*)
+(*decode_message string string -> string
+Decrypts an encrypted message provided the aes key.
+The given message is encoded in aes and padded using
+the padding constant.*)
 let decode_message (key: string) (encoded_message: string) : string =
 (* <solution> *)
   let aes = Cryptokit.Cipher.(aes ~pad:padding key Decrypt) in
