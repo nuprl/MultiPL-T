@@ -1,7 +1,6 @@
 #use "topfind";;
 #require "cryptokit";;
 open Cryptokit
-open Printf
 
 (* ensure_source: RSA.key String String -> Boolean
 Verifies the identity of an author who sent the message.
