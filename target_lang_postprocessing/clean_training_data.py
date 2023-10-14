@@ -100,7 +100,9 @@ def clean_julia(sol):
     sol_lines = [line for line in sol_lines if line.rstrip() != ""]
     return "\n".join(sol_lines) + "\nend"  # since end is the stop token
 
+
 def clean_r(sol):
+    sol = sol[:sol.find("\ntest_humaneval")]
     sol_lines = sol.split("\n")
     if "## Canonical Python Solution ##" in sol_lines[0]:
         for i, line in enumerate(sol_lines[1:]):
@@ -112,6 +114,7 @@ def clean_r(sol):
     sol_lines = [line for line in sol_lines if line.rstrip() != ""]
     return "\n".join(sol_lines)   # since end is the stop token
 
+
 def clean_ex(ex, cleaner):
     ex["content"] = cleaner(ex["content"])
     return ex
@@ -122,7 +125,6 @@ def clean_lua_ex(ex): return clean_ex(ex, clean_lua)
 def clean_racket_ex(ex): return clean_ex(ex, clean_racket)
 def clean_ml_ex(ex): return clean_ex(ex, clean_ml)
 def clean_r_ex(ex): return clean_ex(ex, clean_r)
-
 
 
 if __name__ == "__main__":
