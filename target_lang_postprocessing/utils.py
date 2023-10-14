@@ -1,4 +1,5 @@
-from clean_training_data import clean_lua, clean_luau, clean_py, clean_racket, clean_ml
+from clean_training_data import clean_lua, clean_luau, clean_py, clean_r, clean_racket, clean_ml
+
 
 def clean_sol_prompt(lang, sol):
     if lang == "lua":
@@ -11,5 +12,7 @@ def clean_sol_prompt(lang, sol):
         return clean_racket(sol)
     elif lang == "ml":
         return clean_ml(sol)
+    elif lang == "r":
+        return clean_r(sol)
     else:
         raise Exception("Unknown language: " + lang)
