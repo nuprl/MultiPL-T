@@ -14,6 +14,7 @@ name_to_prompt = {p["name"]: p["prompt"] for p in prompts}
 missed = 0
 for path in tqdm(Path("./r_data").glob("**/*.json.gz")):
     if ".results" in path.stem:
+        os.remove(path)
         continue
     with gzip.open(path, "rt") as f:
         data = json.load(f)
