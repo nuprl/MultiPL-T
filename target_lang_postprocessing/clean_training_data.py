@@ -107,8 +107,8 @@ def clean_r(sol):
     if "## Canonical Python Solution ##" in sol_lines[0]:
         for i, line in enumerate(sol_lines[1:]):
             r_i = i + 1
-            if line.strip().startswith("#") and "return" in line:
-                not_canonical_i = r_i + 1
+            if line.count("#") < 2:
+                not_canonical_i = r_i
         sol_lines = sol_lines[not_canonical_i:]
     sol_lines = [line for line in sol_lines if line.rstrip() != ""]
     return "\n".join(sol_lines)   # since end is the stop token
