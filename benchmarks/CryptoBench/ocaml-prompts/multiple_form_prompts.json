@@ -1,0 +1,44 @@
+[
+  {
+    "name": "start_aes",
+    "language": "ocaml",
+    "prompt": "#use \"topfind\";;\n#require \"cryptokit\";;\nopen Cryptokit\n\n(* start_aes: RSA.key string  -> string\nStarts a symmetric key encryption process by generating an \nAES key from the secret using SHA256 and encrypting it with \nthe RSA key.*)\nlet start_aes (rsa_key: RSA.key) (secret: string) : string =",
+    "doctests": "original",
+    "original": "CryptoBench/ocaml-prompts/start_aes.ml",
+    "prompt_terminology": "verbatim",
+    "tests": "let test (secret: string) =\n  let keypair = RSA.new_key 4096 in\n  let aes_key = hash_string (Hash.sha256()) secret in\n  let encrypted_key = (RSA.encrypt keypair (aes_key)) in\n  assert(start_aes keypair secret = encrypted_key)\n;;\n\ntest(\"A good secret!\");;\ntest(\"A terrible evening!\");;\ntest(\"Disaster!\");;",
+    "stop_tokens": [
+      "\n\n",
+      "\n(*",
+      "\ntype"
+    ]
+  },
+  {
+    "name": "ensure_source",
+    "language": "ocaml",
+    "prompt": "#use \"topfind\";;\n#require \"cryptokit\";;\nopen Cryptokit\n\n(* ensure_source: RSA.key String String -> Boolean\nVerifies the identity of an author who sent the message.\nReturns True if the author did write the message.\nPublic key is an RSA public key and message can be \nsigned to verify it matches given signature*)\nlet ensure_source (key: RSA.key) (signature: string) (message: string) : bool =",
+    "doctests": "original",
+    "original": "CryptoBench/ocaml-prompts/ensure_source.ml",
+    "prompt_terminology": "verbatim",
+    "tests": "let keypair_a = RSA.new_key 2048;;\nlet keypair_b = RSA.new_key 2048;;\nlet message = Random.string Random.secure_rng 255;;\nlet message_a = RSA.sign keypair_a message;;\nlet message_b = RSA.sign keypair_b message;;\n\nassert(ensure_source keypair_a message_a message = true);;\nassert(ensure_source keypair_a message_b message = false);;\nassert(ensure_source keypair_b message_a message = false);;\nassert(ensure_source keypair_b message_b message = true);;",
+    "stop_tokens": [
+      "\n\n",
+      "\n(*",
+      "\ntype"
+    ]
+  },
+  {
+    "name": "decode_message",
+    "language": "ocaml",
+    "prompt": "#use \"topfind\";;\n#require \"cryptokit\";;\nopen Cryptokit\n\nlet padding = Cryptokit.Padding.length;;\n\n(*decode_message string string -> string\nDecrypts an encrypted message provided the aes key.\nThe given message is encoded in aes and padded using\nthe padding constant.*)\nlet decode_message (key: string) (encoded_message: string) : string =",
+    "doctests": "original",
+    "original": "CryptoBench/ocaml-prompts/decode_message.ml",
+    "prompt_terminology": "verbatim",
+    "tests": "let test_message (message: string) = \n  let key = Random.string Random.secure_rng 32 in \n  let aes = Cryptokit.Cipher.(aes ~pad:Cryptokit.Padding.length key Encrypt) in\n  let encoded_message = Cryptokit.transform_string aes message in\n  assert(decode_message key encoded_message = message);;\n\ntest_message(\"A good message\");;\ntest_message(\"A great day to live\");;\ntest_message(\"No time to die\");;",
+    "stop_tokens": [
+      "\n\n",
+      "\n(*",
+      "\ntype"
+    ]
+  }
+]
