@@ -40,5 +40,13 @@ for epoch, checkpoint in enumerate(checkpoints):
         dir_name + "/" + checkpoint,
         torch_dtype=torch.bfloat16
     )
-    m.push_to_hub(args.base_repo, private=True,
-                  commit_message=commit)
+    while True:
+        try:
+            m.push_to_hub(args.base_repo, private=True,
+                          commit_message=commit)
+        except RuntimeError as e:
+            print(e)
+            print("Retrying...")
+            continue
+
+        break
