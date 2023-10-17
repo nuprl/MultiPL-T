@@ -26,6 +26,7 @@ for path in pathlib.Path(args.dir).rglob(f"checkpoint{args.checkpoint_sep}*"):
 dir_name = pathlib.Path(args.dir).name
 
 if args.tokenizer:
+    print(f"Pushing tokenizer {args.tokenizer} to {args.base_repo}")
     tok = AutoTokenizer.from_pretrained(args.tokenizer)
     tok.push_to_hub(args.base_repo, private=True)
 
