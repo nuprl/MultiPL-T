@@ -15,7 +15,7 @@ def color_tok(attn, tok, distr) -> str:
     
 
 def visualize_attn(tokenizer, out, meaned_attns):
-    distr = pd.DataFrame(meaned_attns.detach().cpu().numpy()).describe()[0]
+    distr = pd.DataFrame(filter(lambda n: n > 0, meaned_attns.detach().cpu().numpy())).describe()[0]
     buf = ""
     for i, tok in enumerate(out):
         colored = color_tok(meaned_attns[i], tokenizer.decode(tok), distr)
@@ -59,6 +59,21 @@ def attn_distribution(tokenizer, out, meaned_attns):
     attns_in_sig = torch.tensor(attns_in_sig)
     attns_in_body = torch.tensor(attns_in_body)
     return {"comment": attns_in_comment, "sig": attns_in_comment, "body": attns_in_body}
+
+def attn_from_toks_single(model, toks, i):
+    assert len(toks.size()) == 1, "mean pooling batched toks is currently not supported"
+    enc = model(toks, output_attentions=True)
+    attns = enc["attentions"]
+    # quite a deep tensor...
+    layer_i = 0
+    batch_i = 0 # we only have one prompt
+    attn_head_i = 0
+    # attns[layer_i][batch_i][attn_head_i][tok]
+
+    # get last layer attns
+    last_layer_attns = attns[-1][batch_i]
+    last_layer_attns_head_mean = last_layer_attns.mean(dim=0)
+    return last_layer_attns_head_mean[i]
 
 def mean_pool_attn_from_toks(model, toks):
     assert len(toks.size()) == 1, "mean pooling batched toks is currently not supported"

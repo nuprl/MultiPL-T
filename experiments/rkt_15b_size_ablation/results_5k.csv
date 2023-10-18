@@ -1,0 +1,10 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+eval_rkt_checkpoint-9,1,0.08167701863354038,161,20,20
+eval_rkt_checkpoint-18,1,0.12111801242236025,161,20,20
+eval_rkt_checkpoint-27,1,0.14503105590062113,161,20,20
+eval_rkt_checkpoint-36,1,0.16366459627329194,161,20,20
+eval_rkt_checkpoint-45,1,0.16801242236024844,161,20,20
+eval_rkt_checkpoint-54,1,0.16925465838509315,161,20,20
+eval_rkt_checkpoint-63,1,0.1590062111801242,161,20,20
+eval_rkt_checkpoint-72,1,0.1785714285714286,161,20,20
+

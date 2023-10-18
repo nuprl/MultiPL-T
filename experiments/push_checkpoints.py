@@ -1,10 +1,12 @@
-from transformers import AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 import pathlib
 import argparse
 
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--dir", type=str, required=True)
+arg_parser.add_argument("--tokenizer", type=str,
+                        default="", help="Optional, tokenizer to push to hub")
 arg_parser.add_argument("--base_repo", type=str,
                         default="nuprl/MultiPLCoder-1b")
 arg_parser.add_argument("--checkpoint_sep", type=str,
@@ -23,6 +25,11 @@ for path in pathlib.Path(args.dir).rglob(f"checkpoint{args.checkpoint_sep}*"):
 
 dir_name = pathlib.Path(args.dir).name
 
+if args.tokenizer:
+    print(f"Pushing tokenizer {args.tokenizer} to {args.base_repo}")
+    tok = AutoTokenizer.from_pretrained(args.tokenizer)
+    tok.push_to_hub(args.base_repo, private=True)
+
 checkpoints.sort(key=lambda x: int(x.split(args.checkpoint_sep)[1]))
 for epoch, checkpoint in enumerate(checkpoints):
     epoch += 1  # 1-indexed
@@ -33,5 +40,13 @@ for epoch, checkpoint in enumerate(checkpoints):
         dir_name + "/" + checkpoint,
         torch_dtype=torch.bfloat16
     )
-    m.push_to_hub(args.base_repo, private=True,
-                  commit_message=commit)
+    while True:
+        try:
+            m.push_to_hub(args.base_repo, private=True,
+                          commit_message=commit)
+        except RuntimeError as e:
+            print(e)
+            print("Retrying...")
+            continue
+
+        break

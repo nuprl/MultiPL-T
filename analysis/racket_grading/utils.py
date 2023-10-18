@@ -3,6 +3,9 @@ import numpy as np
 import gzip 
 import json 
 from pathlib import Path
+import argparse
+import tarfile
+import pandas as pd
 
 def pass_k(n: int, c: int, k: int) -> float:
     """
@@ -35,6 +38,7 @@ def gunzip_json(path):
         with gzip.open(path, "rt") as f:
             return json.load(f)
     except Exception as e:
+        print(f"Error reading {path}: {e}")
         return None
 
 def multiple_results_to_ds(path):
@@ -56,8 +60,38 @@ def multiple_results_to_ds(path):
 def filter_successful_programs(ds):
     return ds.filter(lambda x: any(s.upper() == "OK" for s in x["statuses"]))
 
-if __name__ == "__main__":
-    ds = multiple_results_to_ds(Path("humaneval-rkt-15b-tuned"))
+def extract_successful(results_dir, max_completions=20):
+    """Selects first N completions per problem and returns a dataset of successful programs."""
+    ds = multiple_results_to_ds(Path(results_dir))
+    ds = select(ds, max_completions)
     ds = filter_successful_programs(ds)
-    print(ds)
+    return ds
+
+def select(ds, num_completions):
+    """Selects first num_completions completions per problem."""
+    ds = ds.map(lambda x: {"programs": x["programs"][:num_completions], "statuses": x["statuses"][:num_completions]})
+    return ds
+
+def make_scoresheet_template(n):
+    """
+    Makes a scoresheet template for n problems.
+    """
+    scoresheet = []
+    for i in range(n):
+        scoresheet.append({
+            "File" : f"prog_{i}.rkt",
+            "Text score" : -1,
+            "Code score" : -1,
+            "Assignment deduction" : False,
+            "Conditional deduction" : False,
+            "Definitions deduction" : False,
+            "Unreadable deduction" : False,
+        })
+    pd.DataFrame(scoresheet).to_csv("grader_scoresheet.csv", index=False)
+    
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path", type=Path, help="Path to a dir containing .results.json.gz files.")
+    args = parser.parse_args()
+    extract_successful(args.path)
 
