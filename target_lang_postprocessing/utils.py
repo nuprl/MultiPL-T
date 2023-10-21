@@ -1,4 +1,4 @@
-from clean_training_data import clean_lua, clean_luau, clean_py, clean_r, clean_racket, clean_ml
+from clean_training_data import clean_lua, clean_luau, clean_py, clean_r, clean_racket, clean_ml, clean_julia
 
 
 def clean_sol_prompt(lang, sol):
@@ -14,5 +14,7 @@ def clean_sol_prompt(lang, sol):
         return clean_ml(sol)
     elif lang == "r":
         return clean_r(sol)
+    elif lang == "julia":
+        return clean_julia(sol)
     else:
         raise Exception("Unknown language: " + lang)
