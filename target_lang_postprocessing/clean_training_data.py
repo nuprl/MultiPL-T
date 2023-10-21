@@ -88,6 +88,7 @@ def clean_ml(sol):
 
 
 def clean_julia(sol):
+    sol = sol[:sol.find("\nusing Test")]
     sol_lines = sol.split("\n")
     if "## Canonical Python Solution ##" in sol_lines[0]:
         for i, line in enumerate(sol_lines[1:]):
@@ -98,7 +99,7 @@ def clean_julia(sol):
         sol_lines = sol_lines[not_canonical_i:]
         sol_lines = ['"""'] + sol_lines
     sol_lines = [line for line in sol_lines if line.rstrip() != ""]
-    return "\n".join(sol_lines) + "\nend"  # since end is the stop token
+    return "\n".join(sol_lines)
 
 
 def clean_r(sol):
