@@ -1,0 +1,5 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+eval_jl_checkpoint-192,1,0.4012578616352201,159,20,20
+eval_jl_checkpoint-288,1,0.41603773584905657,159,20,20
+eval_jl_checkpoint-384,1,0.4380503144654088,159,20,20
+eval_jl_checkpoint-96,1,0.34056603773584904,159,20,20
