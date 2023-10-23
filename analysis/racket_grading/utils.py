@@ -6,7 +6,31 @@ from pathlib import Path
 import argparse
 import tarfile
 import pandas as pd
+# from glob import glob
 
+def view_all_completions(json_gz_dir):
+    s = ""
+    for file in Path(json_gz_dir).glob("*.json.gz"):
+        if "results" in file.name:
+            continue
+        data = gunzip_json(file)
+        if data is None:
+            continue
+        programs = [data["prompt"] + "\n" + p for p in data["results"]["program"]]
+        s += '\n\n'.join(programs) + "\n\n"
+    return s
+
+def remove_tests(dir):
+    for file in Path(dir).glob("*.rkt"):
+        with open(file, "r") as f:
+            lines = f.readlines()
+        with open(file, "w") as f:
+            for line in lines:
+                if "(require rackunit)" in line:
+                    break
+                else:
+                    f.write(line)
+        
 def pass_k(n: int, c: int, k: int) -> float:
     """
     Calculates 1 - comb(n - c, k) / comb(n, k).
@@ -27,7 +51,7 @@ def proc_multiple_results(file):
     statuses = []
     for res in data["results"]:
         statuses.append(res["status"])
-        programs.append(res["program"])
+        programs.append(res["program"].split("(require rackunit)")[0].strip())
     return data["name"], statuses,  programs
 
 def gunzip_json(path): 
@@ -93,5 +117,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("path", type=Path, help="Path to a dir containing .results.json.gz files.")
     args = parser.parse_args()
-    extract_successful(args.path)
+    # d = extract_successful(args.path)
+    # print(d["programs"])
 
