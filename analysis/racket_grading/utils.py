@@ -104,19 +104,27 @@ def make_scoresheet_template(n):
     for i in range(n):
         scoresheet.append({
             "File" : f"prog_{i}.rkt",
-            "Text score" : -1,
-            "Code score" : -1,
-            "Assignment deduction" : False,
-            "Conditional deduction" : False,
-            "Definitions deduction" : False,
-            "Unreadable deduction" : False,
+            "[TEXT] Dangling Parens" : -0.5,
+            "[TEXT] Line too long" : -1,
+            "[TEXT] Using car cdr" : -0.5,
+            "[TEXT] Cond without square brackets" : -0.5,
+            "[TEXT] Uninformative local names" : -0.5,
+            "[DEFNS] let-expr not at topmost start" : -1,
+            "[DEFNS] Nesting let-exprs or defines" : -2,
+            "[DEFNS] Unnecessary let* or letrec exprs" : -1,
+            "[DEFNS] Unused or useless local vars" : -1,
+            "[DEFNS] Not defining helpers or local vars" : -1,
+            "[COND] Nested if-expr instead of cond": -2,
+            "[COND] (if COND #t #f)":-1,
+            "[TRAV] iteration instead of recursion" : -3,
         })
     pd.DataFrame(scoresheet).to_csv("grader_scoresheet.csv", index=False)
     
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("path", type=Path, help="Path to a dir containing .results.json.gz files.")
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("path", type=Path, help="Path to a dir containing .results.json.gz files.")
+    # args = parser.parse_args()
     # d = extract_successful(args.path)
     # print(d["programs"])
+    make_scoresheet_template(70)
 
