@@ -1,7 +1,6 @@
 import code_scorer.inference
 import datasets
 import argparse
-import random
 from tqdm import tqdm
 
 
@@ -22,8 +21,6 @@ parser.add_argument('--split', type=str, default='train')
 parser.add_argument('--score_filter', type=float, default=0.0)
 parser.add_argument('--push', type=str, required=True)
 args = parser.parse_args()
-
-random.seed(args.seed)
 
 ds = datasets.load_dataset(args.dataset, split=args.split)
 
