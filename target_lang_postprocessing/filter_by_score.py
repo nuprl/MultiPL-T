@@ -36,5 +36,7 @@ for exs in tqdm(chunks, total=len(chunks)):
     scores.extend(c_scores)
 
 ds = ds.add_column('score', scores)
+print(f"Total examples: {len(ds)}")
 ds = ds.filter(lambda x: x['score'] >= args.score_filter)
+print(f"Total examples after filtering: {len(ds)}")
 ds.push_to_hub(args.push, private=True)
