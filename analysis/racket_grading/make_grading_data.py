@@ -21,30 +21,59 @@ def load_selections(model_dir):
     return datasets.Dataset.from_list(ds)
 
 def merge_base_to_tuned_ds(base_ds, tune_ds, seed=42):
-    # randomly assign a ds to model_A and the other to model_B
-    random.seed(seed)
-    model_A = random.choice([base_ds, tune_ds])
-    model_B = base_ds if model_A == tune_ds else tune_ds
     
-    with open(f"secret_key_{seed}.md", "w") as f:
-        # write which is which
-        f.write(f"seed: {seed}\n")
-        if model_A == base_ds:
-            f.write("model_A: base_ds\n")
-        else:
-            f.write("model_A: tuned_ds\n")
+    def random_model(seed):
+        # randomly assign a ds to model_A and the other to model_B
+        random.seed(seed)
+        model_A = random.choice([base_ds, tune_ds])
+        model_B = base_ds if model_A == tune_ds else tune_ds
+        secret_key = {"model_B" : "base" if model_B == base_ds else "tuned",
+               "model_A" : "base" if model_A == base_ds else "tuned",
+               "seed": seed}
+        return model_A, model_B, secret_key
     
+    secret_keys = []
     ds = []
-    problems = model_A["problem"]
-    for p in problems:
+    problems = base_ds["problem"]
+    for i,p in enumerate(problems):
+        model_A, model_B, secret_key = random_model(seed)
+        secret_key.update({"problem": p, "id":i})
+        secret_keys.append(secret_key)
         ds.append({
             "problem": p,
+            "id": i,
             "model_A": model_A["program"][model_A["problem"].index(p)],
             "model_B": model_B["program"][model_B["problem"].index(p)],
         })
-    return datasets.Dataset.from_list(ds)
+        seed += 1
+        
+    with open(f"pair_secret_key.json", "w") as f:
+        json.dump(secret_keys, f, indent=2)
+    return ds
+
+def make_pair_grading_dir(base_ds, tune_ds, outdir, seed=42):
+    """Makes a grading dir for comparing pairs"""
+    if os.path.exists(outdir):
+        raise ValueError(f"{outdir} already exists.")
+    os.makedirs(outdir)
+    
+    merged_list = merge_base_to_tuned_ds(base_ds, tune_ds, seed=seed)
+    
+    for pair_dict in merged_list:
+        problem = pair_dict["problem"]
+        id = pair_dict["id"]
+        with open(f"{outdir}/prog_{id}_{problem}.rkt", "w") as f:
+            f.write(";; Example A\n")
+            f.write(str(pair_dict["model_A"]))
+            f.write("\n;; Example B\n")
+            f.write(str(pair_dict["model_B"]))
+    
 
 def make_grading_dir(base_ds, tune_ds, outdir, seed=42):
+    """Makes a grading dir for comparing pairs
+    Uses hash names initially and renames to int ids so that grader
+    cannot reverse engineer order of problems from ids."""
+    
     hashes = {"base":[], "tuned":[]}
     if os.path.exists(outdir):
         raise ValueError(f"{outdir} already exists.")
@@ -88,8 +117,8 @@ if __name__ == "__main__":
     tuned_ds = load_selections("select_for_grading/tuned")
     # some tuned problems are not in base; filter those out
     tuned_ds = tuned_ds.filter(lambda x: x["problem"] in base_ds["problem"])
-    # ds = merge_base_to_tuned_ds(base_ds, tuned_ds, seed=random.randint(0, 1000))
-    # print(ds)
-    make_grading_dir(base_ds, tuned_ds, "grading_dir", seed=random.randint(0, 1000))
+
+    # make_grading_dir(base_ds, tuned_ds, "grading_dir", seed=random.randint(0, 1000))
+    make_pair_grading_dir(base_ds, tuned_ds, "pair_grading_dir", seed=41)
     
     

@@ -21,7 +21,7 @@ def view_all_completions(json_gz_dir):
     return s
 
 def remove_tests(dir):
-    for file in Path(dir).glob("*.rkt"):
+    for file in Path(dir).glob("*/*.rkt"):
         with open(file, "r") as f:
             lines = f.readlines()
         with open(file, "w") as f:
@@ -96,6 +96,7 @@ def select(ds, num_completions):
     ds = ds.map(lambda x: {"programs": x["programs"][:num_completions], "statuses": x["statuses"][:num_completions]})
     return ds
 
+
 def make_scoresheet_template(n):
     """
     Makes a scoresheet template for n problems.
@@ -120,11 +121,24 @@ def make_scoresheet_template(n):
         })
     pd.DataFrame(scoresheet).to_csv("grader_scoresheet.csv", index=False)
     
+def make_pair_scoresheet_template(n):
+    """
+    Makes a scoresheet template for n pair problems.
+    """
+    scoresheet = []
+    for i in range(n):
+        scoresheet.append({
+            "File" : f"prog_{i}.rkt",
+            "Example A" : "0",
+            "Example B" : "0",
+        })
+    pd.DataFrame(scoresheet).to_csv("pair_grader_scoresheet.csv", index=False)
+    
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser()
     # parser.add_argument("path", type=Path, help="Path to a dir containing .results.json.gz files.")
     # args = parser.parse_args()
     # d = extract_successful(args.path)
     # print(d["programs"])
-    make_scoresheet_template(70)
+    make_pair_scoresheet_template(35)
 
