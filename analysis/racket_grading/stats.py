@@ -39,18 +39,17 @@ def get_stats(df):
     def file_to_humaneval(filename, grading_dir="rename_grading_dir"):
         def get_name(filename, names):
             for name in names:
-                if filename.replace(".rkt","_") in name:
+                if filename.replace(".rkt","") == name.split("/")[-1].split("_HumanEval")[0]:
                     return "HumanEval" + name.split("HumanEval")[-1].split(".rkt")[0]
             raise Exception(f"Could not find {filename} in {grading_dir}")
         
-        names = glob.glob(os.path.join(grading_dir, "*"))
+        names = glob.glob(f"{grading_dir}/*.rkt")
         return get_name(filename, names)
     
     df["problem"] = df["File"].apply(file_to_humaneval)
     
-    # return a df with columns "problem", "base_model_score", "tuned_model_score"
     df = df[["problem", "model", "total score"]]
-    df = df.groupby(["problem", "model"]).mean().reset_index()
+    df = df.groupby(["problem", "model"]).sum().reset_index()
     df = df.pivot(index="problem", columns="model", values="total score")
     df = df.reset_index()
     df = df.rename(columns={"base":"base_model_score", "tuned":"tuned_model_score"})
@@ -61,12 +60,11 @@ def get_stats(df):
     return df
     
 
-
 if __name__ == "__main__":
-    df = load_grader_scores("fran_final_grader_scoresheet.csv")
+    df = load_grader_scores("grader_scoresheet_gouwar.csv")
     df = deanonimize(df, "secret_key_hash.json")
     df = get_stats(df)
-    df.to_csv("fran_grading_stats.csv", index=False)
+    df.to_csv("john_grading_stats.csv", index=False)
     
     # # read json.gz file
     # sanity check
