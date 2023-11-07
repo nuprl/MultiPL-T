@@ -1,66 +1,69 @@
 import matplotlib.pyplot as plt
 
 BASE_DATA = {
-    "C++": [6.379,30.56 ],
-    "C#":[5.823,20.56 ],
+    "C++": [0.06379,0.3056 ],
+    "C#":[0.05823,0.2056 ],
     #["D",0,10.01 ],
-    "Go": [3.101,21.47 ],
-    "Java" :[11.336,28.53 ],
-    "Javascript": [8.437,31.70 ],
+    "Go": [0.03101,0.2147 ],
+    "Java" :[0.11336,0.2853 ],
+    "Javascript": [0.08437,0.3170 ],
     
-    "PHP": [7.939,26.75 ],
-    #"Perl": [0.291,16.32 ],
-    "Python": [7.875,30.35 ],
-    "Ruby": [0.888,17.25 ],
-    "Rust": [1.188,24.46 ],
-    "Scala": [0.0,28.79 ],
+    "PHP": [0.0939,0.2675 ],
+    #"Perl": [0.00291,0.1632 ],
+    "Python": [0.07875,0.3035 ],
+    "Ruby": [0.00888,0.1725 ],
+    "Rust": [0.01188,0.2446 ],
+    #"Scala": [0.0,28.79 ],
     #["Bash",0,11.02 ],
     #["Swift",0,16.74 ],
-    "Typescript": [3.458,32.15 ],
+    "Typescript": [0.03458,0.3215 ],
 }
 
 START_DATA = { 
-    "Racket": [0.004, 11.77],
-    "Lua": [0.374, 26.61],
-    "OCaml": [0.134, 6.9],
-    "Julia": [0.171, 21.09],
-    "R": [0.039, 10.2],
+    "Racket": [0.00004, 0.1177],
+    "Lua": [0.00374, 0.2661],
+    "OCaml": [0.00134, 0.069],
+    "Julia": [0.00171, 0.2109],
+    "R": [0.00039, 0.102],
 }
 
 TUNED_DATA = {
-    "Racket": [0.004, 21.0],
-    "Lua": [0.374, 31.0],
-    "OCaml": [0.134, 19.9],
-    "Julia": [0.171, 35.2],
-    "R": [0.039, 17.3],
+    "Racket": [0.00004, 0.210],
+    "Lua": [0.00374, 0.310],
+    "OCaml": [0.00134, 0.199],
+    "Julia": [0.00171, 0.352],
+    "R": [0.00039, 0.173],
 }
 
-def plot_data(data, ax: plt.Axes, color="black", marker='o', x_offset=0.0, y_offset=0.5, extra_annot=""):
-    ax.scatter(
-        [x[0] for x in data.values()], 
-        [x[1] for x in data.values()], 
-        marker=marker, 
-        color=color
-    )
-    for p in data.items(): 
-        ax.annotate(p[0]+extra_annot, (p[1][0] + x_offset, p[1][1] + y_offset))
+COLORS = {
+    "Racket": "orange", 
+    "Lua": "green",
+    "OCaml": "blue",
+    "Julia": "purple", 
+    "R": "cyan"
+}
+
+
 
 if __name__ == "__main__":
-    single_fig, sing_ax = plt.subplots(figsize=(10, 6)) 
-    plot_data(BASE_DATA, sing_ax, color="black", marker='o')
-    plot_data(START_DATA, sing_ax, color="green", marker='o')
-    plot_data(TUNED_DATA, sing_ax, color="purple", marker='^', x_offset=-0.5, y_offset=-0.8, extra_annot="(T)")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for (label, data) in BASE_DATA.items():
+        ax.scatter(data[0], data[1], label=label, color="black")
+        ax.annotate(label, (data[0]+0.0015, data[1]))
+    for label in START_DATA:
+        start = START_DATA[label]
+        tuned = TUNED_DATA[label]
+        color = COLORS[label]
+        ax.scatter(start[0], start[1], color=color, alpha=0.5, s=50)
+        ax.scatter(tuned[0], tuned[1], color=color, s=50)
+        ax.annotate(label, (tuned[0]+0.0015, tuned[1]))
+        ax.annotate('', 
+            xy=(tuned[0], tuned[1]), 
+            xytext=(start[0], start[1]),
+            arrowprops=dict(arrowstyle='->', color='grey', linestyle='dashed')
+        )
+        ax.set_xlabel("Fraction of Training Data")
+        ax.set_ylabel("Pass@1 on MultiPL-E HumanEval")
 
-    multi_fig, (max1, max2) = plt.subplots(1, 2, figsize=(10, 6), sharex=True, sharey=True)
 
-    plot_data(BASE_DATA, max1, color="black", marker='o')
-    plot_data(BASE_DATA, max2, color="black", marker='o')
-    plot_data(START_DATA, max1, color="green", marker='^')
-    plot_data(TUNED_DATA, max2, color="green", marker='^')
-    max1.set_title("Before tuning with MultiPL-T")
-    max2.set_title("After tuning with MultiPL-T")
-
-
-    single_fig.savefig("single_freq_graph.png", bbox_inches='tight')
-    multi_fig.savefig("multi_freq_graph.png", bbox_inches='tight')
-
+    fig.savefig("freq_graph.png", bbox_inches='tight')
