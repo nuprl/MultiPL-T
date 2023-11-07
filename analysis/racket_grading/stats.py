@@ -4,6 +4,7 @@ import re
 import glob
 import os
 import gzip
+import argparse
 
 def load_grader_scores(csv_file, max_score=15):
     df = pd.read_csv(csv_file)
@@ -15,6 +16,26 @@ def load_grader_scores(csv_file, max_score=15):
     # make total score int
     df["total score"] = df["total score"].astype(int)
     return df
+
+def load_pair_scores(csv_file):
+    df = pd.read_csv(csv_file)
+    return df.to_dict(orient="records")
+    
+def deanonimize_pairs(pair_list, secret_key_file):
+    key_list = json.load(open(secret_key_file, "r"))
+    keys = {d["id"]:d for d in key_list}
+    deanon_pairs = []
+    for pair in pair_list:
+        id = int(pair["File"].split("_")[-1].split(".rkt")[0].strip())
+        model_A = ("tuned" if keys[id]["model_A"] == "tuned" else "base")
+        model_B = ("tuned" if keys[id]["model_B"] == "tuned" else "base")
+        deanon_pairs.append({"file":pair["File"], model_A:pair["Example A"], model_B:pair["Example B"]})
+        
+    df = pd.DataFrame(deanon_pairs)
+    # add a ROW for total of column "tuned" and "base"
+    df.loc[len(df)] = ["total", df["tuned"].sum(), df["base"].sum()]
+    return df
+    
 
 def deanonimize(df, secret_key_file):
     keys = json.load(open(secret_key_file, "r"))
@@ -32,20 +53,23 @@ def deanonimize(df, secret_key_file):
     
     return df
 
+def file_to_humaneval(filename, grading_dir="rename_grading_dir"):
+    """
+    Rename filenames to match the human eval filenames
+    """
+    def get_name(filename, names):
+        for name in names:
+            if filename.replace(".rkt","") == name.split("/")[-1].split("_HumanEval")[0]:
+                return "HumanEval" + name.split("HumanEval")[-1].split(".rkt")[0]
+        raise Exception(f"Could not find {filename} in {grading_dir}")
+    
+    names = glob.glob(f"{grading_dir}/*.rkt")
+    return get_name(filename, names)
+    
 def get_stats(df):
     """
     Create a df with column names: problem_name, base_model_score, tuned_model_score,
     """
-    def file_to_humaneval(filename, grading_dir="rename_grading_dir"):
-        def get_name(filename, names):
-            for name in names:
-                if filename.replace(".rkt","") == name.split("/")[-1].split("_HumanEval")[0]:
-                    return "HumanEval" + name.split("HumanEval")[-1].split(".rkt")[0]
-            raise Exception(f"Could not find {filename} in {grading_dir}")
-        
-        names = glob.glob(f"{grading_dir}/*.rkt")
-        return get_name(filename, names)
-    
     df["problem"] = df["File"].apply(file_to_humaneval)
     
     df = df[["problem", "model", "total score"]]
@@ -59,12 +83,27 @@ def get_stats(df):
     
     return df
     
+    
+def main(args):
+    if args.do_pair:
+        d = load_pair_scores(args.input)
+        df = deanonimize_pairs(d, args.secret_key)
+        df.to_csv(args.output, index=False)
+    else:
+        df = load_grader_scores(args.input)
+        df = deanonimize(df, args.secret_key)
+        df = get_stats(df)
+        df.to_csv(args.output, index=False)
+    
 
 if __name__ == "__main__":
-    df = load_grader_scores("grader_scoresheet_gouwar.csv")
-    df = deanonimize(df, "secret_key_hash.json")
-    df = get_stats(df)
-    df.to_csv("john_grading_stats.csv", index=False)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input", help="csv file with grader scores")
+    parser.add_argument("output", help="output csv file")
+    parser.add_argument("secret_key", help="json file with secret key")
+    parser.add_argument("--do-pair", action="store_true", help="if true, do pair stats")
+    args = parser.parse_args()
+    main(args)
     
     # # read json.gz file
     # sanity check
