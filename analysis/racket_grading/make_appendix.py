@@ -25,21 +25,50 @@ for i in range(161):
         data.append((humaneval_id_to_name[i], programs[i]["base"], programs[i]["tuned"]))
         
 model_base = ("Base Model", [(humaneval_id_to_name[i], programs[i]["base"]) for i in range(161) if programs[i]["base"] != ""])
-model_tuned = ("Tuned Model", [(humaneval_id_to_name[i], programs[i]["tuned"]) for i in range(161) if programs[i]["tuned"] != ""])
+model_tuned = ("\\system{} Model", [(humaneval_id_to_name[i], programs[i]["tuned"]) for i in range(161) if programs[i]["tuned"] != ""])
 data = [model_base, model_tuned]
+
+
+def remove_comments(code):
+    return "(define" + code.split("(define")[-1].strip()
 
 
 def generate_latex_code(data):
     latex_code = ""
     
-    for model_name, problem_code_pairs in data:
-        latex_code += f"\\textbf{{{model_name}}}\n"
-        for problem, racket_code in problem_code_pairs:
-            latex_code += f"\n\\begin{{lstlisting}}[language=Lisp,caption={problem},captionpos=t,basicstyle=\\ttfamily]\n{racket_code}\n\\end{{lstlisting}}\n\n\n"
+    base = data[0]
+    tuned = data[1]
+    
+    latex_code = """\lstdefinestyle{qual_style}{
+  language=Lisp,
+  tabsize=2,
+  showspaces=false,
+  showstringspaces=false
+}\n\n"""
+
+    for i in range(len(base[1])):
+        
+        problem, racket_code = base[1][i]
+        racket_code = remove_comments(racket_code)
+        heading = base[0] + " - " + " ".join(problem.split( )[:2])
+        latex_code += f"\\textbf{{{heading}}}\n\n"
+        latex_code += "\\vspace{3mm}\n\n"
+        line = f"\n\\begin{{lstlisting}}[basicstyle=\\ttfamily\\small,style=qual_style]\n{racket_code}\n\\end{{lstlisting}}\n\n"
+        latex_code += line + "\\vspace{10mm}\n\n"
+        
+        problem, racket_code = tuned[1][i]
+        racket_code = remove_comments(racket_code)
+        heading = tuned[0] + " - " + " ".join(problem.split( )[:2])
+        latex_code += f"\\textbf{{{heading}}}\n\n"
+        latex_code += "\\vspace{3mm}\n\n"
+        line = f"\n\\begin{{lstlisting}}[basicstyle=\\ttfamily\\small,style=qual_style]\n{racket_code}\n\\end{{lstlisting}}\n\n"
+        latex_code += line
+        
+        latex_code += "\\pagebreak\n\n"
     
     return latex_code
 
 
-table = generate_latex_code(data[:1])
+table = generate_latex_code(data)
 with open("appendix.tex", "w") as f:
     f.write(table)
