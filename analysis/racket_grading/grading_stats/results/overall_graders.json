@@ -1,0 +1,30 @@
+{
+    "grader_1": {
+        "mean_base": 13.457142857142857,
+        "stdev_base": 2.119140463140895,
+        "mean_tuned": 12.857142857142858,
+        "stdev_tuned": 2.390457218668787,
+        "total_base": 471,
+        "total_tuned": 450,
+        "base_total_%": 0.8971428571428571,
+        "tuned_total_%": 0.8571428571428571
+    },
+    "grader_2": {
+        "mean_base": 13.4,
+        "stdev_base": 1.6838331620582423,
+        "mean_tuned": 12.714285714285714,
+        "stdev_tuned": 2.05184893050474,
+        "total_base": 469,
+        "total_tuned": 445,
+        "base_total_%": 0.8933333333333333,
+        "tuned_total_%": 0.8476190476190476
+    },
+    "mean": {
+        "mean_base": 13.428571428571429,
+        "mean_tuned": 12.785714285714285,
+        "total_base": 470.0,
+        "total_tuned": 447.5,
+        "base_total_%": 0.8952380952380952,
+        "tuned_total_%": 0.8523809523809524
+    }
+}

@@ -1,0 +1,102 @@
+{
+    "base": {
+        "[TEXT] Line too long": {
+            "ded": -2.0,
+            "count": 2
+        },
+        "[TEXT] Using car cdr": {
+            "ded": -4.0,
+            "count": 8
+        },
+        "[TEXT] Cond without square brackets": {
+            "ded": -3.0,
+            "count": 6
+        },
+        "[TEXT] Uninformative local names": {
+            "ded": 0,
+            "count": 0
+        },
+        "[DEFNS] let-expr not at topmost start": {
+            "ded": -3.0,
+            "count": 3
+        },
+        "[DEFNS] Nesting let-exprs or defines": {
+            "ded": -15.0,
+            "count": 12
+        },
+        "[DEFNS] Unnecessary let* or letrec exprs": {
+            "ded": 0,
+            "count": 0
+        },
+        "[DEFNS] Unused or useless local vars": {
+            "ded": 0,
+            "count": 0
+        },
+        "[DEFNS] Not defining helpers or local vars": {
+            "ded": -1.0,
+            "count": 2
+        },
+        "[COND] Nested if-expr instead of cond": {
+            "ded": -4.0,
+            "count": 2
+        },
+        "[COND] (if COND #t #f)": {
+            "ded": -1.0,
+            "count": 1
+        },
+        "[TRAV] iteration instead of recursion": {
+            "ded": -3.0,
+            "count": 1
+        }
+    },
+    "tuned": {
+        "[TEXT] Line too long": {
+            "ded": -1.0,
+            "count": 1
+        },
+        "[TEXT] Using car cdr": {
+            "ded": -3.5,
+            "count": 7
+        },
+        "[TEXT] Cond without square brackets": {
+            "ded": -4.0,
+            "count": 8
+        },
+        "[TEXT] Uninformative local names": {
+            "ded": -1.0,
+            "count": 2
+        },
+        "[DEFNS] let-expr not at topmost start": {
+            "ded": -5.5,
+            "count": 6
+        },
+        "[DEFNS] Nesting let-exprs or defines": {
+            "ded": -14.5,
+            "count": 12
+        },
+        "[DEFNS] Unnecessary let* or letrec exprs": {
+            "ded": -3.0,
+            "count": 3
+        },
+        "[DEFNS] Unused or useless local vars": {
+            "ded": -1.0,
+            "count": 1
+        },
+        "[DEFNS] Not defining helpers or local vars": {
+            "ded": -2.0,
+            "count": 3
+        },
+        "[COND] Nested if-expr instead of cond": {
+            "ded": -10.0,
+            "count": 5
+        },
+        "[COND] (if COND #t #f)": {
+            "ded": -2.0,
+            "count": 2
+        },
+        "[TRAV] iteration instead of recursion": {
+            "ded": -9.0,
+            "count": 3
+        }
+    }
+}

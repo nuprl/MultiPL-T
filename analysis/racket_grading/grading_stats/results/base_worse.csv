@@ -1,0 +1,9 @@
+problem,base_model_score_x,tuned_model_score_x,base_model_score_y,tuned_model_score_y,mean_base,abs_diff_base,mean_tuned,abs_diff_tuned
+HumanEval_12_longest,5,10,9,11,7.0,4,10.5,1
+HumanEval_152_compare,14,14,13,14,13.5,1,14.0,0
+HumanEval_153_Strongest_Extension,8,12,11,10,9.5,3,11.0,2
+HumanEval_21_rescale_to_unit,14,14,12,14,13.0,2,14.0,0
+HumanEval_30_get_positive,14,15,14,15,14.0,0,15.0,0
+HumanEval_42_incr_list,14,15,14,15,14.0,0,15.0,0
+HumanEval_4_mean_absolute_deviation,14,15,13,13,13.5,1,14.0,2
+HumanEval_66_digitSum,14,15,15,15,14.5,1,15.0,0
