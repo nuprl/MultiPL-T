@@ -30,7 +30,8 @@ data = [model_base, model_tuned]
 
 
 def remove_comments(code):
-    return "(define" + code.split("(define")[-1].strip()
+    # find the last line with ";;" and remove all before it (including itself)
+    return "\n".join(code.rsplit(";;")[-1].split("\n")[1:])
 
 
 def generate_latex_code(data):
