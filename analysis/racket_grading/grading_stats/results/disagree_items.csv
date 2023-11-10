@@ -1,0 +1,68 @@
+problem,item,grader1,grader2
+prog_0.rkt,[DEFNS] Not defining helpers or local vars,-0.5,0.0
+prog_1.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_1.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_5.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_7.rkt,[DEFNS] Not defining helpers or local vars,-1.0,0.0
+prog_15.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_15.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_18.rkt,[DEFNS] Not defining helpers or local vars,0.0,-1.0
+prog_20.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_22.rkt,[DEFNS] Not defining helpers or local vars,-1.0,0.0
+prog_23.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_25.rkt,[DEFNS] Unused or useless local vars,-1.0,0.0
+prog_25.rkt,[DEFNS] Not defining helpers or local vars,0.0,-1.0
+prog_27.rkt,[DEFNS] Not defining helpers or local vars,-1.0,0.0
+prog_27.rkt,[COND] (if COND #t #f),-0.5,0.0
+prog_28.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_29.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_31.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_31.rkt,[COND] Nested if-expr instead of cond,-0.5,0.0
+prog_33.rkt,[DEFNS] Not defining helpers or local vars,0.0,-1.0
+prog_34.rkt,[TEXT] Line too long,-1.0,0.0
+prog_35.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_36.rkt,[TEXT] Using car cdr,-0.5,0.0
+prog_37.rkt,[TEXT] Using car cdr,-0.5,0.0
+prog_38.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_38.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_38.rkt,[COND] (if COND #t #f),-1.0,0.0
+prog_39.rkt,[TEXT] Line too long,-0.5,0.0
+prog_39.rkt,[COND] (if COND #t #f),-0.5,0.0
+prog_40.rkt,[DEFNS] Not defining helpers or local vars,0.0,-1.0
+prog_43.rkt,[TEXT] Line too long,-0.5,0.0
+prog_44.rkt,[TEXT] Line too long,-1.0,0.0
+prog_44.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_44.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_44.rkt,[DEFNS] Unused or useless local vars,-1.0,0.0
+prog_45.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_45.rkt,[DEFNS] Unused or useless local vars,-1.0,0.0
+prog_46.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_49.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_49.rkt,[TRAV] iteration instead of recursion,-3.0,0.0
+prog_51.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_52.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_52.rkt,[DEFNS] let-expr not at topmost start,0.0,-1.0
+prog_52.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_52.rkt,[DEFNS] Unused or useless local vars,-1.0,0.0
+prog_53.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_54.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_54.rkt,[DEFNS] Not defining helpers or local vars,-1.0,0.0
+prog_54.rkt,[COND] Nested if-expr instead of cond,-2.0,0.0
+prog_56.rkt,[TEXT] Line too long,-1.0,0.0
+prog_56.rkt,[DEFNS] Unused or useless local vars,-1.0,0.0
+prog_56.rkt,[COND] Nested if-expr instead of cond,-2.0,0.0
+prog_57.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_57.rkt,[DEFNS] let-expr not at topmost start,-1.0,0.0
+prog_57.rkt,[DEFNS] Nesting let-exprs or defines,-1.0,-2.0
+prog_57.rkt,[COND] (if COND #t #f),-1.0,0.0
+prog_60.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_60.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_60.rkt,[DEFNS] Unused or useless local vars,-1.0,0.0
+prog_60.rkt,[COND] Nested if-expr instead of cond,-2.0,0.0
+prog_63.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_63.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_67.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_67.rkt,[DEFNS] let-expr not at topmost start,-1.0,0.0
+prog_67.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
+prog_68.rkt,[TEXT] Uninformative local names,-0.5,0.0
+prog_68.rkt,[DEFNS] Nesting let-exprs or defines,0.0,-2.0
