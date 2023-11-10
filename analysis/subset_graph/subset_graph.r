@@ -41,12 +41,12 @@ remap_languae <- function(lang) {
 }
 
 data_files <- c(
-    "../experiments/ocaml_subset_1b/results.csv",
-    "../experiments/ocaml_full_1b/results.csv",
-    "../experiments/rkt_full_1b/results.csv",
-    "../experiments/rkt_subset_1b/results.csv",
-    "../experiments/lua_full_1b/results.csv",
-    "../experiments/lua_subset_1b/results.csv"
+    "../../experiments/ocaml_subset_1b/results.csv",
+    "../../experiments/ocaml_full_1b/results.csv",
+    "../../experiments/rkt_full_1b/results.csv",
+    "../../experiments/rkt_subset_1b/results.csv",
+    "../../experiments/lua_full_1b/results.csv",
+    "../../experiments/lua_subset_1b/results.csv"
 )
 
 
