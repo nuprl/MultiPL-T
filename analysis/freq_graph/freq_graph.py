@@ -35,28 +35,21 @@ TUNED_DATA = {
     "R": [0.00039, 0.173],
 }
 
-COLORS = {
-    "Racket": "orange", 
-    "Lua": "green",
-    "OCaml": "blue",
-    "Julia": "purple", 
-    "R": "cyan"
-}
-
-
 
 if __name__ == "__main__":
     fig, ax = plt.subplots(figsize=(10, 6))
     for (label, data) in BASE_DATA.items():
-        ax.scatter(data[0], data[1], label=label, color="black")
+        ax.scatter(data[0], data[1], label=label, color="black", alpha=0.3, s=50)
         ax.annotate(label, (data[0]+0.0015, data[1]))
     for label in START_DATA:
         start = START_DATA[label]
         tuned = TUNED_DATA[label]
-        color = COLORS[label]
-        ax.scatter(start[0], start[1], color=color, alpha=0.5, s=50)
-        ax.scatter(tuned[0], tuned[1], color=color, s=50)
-        ax.annotate(label, (tuned[0]+0.0015, tuned[1]))
+        ax.scatter(start[0], start[1], color="black", alpha=0.5, s=50)
+        ax.scatter(tuned[0], tuned[1], color="black", s=50)
+        if label == "Racket":
+            ax.annotate(label, (tuned[0]-0.0015, tuned[1]+0.005))
+        else:
+            ax.annotate(label, (tuned[0]+0.0015, tuned[1]))
         ax.annotate('', 
             xy=(tuned[0], tuned[1]), 
             xytext=(start[0], start[1]),
@@ -65,5 +58,5 @@ if __name__ == "__main__":
         ax.set_xlabel("Fraction of Training Data")
         ax.set_ylabel("Pass@1 on MultiPL-E HumanEval")
 
-
-    fig.savefig("freq_graph.png", bbox_inches='tight')
+    # save image as a pdf 
+    fig.savefig("freq_graph.pdf", bbox_inches='tight')
