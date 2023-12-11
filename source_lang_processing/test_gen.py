@@ -41,7 +41,7 @@ if args.engine == "hf":
 elif args.engine == "openai":
     codegen = GPTCodeGen(args.model)
 elif args.engine == "vllm":
-    codegen = VLLMCodeGen(args.model, accelerator, args.seq_len, args.load_in_8bit)
+    codegen = VLLMCodeGen(args.model)
 assert codegen is not None
 
 accelerator.wait_for_everyone()  # wait for model to be loaded
