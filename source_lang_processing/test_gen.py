@@ -1,4 +1,5 @@
 import datasets
+import os
 from tree_sitter_parser import global_parser, node_to_string, get_fn_name
 from assert_test import capture_assertions, assert_block_start
 import time
@@ -12,7 +13,8 @@ from codegen import HFCodeGen, GPTCodeGen, VLLMCodeGen
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str,
                     default="bigcode/starcoder")
-parser.add_argument("--engine", type=str, default="hf", choices=["hf", "openai", "vllm"])
+parser.add_argument("--engine", type=str, default="hf",
+                    choices=["hf", "openai", "vllm"])
 parser.add_argument("--num_comps", type=int, default=5)
 parser.add_argument("--dataset", type=str,
                     default="nuprl/stack-dedup-python-fns-returns-typechecks")
@@ -33,11 +35,23 @@ ds = datasets.load_dataset(args.dataset, split="train")
 ds = ds.shuffle()
 
 
-accelerator = Accelerator()
+class BootLegAccelerator:
+    # fake accelerator, when using --engine vllm
+    def __init__(self):
+        self.num_processes = os.environ.get("WORLD_SIZE", 1)
+        self.process_index = os.environ.get("RANK", 0)
+        self.is_main_process = self.process_index == 0
+
+
+if args.engine == "vllm":
+    accelerator = BootLegAccelerator()
+else:
+    accelerator = Accelerator()
 
 codegen = None
 if args.engine == "hf":
-    codegen = HFCodeGen(args.model, accelerator, args.seq_len, args.load_in_8bit)
+    codegen = HFCodeGen(args.model, accelerator,
+                        args.seq_len, args.load_in_8bit)
 elif args.engine == "openai":
     codegen = GPTCodeGen(args.model)
 elif args.engine == "vllm":
