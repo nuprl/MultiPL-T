@@ -1,9 +1,10 @@
+from typing import List
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
 
 class CodeGen:
-    def code_complete(self, prompts, temp):
+    def code_complete(self, prompts: List[str], temp):
         raise NotImplementedError
 
 
@@ -11,7 +12,7 @@ class GPTCodeGen(CodeGen):
     def __init__(self, model):
         self.model = model
 
-    def code_complete(self, prompts, temp=0.75):
+    def code_complete(self, prompts: List[str], temp=0.75):
         import os
         import openai
         openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -43,7 +44,7 @@ class GPTCodeGen(CodeGen):
 
 
 class HFCodeGen(CodeGen):
-    def __init__(self, model, accelerator,  seq_len, load_in_8bit=False):
+    def __init__(self, model, accelerator, seq_len, load_in_8bit=False):
         model_kwargs = {}
         if load_in_8bit:
             from transformers import BitsAndBytesConfig
@@ -69,7 +70,7 @@ class HFCodeGen(CodeGen):
         self.max_new_tokens = 400
         self.accelerator = accelerator
 
-    def code_complete(self, prompts, temp=0.2):
+    def code_complete(self, prompts: List[str], temp=0.2):
         with torch.no_grad():
             tokens = self.tokenizer(
                 prompts,
@@ -88,3 +89,49 @@ class HFCodeGen(CodeGen):
                 pad_token_id=self.tokenizer.eos_token_id
             )
             return self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
+
+def autodetect_dtype() -> str:  # for vllm only
+    if torch.cuda.is_bf16_supported():
+        return "bfloat16"
+    else:
+        return "auto"
+
+    #  def edit_model_generate(self, model: LLM, str_prompts: List[str], **kwargs) -> List[RequestOutput]:
+        #  kwargs_gen = kwargs.copy()
+        #  if "declaration" in kwargs_gen:
+        #  del kwargs_gen["declaration"]
+        #  use_tqdm = kwargs_gen.pop("use_tqdm", False)
+        #  gens = model.generate(
+        #  prompts=str_prompts,
+        #  sampling_params=SamplingParams(
+        #  top_p=kwargs_gen.pop("top_p", 0.95),
+        #  temperature=kwargs_gen.pop("temperature", 0.2),
+        #  max_tokens=kwargs_gen.pop("max_tokens", 1024),
+        #  **kwargs_gen
+        #  ),
+        #  use_tqdm=use_tqdm,
+        #  )
+        #  return gens
+
+
+class VLLMCodeGen(CodeGen):
+    def __init__(self, model):
+        from vllm import LLM
+        self.model_name = model
+        self.model = LLM(
+            self.model_name,
+            dtype=autodetect_dtype(),
+        )
+
+    def code_complete(self, prompts: List[str], temp=0.2):
+        from vllm import SamplingParams
+        gens = self.model.generate(
+            prompts=prompts,
+            sampling_params=SamplingParams(
+                top_p=0.95,
+                temperature=temp,
+                max_tokens=1024,
+            ),
+        )
+        return [g.outputs[0].text for g in gens]

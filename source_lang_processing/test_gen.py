@@ -12,6 +12,7 @@ from codegen import HFCodeGen, GPTCodeGen
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str,
                     default="bigcode/starcoder")
+parser.add_argument("--engine", type=str, default="hf", choices=["hf", "openai", "vllm"])
 parser.add_argument("--num_comps", type=int, default=5)
 parser.add_argument("--dataset", type=str,
                     default="nuprl/stack-dedup-python-fns-returns-typechecks")
@@ -34,12 +35,14 @@ ds = ds.shuffle()
 
 accelerator = Accelerator()
 
-# if openai model, use GPTCodeGen, else use HFCodeGen
-if args.model == "gpt-4" or args.model == "gpt-3.5-turbo":
+codegen = None
+if args.engine == "hf":
+    codegen = HFCodeGen(args.model, accelerator, args.seq_len, args.load_in_8bit)
+elif args.engine == "openai":
     codegen = GPTCodeGen(args.model)
-else:
-    codegen = HFCodeGen(args.model, accelerator,
-                        args.seq_len, args.load_in_8bit)
+elif args.engine == "vllm":
+    raise NotImplementedError("VLLM not implemented yet")
+assert codegen is not None
 
 accelerator.wait_for_everyone()  # wait for model to be loaded
 
