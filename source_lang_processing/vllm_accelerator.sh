@@ -30,3 +30,4 @@ for i in $(seq 0 $((NUM_GPUS-1))); do
     CUDA_VISIBLE_DEVICES=$GPU WORLD_SIZE=$NUM_GPUS RANK=$i python -u $@ &
     PIDS+=($!)
 done
+wait
