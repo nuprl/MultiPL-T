@@ -42,6 +42,9 @@ class BootLegAccelerator:
         self.process_index = os.environ.get("RANK", 0)
         self.is_main_process = self.process_index == 0
 
+    def wait_for_everyone(self):
+        pass
+
 
 if args.engine == "vllm":
     accelerator = BootLegAccelerator()
