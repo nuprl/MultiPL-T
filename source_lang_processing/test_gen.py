@@ -7,7 +7,7 @@ import argparse
 import json
 import zmq
 from code_exec_server.code_exec_reqs import exec_test, run_coverage
-from codegen import HFCodeGen, GPTCodeGen
+from codegen import HFCodeGen, GPTCodeGen, VLLMCodeGen
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", type=str,
@@ -41,7 +41,7 @@ if args.engine == "hf":
 elif args.engine == "openai":
     codegen = GPTCodeGen(args.model)
 elif args.engine == "vllm":
-    raise NotImplementedError("VLLM not implemented yet")
+    codegen = VLLMCodeGen(args.model, accelerator, args.seq_len, args.load_in_8bit)
 assert codegen is not None
 
 accelerator.wait_for_everyone()  # wait for model to be loaded
