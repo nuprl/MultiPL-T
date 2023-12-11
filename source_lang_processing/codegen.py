@@ -97,24 +97,6 @@ def autodetect_dtype() -> str:  # for vllm only
     else:
         return "auto"
 
-    #  def edit_model_generate(self, model: LLM, str_prompts: List[str], **kwargs) -> List[RequestOutput]:
-        #  kwargs_gen = kwargs.copy()
-        #  if "declaration" in kwargs_gen:
-        #  del kwargs_gen["declaration"]
-        #  use_tqdm = kwargs_gen.pop("use_tqdm", False)
-        #  gens = model.generate(
-        #  prompts=str_prompts,
-        #  sampling_params=SamplingParams(
-        #  top_p=kwargs_gen.pop("top_p", 0.95),
-        #  temperature=kwargs_gen.pop("temperature", 0.2),
-        #  max_tokens=kwargs_gen.pop("max_tokens", 1024),
-        #  **kwargs_gen
-        #  ),
-        #  use_tqdm=use_tqdm,
-        #  )
-        #  return gens
-
-
 class VLLMCodeGen(CodeGen):
     def __init__(self, model):
         from vllm import LLM
