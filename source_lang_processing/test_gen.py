@@ -38,8 +38,8 @@ ds = ds.shuffle()
 class BootLegAccelerator:
     # fake accelerator, when using --engine vllm
     def __init__(self):
-        self.num_processes = os.environ.get("WORLD_SIZE", 1)
-        self.process_index = os.environ.get("RANK", 0)
+        self.num_processes = int(os.environ.get("WORLD_SIZE", 1))
+        self.process_index = int(os.environ.get("RANK", 0))
         self.is_main_process = self.process_index == 0
 
     def wait_for_everyone(self):
