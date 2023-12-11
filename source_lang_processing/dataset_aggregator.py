@@ -31,7 +31,7 @@ client_ids = set()
 def push():
     new_ds_hf = datasets.Dataset.from_dict(new_ds)
     try:
-        new_ds_hf.push_to_hub(args.name)
+        new_ds_hf.push_to_hub(args.name, private=True)
     except Exception as e:
         print(e)
 
