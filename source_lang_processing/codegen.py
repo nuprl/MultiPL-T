@@ -114,7 +114,7 @@ class VLLMCodeGen(CodeGen):
             sampling_params=SamplingParams(
                 top_p=0.95,
                 temperature=temp,
-                max_tokens=1024,
+                max_tokens=512,
             ),
         )
         return [g.outputs[0].text for g in gens]
