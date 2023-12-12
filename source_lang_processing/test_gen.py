@@ -1,5 +1,6 @@
 import datasets
 import os
+import random
 from tree_sitter_parser import global_parser, node_to_string, get_fn_name
 from assert_test import capture_assertions, assert_block_start
 import time
@@ -123,9 +124,11 @@ for i, ex in enumerate(ds):
         existing_tests.append(e_tests)
         name = get_fn_name(code)
         names.append(name)
-        tests_start = assert_block_start(name, existing_tests=e_tests)
-        code_with_tests = code + tests_start
-        this_prompts = [code_with_tests] * args.num_comps
+        this_prompts = []
+        for i in range(args.num_comps):
+            tests_start = assert_block_start(name, existing_tests=random.shuffle(e_tests))
+            code_with_tests = code + tests_start
+            this_prompts.append(code_with_tests)
         prompts.extend(this_prompts)
 
     start_time = time.time()
