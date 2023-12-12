@@ -126,7 +126,9 @@ for i, ex in enumerate(ds):
         names.append(name)
         this_prompts = []
         for i in range(args.num_comps):
-            tests_start = assert_block_start(name, existing_tests=random.shuffle(e_tests))
+            e_tests_copy = list(e_tests)
+            random.shuffle(e_tests_copy)
+            tests_start = assert_block_start(name, existing_tests=e_tests_copy)
             code_with_tests = code + tests_start
             this_prompts.append(code_with_tests)
         prompts.extend(this_prompts)
