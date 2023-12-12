@@ -41,7 +41,11 @@ num = 0
 while True:
     print("Waiting for request...")
     message = socket.recv()
-    req = json.loads(message)
+    try:
+        req = json.loads(message)
+    except Exception as e:
+        print(e)
+        continue
     if req["type"] == "exit":
         pid = req["process_id"]
         print(f"Process {pid} exited")
