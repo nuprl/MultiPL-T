@@ -16,6 +16,7 @@ parser.add_argument("--model", type=str,
 parser.add_argument("--engine", type=str, default="hf",
                     choices=["hf", "openai", "vllm"])
 parser.add_argument("--num_comps", type=int, default=5)
+parser.add_argument("--num_gpus", type=int, default=1, help="Number of GPUs to use, only used with VLLM")
 parser.add_argument("--dataset", type=str,
                     default="nuprl/stack-dedup-python-fns-returns-typechecks")
 parser.add_argument("--batch_size", type=int, default=1)
@@ -58,7 +59,7 @@ if args.engine == "hf":
 elif args.engine == "openai":
     codegen = GPTCodeGen(args.model)
 elif args.engine == "vllm":
-    codegen = VLLMCodeGen(args.model)
+    codegen = VLLMCodeGen(args.model, args.num_gpus)
 assert codegen is not None
 
 accelerator.wait_for_everyone()  # wait for model to be loaded

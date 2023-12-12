@@ -98,12 +98,13 @@ def autodetect_dtype() -> str:  # for vllm only
         return "auto"
 
 class VLLMCodeGen(CodeGen):
-    def __init__(self, model):
+    def __init__(self, model, num_gpus):
         from vllm import LLM
         self.model_name = model
         self.model = LLM(
             self.model_name,
             dtype=autodetect_dtype(),
+            tensor_parallel_size=num_gpus,
         )
 
     def code_complete(self, prompts: List[str], temp=0.2):
