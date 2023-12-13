@@ -58,6 +58,7 @@ class HFCodeGen(CodeGen):
             model,
             device_map=accelerator.device,
             torch_dtype=torch.float16,
+            use_flash_attention_2=True,
             **model_kwargs
         )
         self.tokenizer = AutoTokenizer.from_pretrained(
