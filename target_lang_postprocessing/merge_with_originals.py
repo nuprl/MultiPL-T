@@ -46,6 +46,5 @@ for sample in dataset:
 
 new_ds = datasets.Dataset.from_list(new_ds)
 print(new_ds)
-# print a sample pass and original
-print(new_ds[0]["original"])
-print(new_ds[0]["pass"][0])
+
+new_ds.push_to_hub(args.push, private=True)
