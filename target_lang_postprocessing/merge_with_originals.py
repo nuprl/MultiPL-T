@@ -31,4 +31,14 @@ dataset = datasets.load_dataset(args.dataset, split="train")
 ids_to_file = {}
 for file in Path(args.originals_dir).rglob("*"):
     e_id = int(file.name.split("_")[1])
-    print(e_id)
+    ids_to_file[e_id] = get_impl(file.read_text())
+
+
+originals = []
+for i, sample in enumerate(dataset):
+    e_id = sample["id"]
+    impl = ids_to_file[e_id]
+    originals.append(impl)
+
+new_ds = dataset.add_column("original", originals)
+print(new_ds)
