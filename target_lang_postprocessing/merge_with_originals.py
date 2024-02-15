@@ -34,13 +34,17 @@ for file in Path(args.originals_dir).rglob("*"):
     ids_to_file[e_id] = get_impl(file.read_text())
 
 
-originals = []
-for i, sample in enumerate(dataset):
+new_ds = []
+for sample in dataset:
     e_id = sample["id"]
+    if e_id not in ids_to_file:
+        continue
     impl = ids_to_file[e_id]
-    originals.append(impl)
 
-new_ds = dataset.add_column("original", originals)
+    new_ds.append({"original": impl, **sample})
+
+
+new_ds = dataset.Dataset.from_list(new_ds)
 print(new_ds)
 # print a sample pass and original
 print(new_ds[0]["original"])
