@@ -42,3 +42,6 @@ for i, sample in enumerate(dataset):
 
 new_ds = dataset.add_column("original", originals)
 print(new_ds)
+# print a sample pass and original
+print(new_ds[0]["original"])
+print(new_ds[0]["pass"][0])
