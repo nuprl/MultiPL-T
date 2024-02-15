@@ -44,7 +44,7 @@ for sample in dataset:
     new_ds.append({"original": impl, **sample})
 
 
-new_ds = dataset.Dataset.from_list(new_ds)
+new_ds = datasets.Dataset.from_list(new_ds)
 print(new_ds)
 # print a sample pass and original
 print(new_ds[0]["original"])
