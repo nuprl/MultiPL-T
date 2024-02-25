@@ -74,7 +74,7 @@ if [[ $STAGES == *"generate"* ]]; then
           --use-local \
           --dataset ../MultiPL-T/multipl_e_target_adaptor/$LANG-prompts.jsonl \
           --completion-limit 50 \
-          --batch-size 50 \
+          --batch-size 500 \
           --temperature 0.8 \
           --output-dir $OUT \
           --input-start-index $START_INDEX \
