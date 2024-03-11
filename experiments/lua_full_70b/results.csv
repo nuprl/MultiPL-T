@@ -1,0 +1,5 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+baseline,1,0.417,161,20,20
+eval_lua_checkpoint-131,1,0.44906832298136645,161,20,20
+eval_lua_checkpoint-262,1,0.4307453416149069,161,20,20
+eval_lua_checkpoint-393,1,0.3863354037267081,161,20,20

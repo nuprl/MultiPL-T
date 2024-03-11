@@ -1,0 +1,7 @@
+Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+cl70b_ml,1,0.23232258064516123,155,100,100
+eval_ocaml_checkpoint-103,1,0.2664516129032258,155,20,20
+eval_ocaml_checkpoint-206,1,0.2716129032258064,155,20,20
+eval_ocaml_checkpoint-309,1,0.2719354838709677,155,20,20
+eval_ocaml_checkpoint-412,1,0.26838709677419353,155,20,20
+eval_ocaml_checkpoint-515,1,0.2929032258064516,155,20,20
