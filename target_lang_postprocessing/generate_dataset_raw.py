@@ -11,7 +11,6 @@ pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
 pa.add_argument("--lang", type=str, required=True)
-pa.add_argument("--min_tests", type=int, default=3)
 args = pa.parse_args()
 
 funcs = []
