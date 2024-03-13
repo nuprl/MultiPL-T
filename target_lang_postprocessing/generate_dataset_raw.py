@@ -14,6 +14,7 @@ pa.add_argument("--lang", type=str, required=True)
 args = pa.parse_args()
 
 funcs = []
+statuses = []
 ids = []
 
 
@@ -33,18 +34,23 @@ for path in tqdm(make_path_iterator(), total=len(list(make_path_iterator()))):
     tests_code = data["tests"]
 
     sols = []
+    _statuses = []
 
     for res in results:
         sol = clean_sol_prompt(args.lang, res["program"])
+        status = res["exit_code"] == 0
         sols.append(sol)
+        _statuses.append(status)
 
-    funcs.append(sols)
-    ids.append(e_id)
+    funcs.extend(sols)
+    ids.extend([e_id] * len(sols))
+    statuses.extend(_statuses)
 
 new_ds = datasets.Dataset.from_dict(
     {
         "id": ids,
         "content": funcs,
+        "status": statuses
     }
 )
 print(len(new_ds))
