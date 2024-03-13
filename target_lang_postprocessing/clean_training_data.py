@@ -10,6 +10,13 @@ import re
 
 def clean_racket(sol):
     content_lines = sol.split("\n")
+    # find "(require rackunit)" line
+    # remove everything after that
+    for i, line in enumerate(content_lines):
+        if "(require rackunit)" in line:
+            content_lines = content_lines[:i]
+            break
+
     # regex to recognize linestart ;; #
     canon_regex = re.compile(r"^\s*;;\s*#.*$")
     comment_line = re.compile(r"^\s*;;\s*$")
