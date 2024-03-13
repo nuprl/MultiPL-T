@@ -44,7 +44,7 @@ for path in tqdm(make_path_iterator(), total=len(list(make_path_iterator()))):
 new_ds = datasets.Dataset.from_dict(
     {
         "id": ids,
-        "pass": funcs,
+        "content": funcs,
     }
 )
 print(len(new_ds))
