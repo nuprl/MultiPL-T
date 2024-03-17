@@ -35,6 +35,7 @@ def main_with_args(
     model_path: str,
     seed_dataset_path: Path,
     generated_dataset_path: Path,
+    batch_size: int,
     max_generated: int):
 
     seed_dataset = read_jsonl(seed_dataset_path)
@@ -46,22 +47,24 @@ def main_with_args(
     
     with open(generated_dataset_path, "a") as f:
         while len(generated_dataset) < max_generated:
-            prompt = build_prompt(seed_dataset, generated_dataset)
+            prompts = [ build_prompt(seed_dataset, generated_dataset) for _ in range(batch_size) ]
             if model is None:
                 model = LLM(model=model_path, dtype=torch.bfloat16, gpu_memory_utilization=0.95)
-            outputs = model.generate(prompt, params, use_tqdm=False)
-            output = ";;" + outputs[0].outputs[0].text.rstrip()
-            new_item = { "content": output }
-            generated_dataset.append(new_item)
-            f.write(json.dumps(new_item) + "\n")
+            outputs = model.generate(prompts, params, use_tqdm=False)
+            for item in outputs:
+                new_item = { "content": ";;" + item.outputs[0].text.rstrip() }
+                generated_dataset.append(new_item)
+                f.write(json.dumps(new_item) + "\n")
             f.flush()
-            print(f"Generated 1 new item. Total: {len(generated_dataset)}")
+            print(f"Generated {batch_size} new items. Total: {len(generated_dataset)}")
     
 def main():
     main_with_args(
-        model_path="/work/arjunguha-research-group/arjun/models/starcoderbase",
+        #model_path="/work/arjunguha-research-group/arjun/models/starcoderbase",
+        model_path="/home/arjun/models/starcoderbase",
         seed_dataset_path=Path("./multipl_humaneval_rkt_seeds.jsonl"),
         generated_dataset_path=Path("./generated.jsonl"),
+        batch_size=64,
         max_generated=50_000
     )
 
