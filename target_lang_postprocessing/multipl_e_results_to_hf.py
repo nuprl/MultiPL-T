@@ -7,7 +7,7 @@ import os
 import gzip
 import multiprocessing
 import random
-from progressbar import progressbar
+from tqdm import tqdm
 from pathlib import Path
 from dedup_solutions import rouge_dedup
 from code_scorer.inference import CodeScorer
@@ -17,7 +17,8 @@ from argparse import ArgumentParser
 pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
-pa.add_argument("--strategy", type=str, default="dedup")
+pa.add_argument("--strategy", type=str, default="dedup",
+                choices=["dedup", "dedup_best", "best", "random"])
 pa.add_argument("--global_dedup", action="store_true")
 pa.add_argument("--global_dedup_prob", type=float, default=0.35,
                 help="the probability that a pair of examples will not be deduplicated, despite being similar. higher results in a more aggressive and slower deduplication.")
@@ -69,6 +70,8 @@ def make_path_iterator(): return Path(args.path).glob("**/*.results.json.gz")
 
 
 RE_DIGITS = re.compile(r"\d+")
+
+
 def process_path(path):
     with gzip.open(path, "rt") as f:
         data = json.load(f)
@@ -125,6 +128,11 @@ def process_path(path):
             best, best_score = get_best_sol(scores, sols)
             sols = [best]
             edu_scores.append(best_score)
+        elif args.strategy == "random":
+            # picks random one
+            sol = random.choice(sols)
+            sols = [sol]
+            edu_scores.append(0)
 
     obj_sols: List[Solution] = []
     for sol, score in zip(sols, edu_scores):
@@ -149,7 +157,7 @@ THREADS = os.cpu_count() - 1  # type: ignore
 pool = multiprocessing.Pool(THREADS)
 if args.no_threading:
     iter_size = len(list(make_path_iterator()))
-    for path in progressbar(make_path_iterator(), max_value=iter_size):
+    for path in tqdm(make_path_iterator(), max_value=iter_size):
         solns, has_at_least_one_passing = process_path(path)
         solutions.extend(solns)
         if has_at_least_one_passing:
@@ -157,7 +165,7 @@ if args.no_threading:
 else:
     batch = []
     iter_size = len(list(make_path_iterator()))
-    for i, path in progressbar(enumerate(make_path_iterator()), max_value=iter_size):
+    for i, path in tqdm(enumerate(make_path_iterator()), max_value=iter_size):
         batch.append(path)
         if len(batch) >= args.processing_batch or i == iter_size - 1:
             solns = pool.map(process_path, batch)
@@ -179,7 +187,7 @@ if args.global_dedup:
     dedup_rounds = compute_rounds(
         len(solutions), dedup_group_size, args.global_dedup_prob)
     prev_num_sols = len(solutions)
-    for rnd in progressbar(range(dedup_rounds)):
+    for rnd in tqdm(range(dedup_rounds)):
         print(
             f" #### global dedup round {rnd+1}/{dedup_rounds}. current num solutions: {len(solutions)} ####")
         # shuffle solutions
@@ -213,7 +221,7 @@ if args.strategy == "dedup" and not args.no_score:
     assert scorer is not None
     print(" #### scoring solutions #### ")
     def make_score_iterator(): return range(0, len(solutions), args.score_batch)
-    for i in progressbar(make_score_iterator(), max_value=len(list(make_score_iterator()))):
+    for i in tqdm(make_score_iterator(), max_value=len(list(make_score_iterator()))):
         batch = solutions[i: i + args.score_batch]
         scores = scorer.score([sol.code for sol in batch])
         for sol, score in zip(batch, scores):
