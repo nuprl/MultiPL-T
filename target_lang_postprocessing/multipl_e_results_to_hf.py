@@ -31,12 +31,7 @@ pa.add_argument("--no_score", action="store_true")
 pa.add_argument("--no_threading", action="store_true")
 args = pa.parse_args()
 
-possible_strategies = ["dedup", "dedup_best", "best"]
-if args.strategy not in possible_strategies:
-    assert False, f"invalid strategy {args.strategy}, must be one of {possible_strategies}"
-
 num_has_at_least_one_passing = 0
-
 
 class Solution:
     def __init__(self, code, score, original_id, pass_rate, tests, failing=None):
