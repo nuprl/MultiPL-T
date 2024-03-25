@@ -98,11 +98,13 @@ def clean_julia(sol):
     sol = sol[:sol.find("\nusing Test")]
     sol_lines = sol.split("\n")
     if "## Canonical Python Solution ##" in sol_lines[0]:
+        not_canonical_i = None
         for i, line in enumerate(sol_lines[1:]):
             r_i = i + 1
             if not line.strip().startswith("#"):
                 not_canonical_i = r_i
                 break
+        assert not_canonical_i
         sol_lines = sol_lines[not_canonical_i:]
         sol_lines = ['"""'] + sol_lines
     sol_lines = [line for line in sol_lines if line.rstrip() != ""]
@@ -113,10 +115,14 @@ def clean_r(sol):
     sol = sol[:sol.find("\ntest_humaneval")]
     sol_lines = sol.split("\n")
     if "## Canonical Python Solution ##" in sol_lines[0]:
+        not_canonical_i = None
         for i, line in enumerate(sol_lines[1:]):
             r_i = i + 1
             if line.count("#") < 2:
-                not_canonical_i = r_i
+                not_canonical_i = r_i + 1
+                break
+
+        assert not_canonical_i
         sol_lines = sol_lines[not_canonical_i:]
     sol_lines = [line for line in sol_lines if line.rstrip() != ""]
     return "\n".join(sol_lines)   # since end is the stop token
