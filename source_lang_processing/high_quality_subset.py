@@ -111,7 +111,7 @@ def main(args):
             batch = []
 
     new_ds_hf = datasets.Dataset.from_dict(new_ds)
-    new_ds_hf.push_to_hub(args.push)
+    new_ds_hf.push_to_hub(args.push, private=True)
 
 
 if __name__ == "__main__":
