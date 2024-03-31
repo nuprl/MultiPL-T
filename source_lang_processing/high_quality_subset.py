@@ -66,13 +66,19 @@ def typecheck_batch(files: List[str]) -> Dict[str, str]:
 
         if no_py in filemap:
             del filemap[no_py]
-
+    
+    print(f"Pass rate: {len(filemap)}/{len(files)}")
+        
     return filemap
 
 
 def infer_imports(code: str) -> str:
     import autoimport
-    return autoimport.fix_code(code)
+    try:
+        return autoimport.fix_code(code)
+    except Exception as e:
+        print(f"Error while inferring imports: {e}")
+        return code
 
 
 def main(args):
