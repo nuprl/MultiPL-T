@@ -85,7 +85,6 @@ def main(args):
     ds = datasets.load_dataset(args.dataset,
                                data_dir="data", split="train")
 
-    BATCH_SIZE = 1000
     batch = []
     max_i = len(ds) - 1
 
@@ -106,7 +105,7 @@ def main(args):
             continue
         batch.append(code)
 
-        if len(batch) == BATCH_SIZE or i == max_i:
+        if len(batch) == args.batch_size or i == max_i:
             filemap = typecheck_batch(batch)
             for sha1, contents in filemap.items():
                 new_ds["content"].append(contents)
@@ -128,5 +127,7 @@ if __name__ == "__main__":
         "--push", type=str, default="nuprl/stack-dedup-python-fns-returns-typechecks")
     parser.add_argument(
         "--infer-imports", action="store_true", help="Infer imports for functions")
+    parser.add_argument(
+        "--batch-size", type=int, default=250, help="Batch size for typechecking")
     args = parser.parse_args()
     main(args)
