@@ -2,10 +2,11 @@ import datasets
 import subprocess
 import tempfile
 import hashlib
-import time
 import os
+import argparse
 from has_return import does_have_return
-from typing import List, Tuple, Dict
+from typing import List, Dict
+from tqdm import tqdm
 
 
 # runs pyright in the given directory, returns stdout
@@ -69,54 +70,57 @@ def typecheck_batch(files: List[str]) -> Dict[str, str]:
     return filemap
 
 
-ds = datasets.load_dataset("nuprl/stack-dedup-python-fns",
-                           data_dir="data", split="train")
-
-BATCH_SIZE = 1000
-batch = []
-max_i = len(ds) - 1
-
-new_ds = {
-    "content": [],
-    "sha1": [],
-    "id": [],
-}
-
-e_id = 0
+def infer_imports(code: str) -> str:
+    import autoimport
+    return autoimport.fix_code(code)
 
 
-def estimate_time_to_finish(start_time, end_time, i, max_i):
-    elapsed_time = end_time - start_time
-    remaining_items = max_i - i
-    remaining_batches = remaining_items / \
-        BATCH_SIZE if remaining_items % BATCH_SIZE == 0 else remaining_items // BATCH_SIZE + 1
-    est_time = elapsed_time * remaining_batches
-    return est_time
+def main(args):
+    ds = datasets.load_dataset(args.dataset,
+                               data_dir="data", split="train")
+
+    BATCH_SIZE = 1000
+    batch = []
+    max_i = len(ds) - 1
+
+    new_ds = {
+        "content": [],
+        "sha1": [],
+        "id": [],
+    }
+
+    e_id = 0
+
+    for i, ex in enumerate(tqdm(ds, total=len(ds))):
+        code = ex["content"]
+        if args.infer_imports:
+            code = infer_imports(code)
+
+        if not does_have_return(code):
+            continue
+        batch.append(code)
+
+        if len(batch) == BATCH_SIZE or i == max_i:
+            filemap = typecheck_batch(batch)
+            for sha1, contents in filemap.items():
+                new_ds["content"].append(contents)
+                new_ds["sha1"].append(sha1)
+                new_ds["id"].append(e_id)
+                e_id += 1
+
+            batch = []
+
+    new_ds_hf = datasets.Dataset.from_dict(new_ds)
+    new_ds_hf.push_to_hub(args.push)
 
 
-for i, ex in enumerate(ds):
-    code = ex["content"]
-
-    if not does_have_return(code):
-        continue
-    batch.append(code)
-
-    if len(batch) == BATCH_SIZE or i == max_i:
-        start_time = time.time()
-        filemap = typecheck_batch(batch)
-        for sha1, contents in filemap.items():
-            new_ds["content"].append(contents)
-            new_ds["sha1"].append(sha1)
-            new_ds["id"].append(e_id)
-            e_id += 1
-
-        end_time = time.time()
-        print(
-            f"[{i}] Finished batch (num typecheck: {len(filemap)}) {i} of {max_i} ({i/max_i})")
-        print(f"[{i}] Took: {end_time - start_time} (est to finish: {estimate_time_to_finish(start_time, end_time, i, max_i)})")
-        batch = []
-
-
-
-new_ds_hf = datasets.Dataset.from_dict(new_ds)
-new_ds_hf.push_to_hub("nuprl/stack-dedup-python-fns-returns-typechecks")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", type=str,
+                        default="nuprl/stack-dedup-python-fns")
+    parser.add_argument(
+        "--push", type=str, default="nuprl/stack-dedup-python-fns-returns-typechecks")
+    parser.add_argument(
+        "--infer-imports", action="store_true", help="Infer imports for functions")
+    args = parser.parse_args()
+    main(args)
