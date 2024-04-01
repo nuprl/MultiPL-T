@@ -66,16 +66,25 @@ def typecheck_batch(files: List[str]) -> Dict[str, str]:
 
         if no_py in filemap:
             del filemap[no_py]
-    
+
     print(f"Pass rate: {len(filemap)}/{len(files)}")
-        
+
     return filemap
 
 
 def infer_imports(code: str) -> str:
     import autoimport
+    import signal
+
+    def handler(signum, frame):
+        raise Exception("Timeout")
+
     try:
-        return autoimport.fix_code(code)
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(10)
+        inferred = autoimport.fix_code(code)
+        signal.alarm(0)
+        return inferred
     except Exception as e:
         print(f"Error while inferring imports: {e}")
         return code
