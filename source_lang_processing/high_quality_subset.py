@@ -1,6 +1,7 @@
 import datasets
 import subprocess
 import tempfile
+import signal
 import hashlib
 import os
 import argparse
@@ -74,16 +75,9 @@ def typecheck_batch(files: List[str]) -> Dict[str, str]:
 
 def infer_imports(code: str) -> str:
     import autoimport
-    import signal
-
-    def handler(signum, frame):
-        raise Exception("Timeout")
 
     try:
-        signal.signal(signal.SIGALRM, handler)
-        signal.alarm(10)
         inferred = autoimport.fix_code(code)
-        signal.alarm(0)
         return inferred
     except Exception as e:
         print(f"Error while inferring imports: {e}")
@@ -105,24 +99,36 @@ def main(args):
 
     e_id = 0
 
+    def handler(signum, frame):
+        raise Exception("Timeout")
+
     for i, ex in enumerate(tqdm(ds, total=len(ds))):
-        code = ex["content"]
-        if args.infer_imports:
-            code = infer_imports(code)
+        try:
+            signal.signal(signal.SIGALRM, handler)
+            signal.alarm(240)
+            code = ex["content"]
+            if args.infer_imports:
+                code = infer_imports(code)
 
-        if not does_have_return(code):
+            has_ret = does_have_return(code)
+            if not has_ret:
+                continue
+
+            batch.append(code)
+            signal.alarm(0)
+
+            if len(batch) == args.batch_size or i == max_i:
+                filemap = typecheck_batch(batch)
+                for sha1, contents in filemap.items():
+                    new_ds["content"].append(contents)
+                    new_ds["sha1"].append(sha1)
+                    new_ds["id"].append(e_id)
+                    e_id += 1
+
+                batch = []
+        except Exception as e:
+            print(f"There was an error: {e}")
             continue
-        batch.append(code)
-
-        if len(batch) == args.batch_size or i == max_i:
-            filemap = typecheck_batch(batch)
-            for sha1, contents in filemap.items():
-                new_ds["content"].append(contents)
-                new_ds["sha1"].append(sha1)
-                new_ds["id"].append(e_id)
-                e_id += 1
-
-            batch = []
 
     new_ds_hf = datasets.Dataset.from_dict(new_ds)
     new_ds_hf.push_to_hub(args.push, private=True)
