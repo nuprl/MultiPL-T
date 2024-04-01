@@ -101,7 +101,7 @@ def main(args):
     if args.infer_imports:
         print("Inferring imports for functions")
         ds = ds.map(lambda ex: {"content": infer_imports(
-            ex["content"])})
+            ex["content"])}, num_proc=os.cpu_count())
 
     batch = []
     max_i = len(ds) - 1
