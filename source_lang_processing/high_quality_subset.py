@@ -112,10 +112,10 @@ def main(args):
 
             has_ret = does_have_return(code)
             if not has_ret:
+                signal.alarm(0)
                 continue
 
             batch.append(code)
-            signal.alarm(0)
 
             if len(batch) == args.batch_size or i == max_i:
                 filemap = typecheck_batch(batch)
@@ -126,8 +126,10 @@ def main(args):
                     e_id += 1
 
                 batch = []
+            signal.alarm(0)
         except Exception as e:
             print(f"There was an error: {e}")
+            signal.alarm(0)
             continue
 
     new_ds_hf = datasets.Dataset.from_dict(new_ds)
