@@ -88,6 +88,15 @@ def main(args):
     ds = datasets.load_dataset(args.dataset,
                                data_dir="data", split="train")
 
+    print("Filtering to only functions with return statements")
+    ds = ds.filter(lambda ex: does_have_return(ex["content"]))
+
+    if args.infer_imports:
+        print("Inferring imports for functions")
+        ds = ds.map(lambda ex: {"content": infer_imports(
+            ex["content"])}, num_proc=os.cpu_count())
+
+
     batch = []
     max_i = len(ds) - 1
 
@@ -107,13 +116,6 @@ def main(args):
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(240)
             code = ex["content"]
-            if args.infer_imports:
-                code = infer_imports(code)
-
-            has_ret = does_have_return(code)
-            if not has_ret:
-                signal.alarm(0)
-                continue
 
             batch.append(code)
 
