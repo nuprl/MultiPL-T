@@ -77,9 +77,15 @@ def infer_imports(code: str) -> str:
     import autoimport
 
     try:
+        def handler(signum, frame):
+            raise Exception("Timeout")
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(10)
         inferred = autoimport.fix_code(code)
+        signal.alarm(0)
         return inferred
     except Exception as e:
+        signal.alarm(0)
         print(f"Error while inferring imports: {e}")
         return code
 
@@ -95,7 +101,7 @@ def main(args):
     if args.infer_imports:
         print("Inferring imports for functions")
         ds = ds.map(lambda ex: {"content": infer_imports(
-            ex["content"])}, num_proc=os.cpu_count())
+            ex["content"])})
 
     batch = []
     max_i = len(ds) - 1
@@ -110,11 +116,6 @@ def main(args):
 
     for i, ex in enumerate(tqdm(ds, total=len(ds))):
         try:
-            def handler(signum, frame):
-                raise Exception("Timeout")
-
-            signal.signal(signal.SIGALRM, handler)
-            signal.alarm(240)
             code = ex["content"]
 
             batch.append(code)
@@ -128,10 +129,8 @@ def main(args):
                     e_id += 1
 
                 batch = []
-            signal.alarm(0)
         except Exception as e:
             print(f"There was an error: {e}")
-            signal.alarm(0)
             continue
 
     new_ds_hf = datasets.Dataset.from_dict(new_ds)
