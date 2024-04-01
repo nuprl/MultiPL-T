@@ -89,13 +89,13 @@ def main(args):
                                data_dir="data", split="train")
 
     print("Filtering to only functions with return statements")
-    ds = ds.filter(lambda ex: does_have_return(ex["content"]))
+    ds = ds.filter(lambda ex: does_have_return(
+        ex["content"]), num_proc=os.cpu_count())
 
     if args.infer_imports:
         print("Inferring imports for functions")
         ds = ds.map(lambda ex: {"content": infer_imports(
             ex["content"])}, num_proc=os.cpu_count())
-
 
     batch = []
     max_i = len(ds) - 1
@@ -108,11 +108,11 @@ def main(args):
 
     e_id = 0
 
-    def handler(signum, frame):
-        raise Exception("Timeout")
-
     for i, ex in enumerate(tqdm(ds, total=len(ds))):
         try:
+            def handler(signum, frame):
+                raise Exception("Timeout")
+
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(240)
             code = ex["content"]
