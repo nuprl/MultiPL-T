@@ -60,10 +60,10 @@ def main_with_args(
     
 def main():
     main_with_args(
-        #model_path="/work/arjunguha-research-group/arjun/models/starcoderbase",
-        model_path="/home/arjun/models/starcoderbase",
-        seed_dataset_path=Path("./multipl_humaneval_rkt_seeds.jsonl"),
-        generated_dataset_path=Path("./generated.jsonl"),
+        model_path="/work/arjunguha-research-group/arjun/models/starcoderbase",
+        # model_path="/home/arjun/models/starcoderbase",
+        seed_dataset_path=Path("./multiplt_translated_rkt.jsonl"),
+        generated_dataset_path=Path("./generated_multiplt_translated_rkt.jsonl"),
         batch_size=64,
         max_generated=50_000
     )
