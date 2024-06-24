@@ -21,7 +21,19 @@ All of these fine-tuned models are available at https://huggingface.co/nuprl/Mul
 
 ## Figure 8
 
-**We fine-tune three versions of StarCoderBase-1B on 25k MultiPL-T generated training items. **
+**We fine-tune three versions of StarCoderBase-1B on 25k MultiPL-T generated training items.**
+
+All of these fine-tuned models are available as revisions of [nuprl/MultiPL-T-StarCoderBase_1b](https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b).
+
+- Lua Epoch 1: 3bcfd792f683a965047545bbba09c8fae5064d07
+- Lua Epoch 2: 5656bb80775e618e05575057699805e64a3875cb
+- Lua Epoch 3: 7e18e064e05642063abb53aad0ea0ef115eb2d8e
+- Lua Epoch 4: 883f8f94bc88e15727113330e8627817a8025c42
+- Lua Epoch 5: 77f92b21f9b9e5c8f773b851639fa9f9714f6da9
+- Lua Epoch 6: 39be1a2cd81cee4fa3ed0f82b368ef4aff395d48
+- Lua Epoch 7: 96aa7ad9f620c5150a33cddc540e0709cd81e2da
+- Racket [FILL]
+- OCaml [FILL]
 
 ## Table 2
 
@@ -40,5 +52,17 @@ The base models are third-party models. The fine-tuned models are available in t
 
 The base models are third-party models. The fine-tuned models are available in the repositories below.
 
-- (nuprl/MultiPL-T-StarCoder2_15B)[https://huggingface.co/nuprl/MultiPL-T-StarCoder2_15B]
-- (nuprl/MultiPL-T-DeepSeekCoder_33b)[https://huggingface.co/nuprl/MultiPL-T-DeepSeekCoder_33b]
+- [nuprl/MultiPL-T-StarCoder2_15B](https://huggingface.co/nuprl/MultiPL-T-StarCoder2_15B)
+- [nuprl/MultiPL-T-DeepSeekCoder_33b](https://huggingface.co/nuprl/MultiPL-T-DeepSeekCoder_33b)
+
+## Table 6
+
+**Dataset sizes**
+
+The reported sizes in this table are the sizes of each split in the [nuprl/MultiPL-T](https://huggingface.co/datasets/nuprl/MultiPL-T) dataset.
+
+## Appendix A
+
+**A Full Self-Instruction Experiment**
+
+See the directory `./A_A_Full_Self_Instruction-Experiment` in this repository.
