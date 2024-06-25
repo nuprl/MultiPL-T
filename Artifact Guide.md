@@ -6,7 +6,7 @@ This paper is not amenable to push-button reproduction. An attempt to reproduce 
 
 ## Figure 3a
 
-**Fine-tuning on the complete language specific subsets of The Stack.**
+**Fine-tuning on the complete language-specific subsets of The Stack.**
 
 All of these fine-tuned models are available at https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b
 and are tagged `$LANG-morestack-epoch_$N`. Run this command to see the list:
@@ -16,6 +16,17 @@ huggingface-cli tag -l nuprl/MultiPL-T-StarCoderBase_1b | grep morestack
 ```
 
 ## Figure 3b
+
+**Fine-tuning on the token-balanced language-specific subsets of The Stack.**
+
+All of these fine-tuned models are available at https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b
+and are tagged `$LANG-balancedstack-epoch_$N`. Run this command to see the list:
+
+```bash
+huggingface-cli tag -l nuprl/MultiPL-T-StarCoderBase_1b | grep balancedstack
+```
+
+
 
 [FILL]
 
