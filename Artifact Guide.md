@@ -26,8 +26,6 @@ and are tagged `$LANG-balancedstack-epoch_$N`. Run this command to see the list:
 huggingface-cli tag -l nuprl/MultiPL-T-StarCoderBase_1b | grep balancedstack
 ```
 
-[FILL]
-
 ## Figure 8
 
 **We fine-tune three versions of StarCoderBase-1B on 25k MultiPL-T generated training items.**
@@ -48,7 +46,16 @@ The base models are third-party models. The fine-tuned models are available in t
 - [nuprl/MultiPL-T-StarCoderBase_1b](https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b)
 - [nuprl/MultiPL-T-StarCoderBase_15b](https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_15b)
 - [nuprl/MultiPL-T-CodeLlama_34b](https://huggingface.co/nuprl/MultiPL-T-CodeLlama_34b)
+  
 - [nuprl/MultiPL-T-CodeLlama_70b](https://huggingface.co/nuprl/MultiPL-T-CodeLlama_70b)
+
+  Each model requires ~280GB disk space. We saved the best performing checkpoints for
+  each programming language. (We had to evaluate and delete the others during training
+  to manage disk space on our GPU server.)
+
+  ```bash
+  huggingface-cli tag -l nuprl/MultiPL-T-CodeLlama_70b
+  ```
 
 ## Table 3
 
