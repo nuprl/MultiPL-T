@@ -8,7 +8,6 @@ from pathlib import Path
 from tqdm import tqdm
 from collections.abc import Mapping
 import json
-from torch.utils.tensorboard import SummaryWriter
 import sys
 
 def eprint(*args, **kwargs):
@@ -37,8 +36,6 @@ def train(model, evaluate, train_dataloader, gradient_accumulation_steps, epochs
     model.train()
     evaluate(checkpoint_dir=None, step=0)
 
-    writer = SummaryWriter()
-    
     for step, batch in tqdm(
         enumerate(train_dataloader),
         total=max_steps,
@@ -86,8 +83,6 @@ def train(model, evaluate, train_dataloader, gradient_accumulation_steps, epochs
             "train/loss": global_mean_loss,
         }
         eprint(json.dumps(metrics))
-        for k, v in metrics.items():
-            writer.add_scalar(k, v, step)
 
         
     checkpoint_dir = Path(f"checkpoint_final")
