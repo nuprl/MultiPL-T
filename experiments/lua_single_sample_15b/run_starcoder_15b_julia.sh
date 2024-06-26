@@ -21,6 +21,7 @@ python3 -m torch.distributed.launch \
         --num_workers=$(expr $(nproc --all) - 4) \
         --no_fp16 \
         --bf16 \
+        --fa2 \
         --eval_freq 0 \
         --perc_valid_set 0.0 \
         --save_total_limit 20
