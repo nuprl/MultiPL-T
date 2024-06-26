@@ -68,7 +68,7 @@ def simple_train(
     
     print("Loading model. This can take some time...")
     # We load the model after the dataset so that dataset preparation errors happen immediately.
-    model = AutoModelForCausalLM.from_pretrained(model, torch_dtype=torch.bfloat16, use_cache=False).cuda()
+    model = AutoModelForCausalLM.from_pretrained(model, torch_dtype=torch.bfloat16, use_cache=False, use_flash_attention_2=True).cuda()
     
     optim = AdamW(
         starcoder_params_for_scheduler(model), lr=learning_rate
