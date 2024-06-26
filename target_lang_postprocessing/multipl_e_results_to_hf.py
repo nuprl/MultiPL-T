@@ -77,7 +77,7 @@ def process_path(path):
     results = data["results"]
     func_tests = data["tests"]
 
-    sols = []
+    all_sols = []
     num_failed = 0
     num_passed = 0
     failing = None
@@ -87,7 +87,7 @@ def process_path(path):
             sol = clean_sol_prompt(args.lang, res["program"])
             if "TODO" in sol:
                 continue
-            sols.append(sol)
+            all_sols.append(sol)
         else:
             num_failed += 1
             if failing is None:
@@ -96,7 +96,7 @@ def process_path(path):
     pass_rate = num_passed / (num_passed + num_failed)
 
     # simple set dedup
-    sols = list(set(sols))
+    sols = list(set(all_sols))
 
     edu_scores = []
     if len(sols) > 0:
@@ -125,6 +125,7 @@ def process_path(path):
             edu_scores.append(best_score)
         elif args.strategy == "all":
             # keep all
+            sols = all_sols
             edu_scores.extend([0] * len(sols))
         elif args.strategy == "random":
             # picks random one
