@@ -18,7 +18,7 @@ pa = ArgumentParser()
 pa.add_argument("--path", type=str, required=True)
 pa.add_argument("--name", type=str, required=True)
 pa.add_argument("--strategy", type=str, default="dedup",
-                choices=["dedup", "dedup_best", "best", "random"])
+                choices=["dedup", "dedup_best", "best", "random", "all"])
 pa.add_argument("--global_dedup", action="store_true")
 pa.add_argument("--global_dedup_prob", type=float, default=0.35,
                 help="the probability that a pair of examples will not be deduplicated, despite being similar. higher results in a more aggressive and slower deduplication.")
@@ -123,6 +123,9 @@ def process_path(path):
             best, best_score = get_best_sol(scores, sols)
             sols = [best]
             edu_scores.append(best_score)
+        elif args.strategy == "all":
+            # keep all
+            edu_scores.extend([0] * len(sols))
         elif args.strategy == "random":
             # picks random one
             sol = random.choice(sols)
