@@ -9,7 +9,7 @@ train_data = datasets.load_dataset("json", data_files="../../datasets/train_lua.
 THIS_DIRECTORY_NAME = Path(".").absolute().name
 
 simple_train(
-    model="/work/arjunguha-research-group/arjun/models/starcoderbase-1b",
+    model="bigcode/starcoderbase-1b",
     batch_size=8,
     epochs=7,
     learning_rate=3e-5,
