@@ -50,7 +50,15 @@ pre-built artifacts:
 
    We describe them in more detail below.
 
-## Recommendation for Artifact Evaluation
+## Hardware Dependencies
+
+### Minimum Requirements
+
+1. A recent consumer Nvidia GPU, such as an RTX 30xx or RTX 40xx
+2. At least 40GB of free disk space to install PyTorch, download LLMs, etc.
+3. Linux or Windows Subsystem for Linux (WSL2). **MacOS will not work.**
+
+### What Can Be Evaluated?
 
 - Given a recent consumer Nvidia GPU, such as an RTX 30xx or 40xx, with 11GB+
   VRAM, it should be possible to re-evaluate StarCoderBase-1b. It will not be
@@ -62,6 +70,202 @@ pre-built artifacts:
 
 - On an 80GB 8xA100 node, it is possible to do reproduce any part of the
   evaluation, but is very expensive.
+
+## Getting Started Guide
+
+Please complete *Installation* and *Evaluate a Base Model* for the
+kick-the-tires phase.
+
+### Installation
+
+It is fairly standard for SIGPLAN artifacts to be packed in a container
+or VM, so that the committee does not need to bother with installation.
+Unfortunately:
+
+- Getting a GPU to work with a VM/container is extraordinarily
+  complicated.
+   
+- The software stack that you install will depend on the GPU that you have
+  available.
+  
+- We would need to run a container-in-a-container for evaluation, which is
+  another can of worms.
+  
+Instead, we will guide you through installing a toolchain that works for your
+hardware.
+
+1. Basic requirements:
+
+   a. You need to be on Linux or the Windows Subsystem for Linux (WSL2).
+   
+   b. You need at Python 3.10 or higher. run `python3 --version` to check your
+      Python version.
+   
+   c. You need an Nvidia GPU with 10GB+ VRAM and CUDa 12.x (preferred) or CUDA 11.8.
+      Check your VRAM and CUDA version by running `nvidia-smi`.
+
+   d. You need the ability to run a container, e.g., using Docker or Podman.
+
+2. *Recommended:* Create and activate a new Python virtual environment:
+
+   ```bash
+   cd ~
+   python3 -m venv multiplt     # Creates the environment
+   source multiplt/bin/activate # Activates the environment
+   ```
+
+   - If activation succeeds, your CLI prompt should be prefixed with `(multiplt)`.
+     **For the rest of this guide, we will assume that you're running commands
+     in this virtual environment.**
+   
+   - Creating the environment may fail if you don't have the right dependency
+     installed. If that occurs, follow the directions printed on screen to
+     install the right package for your system.
+
+3. Install PyTorch:
+   
+   - If you have CUDA 12.1+, you can run `pip3 install torch`.
+   - Otherwise, see https://pytorch.org for guidance.
+   
+4. Verify that PyTorch is installed and correctly detects your GPU.
+
+   Start a Python REPL (`python3`) and enter the following:
+
+   ```python
+   import torch
+   torch.cuda.is_available()
+   ```
+
+   You should see `True`. Type `exit()` to quit the Python REPL.
+
+5. Install other needed packages:
+
+  ```bash
+  pip3 install transformers datasets accelerate
+  ```
+
+6. Checkout MultiPL-E:
+
+   ```bash
+   git clone -b StarCoder2 https://github.com/nuprl/MultiPL-E.git
+   ```
+
+7. Download the MultiPL-E Evaluation container:
+
+   ```bash
+   podman pull ghcr.io/nuprl/multipl-e-evaluation
+   ```
+
+### Evaluate a Base Model
+
+### Step 1
+
+Before trying to evaluate a model fine-tuned with MultiPL-T, we recommend
+evaluating a base model from the StarCoder or Code Llama family. Unfortunately,
+to use these models, you need to create an account on huggingface.co and agree
+to there terms of use. Moreover, Code Llama requires someone at Meta to
+manually approve your application.
+
+However, we have a copy of StarCoderBase-1b available that doesn't an
+account. You can download it as follows:
+
+```bash
+huggingface-cli download arjunguha/notstarcoderbase-1b
+```
+
+### Step 2
+
+Use MultiPL-E to generate completions (i.e., code) using the downloaded model:
+
+1. Ensure you're in the MultiPL-E directory that you checked out earlier:
+
+   ```bash
+   cd MultiPL-E
+   ```
+
+2. Generate Racket completions:
+
+   ```bash
+   python3 automodel.py --name arjunguha/notstarcoderbase-1b \
+    --root-dataset humaneval \
+    --lang rkt \
+    --temperature 0.2 \
+    --completion-limit 20 \
+    --output-dir out \
+    --batch-size 40
+   ```
+
+   This will load the model to GPU and start generating results in the `out/`
+   directory. On an RTX 3080, this will take ~5m to run. A few notes and
+   recommendations:
+
+   - The program will resume if an error occurs, such as a CUDA out-of-memory
+     error. So, do not delete the `out` directory unless necessary.
+   - You can monitor GPU memory usage using `nvidia-smi`. If memory usage is
+     too low, you can increase the `--batch-size`.
+   - Conversely, you can decrease `--batch-size` if you get a CUDA out-of-memory
+     error.
+    
+
+3. Execute the generated completions:
+
+   ```bash
+   podman run --rm --network none -v ./out:/out:rw ghcr.io/nuprl/multipl-e-evaluation \
+    --dir /out --output-dir out
+  ```
+
+  This process is CPU intensive and takes about 15 minutes on a 20-core Intel
+  Core i9-10900KF.
+
+4. Compute the pass rate (pass@1):
+
+   ```bash
+   python3 pass_k ./out
+   ```
+
+   You should see something like this:
+
+   ```
+   Dataset,Pass@k,Estimate,NumProblems,MinCompletions,MaxCompletions
+   out,1,0.04,161,20,20
+   ```
+
+   Here is how to read it:
+
+   - `out`: the name of the directory
+   - `1`: This is pass@1, as opposed to pass@10 or pass@100
+   - `0.04`: This is the pass rate (**4.4%**)
+   - `161`: The number of problems evaluated. For Racket, it should be 161. It 
+     is slightly lower for the other languages.
+  - `20,20`: the minimum and maximum number of completions per problem. Since,
+    we ran with `--num-completions 20` earlier, both should be 20. If the minimum
+    is lower, either completions or executions were interrupted. You can run them
+    again to continue.
+
+5. Cross-check the pass rate with the pass rate in the paper. Table 2 lists the
+   pass rate on Racket for StarCoderBase-1b as **4.7%**. We are using a
+   standard, non-deterministic, sampling based LLM generation algorithm, and this
+   is close enough. You can get a more stable estimate with `--num-completions 200`,
+   but it will take 10x longer.
+
+Congratulations if you made it this far! Evaluating fine-tuned MultiPL-T
+models is not very different from evaluating a base model.
+
+## Step by Step Instructions
+
+### Evaluating a Fine-Tuned Model
+
+Evaluating a fine-tuned model is not very different from evaluating a base
+model. Every model has two pieces:
+
+1. The tokenizer: MultiPL-T does not change this. Thus when generating completions,
+   you will need to point the model to the base model's tokenizer, as described
+   below.
+
+2. The model itself: this is fine-tuned. All you need to know is the repository
+   and tag where the model is stored.
+
+
 
 
 ## Figure 3a
