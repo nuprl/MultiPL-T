@@ -1,7 +1,67 @@
-# Artifact Guide
+# Artifact Guide for MultiPL-T
 
-This paper is not amenable to push-button reproduction. An attempt to reproduce everything would require over 50TB of disk space and over 500 days of GPU time (on an datacenter-grade, A100 GPU). Instead, it is better to pick a small subset of data points to reproduce. If you reproduce a fine-tuned model, you will probably want to immediately evaluate it and delete the model after the reproduction.
+## Introduction
 
+We can break MultiPL-T down into the following steps:
+
+1. Filter Python from *The Stack* to a high-quality subset of Python
+   examples, which includes LLM-generated tests that are validated by execution
+   (Sections 4.1 and 4.2).
+2. Use LLM to translate the Python examples to a low-resource
+   programming language. Filter out incorrect translations using test cases
+   translated with MultiPL-E. We support translation to Racket, Julia, R, OCaml,
+   and Lua (Section 4.3 and 4.4).
+3. Fine-tune off-the-shelf LLMs on each low-resource language. (Fine-tuning
+   hyperparameters are described at the top of Section 5.)
+4. Evaluate the performance of these fine-tuned LLMs and compare to baselines
+   (Section 5).
+
+The paper has several secondary ablations and evaluations, but the steps
+above describe the primary artifact.
+
+All the steps above require a GPU. Moreover, as the paper reports, doing a
+complete reproduction will require at least 550 days on a datacenter GPU
+([A100]), and several times longer on a consumer GPU. We have provided
+pre-built artifacts:
+
+1. The filtered Python subset of The Stack (Step 1 above):
+ 
+   https://huggingface.co/datasets/nuprl/stack-dedup-python-testgen-starcoder-filter-v2
+
+   We recommend *not* attempting to rebuild this dataset. We estimate
+   this required 2,000 hours on H100 / A100 GPUs.
+
+2. The MultiPL-T fine-tuning datasets for the five programming languages:
+
+   https://huggingface.co/datasets/nuprl/MultiPL-T
+
+   We recommend *not* attempting to rebuild this dataset. We estimate that 
+   translating each language takes approximately 1,400 hours on an A100 GPU. 
+
+3. Fine-tuned off-the-shelf LLMs for each low-resource language. The resources
+   needed to fine-tune an LLM vary significantly based on the LLM size.
+   The MultiPL-T dataset is small enough that one can fine-tune StarCoderBase-1B
+   in a few hours on an A100. However, the larger models require several days
+   and also require 4-8 A100 GPUs.
+
+   Our fine-tuned models are available in this collection:
+
+   https://huggingface.co/collections/nuprl/multipl-t-65242261eadae29c5faab50e
+
+   We describe them in more detail below.
+
+## Recommendation for Artifact Evaluation
+
+- Given a recent consumer Nvidia GPU, such as an RTX 30xx or 40xx, with 11GB+
+  VRAM, it should be possible to re-evaluate StarCoderBase-1b. It will not be
+  possible to fine-tune models on these GPUs.
+
+- Given an Nvidia GPU with 40GB VRAM, such as an A6000 or older A100, it will 
+  also be possible to fine-tune StarCoderBase-1b. *We will attempt to provide
+  SSH access to a 40GB A100 for artifact evaluation.*
+
+- On an 80GB 8xA100 node, it is possible to do reproduce any part of the
+  evaluation, but is very expensive.
 
 
 ## Figure 3a
@@ -82,3 +142,5 @@ The reported sizes in this table are the sizes of each split in the [nuprl/Multi
 **A Full Self-Instruction Experiment**
 
 See the directory `./A_A_Full_Self_Instruction-Experiment` in this repository.
+
+[A100]: https://www.nvidia.com/en-us/data-center/a100/
