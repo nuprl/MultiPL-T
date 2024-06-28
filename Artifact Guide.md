@@ -46,6 +46,11 @@ The base models are third-party models. The fine-tuned models are available in t
 - [nuprl/MultiPL-T-StarCoderBase_1b](https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b)
 - [nuprl/MultiPL-T-StarCoderBase_15b](https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_15b)
 - [nuprl/MultiPL-T-CodeLlama_34b](https://huggingface.co/nuprl/MultiPL-T-CodeLlama_34b)
+
+  ```bash
+  huggingface-cli tag -l nuprl/MultiPL-T-CodeLlama_34b
+  ```
+
   
 - [nuprl/MultiPL-T-CodeLlama_70b](https://huggingface.co/nuprl/MultiPL-T-CodeLlama_70b)
 
