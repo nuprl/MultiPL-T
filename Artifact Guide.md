@@ -142,82 +142,89 @@ hardware.
 
   ```bash
   pip3 install transformers datasets accelerate
+  pip3 install 'huggingface_hub[cli]'
   ```
 
-6. Checkout MultiPL-E:
+6. Checkout the MultiPL-E source code:
 
    ```bash
    git clone -b StarCoder2 https://github.com/nuprl/MultiPL-E.git
    ```
 
-7. Download the MultiPL-E Evaluation container:
+7. Download the MultiPL-E container:
 
    ```bash
-   podman pull ghcr.io/nuprl/multipl-e-evaluation
+   docker pull ghcr.io/nuprl/multipl-e-evaluation
    ```
 
-### Evaluate a Base Model
+   (You can use `podman` instead of `docker` above.)
 
-### Step 1
+### Evaluate a Base Model
 
 Before trying to evaluate a model fine-tuned with MultiPL-T, we recommend
 evaluating a base model from the StarCoder or Code Llama family. Unfortunately,
 to use these models, you need to create an account on huggingface.co and agree
-to there terms of use. Moreover, Code Llama requires someone at Meta to
+to their terms of use. Moreover, Code Llama requires someone at Meta to
 manually approve your application.
 
 However, we have a copy of StarCoderBase-1b available that doesn't an
-account. You can download it as follows:
+account. We wil walk you through evaluating this model.
 
-```bash
-huggingface-cli download arjunguha/notstarcoderbase-1b
-```
+1. Download the model.
 
-### Step 2
-
-Use MultiPL-E to generate completions (i.e., code) using the downloaded model:
-
-1. Ensure you're in the MultiPL-E directory that you checked out earlier:
-
+  ```bash
+  huggingface-cli download arjunguha/notstarcoderbase-1b
+  ```
+2. Generate completions with MultiPL-E. First, ensure you are in the MultiPL-E
+   directory that you checked out earlier during Installation.
+  
    ```bash
    cd MultiPL-E
    ```
 
-2. Generate Racket completions:
+   Now, generate Racket completions:
 
    ```bash
    python3 automodel.py --name arjunguha/notstarcoderbase-1b \
-    --root-dataset humaneval \
-    --lang rkt \
-    --temperature 0.2 \
-    --completion-limit 20 \
-    --output-dir out \
-    --batch-size 40
+     --root-dataset humaneval \
+     --lang rkt \
+     --temperature 0.2 \
+     --completion-limit 20 \
+     --output-dir out \
+     --batch-size 40
    ```
 
    This will load the model to GPU and start generating results in the `out/`
    directory. On an RTX 3080, this will take ~5m to run. A few notes and
    recommendations:
 
-   - The program will resume if an error occurs, such as a CUDA out-of-memory
-     error. So, do not delete the `out` directory unless necessary.
    - You can monitor GPU memory usage using `nvidia-smi`. If memory usage is
      too low, you can increase the `--batch-size`.
    - Conversely, you can decrease `--batch-size` if you get a CUDA out-of-memory
      error.
+   - If you restart, MultiPL-E will not regenerate completions that are already
+     saved. If you really want to regenerate completions, you can delete
+     `out/*.json.gz`.
     
 
-3. Execute the generated completions:
+3. Execute the generated completions with MultiPL-E.
 
    ```bash
    podman run --rm --network none -v ./out:/out:rw ghcr.io/nuprl/multipl-e-evaluation \
     --dir /out --output-dir out
   ```
 
-  This process is CPU intensive and takes about 15 minutes on a 20-core Intel
-  Core i9-10900KF.
+  A few notes:
 
-4. Compute the pass rate (pass@1):
+  - This process is CPU intensive and takes about 15 minutes on a 20-core Intel
+    Core i9-10900KF.
+  - This command saves execution results to the `./out` directory, alongside
+    the completions.
+   - If you restart, MultiPL-E will not re-execute completions that it has
+     already run.. If you really want to re-execute completions, you can delete
+     `out/*.results.json.gz`.
+
+4. Compute the pass rate (pass@1).
 
    ```bash
    python3 pass_k ./out
@@ -248,6 +255,15 @@ Use MultiPL-E to generate completions (i.e., code) using the downloaded model:
    is close enough. You can get a more stable estimate with `--num-completions 200`,
    but it will take 10x longer.
 
+6. *Optional*. Recover some disk space.
+   
+   - Once you're happy with the results, you can delete the `./out` directory, 
+     or rename it to something more meaningful.
+  - The model consumes 5GB of disk space, and you probably want to recover it.
+    To do so, run `huggingface-cli delete-cache`. You'll get a textual UI
+    where you can press *space* to select the model to delete and *enter* to
+    actually delete it.
+
 Congratulations if you made it this far! Evaluating fine-tuned MultiPL-T
 models is not very different from evaluating a base model.
 
@@ -256,94 +272,200 @@ models is not very different from evaluating a base model.
 ### Evaluating a Fine-Tuned Model
 
 Evaluating a fine-tuned model is not very different from evaluating a base
-model. Every model has two pieces:
+model, as described in the *Getting Started Guide.* The only difference is that
+you need to specify two pieces of information when generating completions:
 
-1. The tokenizer: MultiPL-T does not change this. Thus when generating completions,
-   you will need to point the model to the base model's tokenizer, as described
-   below.
+1. The location of the model, which we described below; and
+2. The location of the model's tokenizer, which is the location of the original
+   model.
 
-2. The model itself: this is fine-tuned. All you need to know is the repository
-   and tag where the model is stored.
+Since we evaluated StarCoderBase-1b on Racket in the Getting Started Guide, we
+will do a walkthrough of the Racket fine-tuned version of the same model. This
+model's performance is reported in Table 2 as **11.3%**, and we will now
+reproduce this number.
 
+1. Download the model.
 
+   ```bash
+   huggingface-cli download nuprl/MultiPL-T-StarCoderBase_1b --revision rkt-multiplt-epoch5
+   ```
 
+   We will explain the naming scheme for the fine-tuned models later.
 
-## Figure 3a
+2. Generate Racket completions with MultiPL-E.
 
-**Fine-tuning on the complete language-specific subsets of The Stack.**
+   ```bash
+   python3 automodel.py \
+     --name nuprl/MultiPL-T-StarCoderBase_1b \
+     --revision rkt-multiplt-epoch5 \
+     --tokenizer_name arjunguha/notstarcoderbase-1b \
+     --root-dataset humaneval \
+     --lang rkt \
+     --temperature 0.2 \
+     --completion-limit 20 \
+     --output-dir out \
+     --batch-size 40
+   ```
 
-All of these fine-tuned models are available at https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b
-and are tagged `$LANG-morestack-epoch_$N`. Run this command to see the list:
+   Notice how this command slightly is different from the way we evaluated the
+   base model. In addition to specifying the model name, we also specified the
+   `--revision` and `--tokenizer_name` flags.
 
-```bash
-huggingface-cli tag -l nuprl/MultiPL-T-StarCoderBase_1b | grep morestack
-```
+3. Execute the generated completions with MultiPL-E.
 
-## Figure 3b
+   ```bash
+   docker run --rm --network none -v ./out:/out:rw ghcr.io/nuprl/multipl-e-evaluation \
+    --dir /out --output-dir out
+   ```
 
-**Fine-tuning on the token-balanced language-specific subsets of The Stack.**
+   This step is unchanged from the Getting Started Guide. In fact, it is the
+   same for every model and programming language. The completions include the 
+   PL name, and the container packages the runtimes for all MultiPL-E supported
+   PLs.
 
-All of these fine-tuned models are available at https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b
-and are tagged `$LANG-balancedstack-epoch_$N`. Run this command to see the list:
+4. Compute the pass rate (pass@1).
 
-```bash
-huggingface-cli tag -l nuprl/MultiPL-T-StarCoderBase_1b | grep balancedstack
-```
+   ```bash
+   python3 pass_k ./out
+   ```
 
-## Figure 8
+   See the Getting Started Guide for directions on how to read this output.
 
-**We fine-tune three versions of StarCoderBase-1B on 25k MultiPL-T generated training items.**
+5. When complete, delete the downloaded model to recover disk space:
 
-All of these fine-tuned models are available at https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b
-and are tagged `$LANG-25k-epoch$N`. Run this command to see the list:
+   ```bash
+   huggingface-cli delete-cache
+   ```
 
-```bash
-huggingface-cli tag -l nuprl/MultiPL-T-StarCoderBase_1b | grep 25k
-```
+### Evaluate Other Fine-Tuned Models
 
-## Table 2
+*What is available?* We have saved checkpoints for every fine-tuned model
+discussed in the paper. We have also include checkpoints at each epoch for
+*most* fine-tuning runs, even in cases where we only report the maximal
+performance. There are some exceptions: a single checkpoint for the larger
+models, such as Code Llama 70b, take 100s of gigabytes of disk space. We were
+not able to save all of these checkpoints with the storage that we had
+available.
 
-**MultiPL-E pass@1 scores for 1B, 15B, 34B, and 70B parameter models before and after fine-tuned on MultiPL-T data.**
-
-The base models are third-party models. The fine-tuned models are available in the repositories below.
+*Where are they available?* The fine-tuned models are available and tagged in
+these repositories:
 
 - [nuprl/MultiPL-T-StarCoderBase_1b](https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_1b)
 - [nuprl/MultiPL-T-StarCoderBase_15b](https://huggingface.co/nuprl/MultiPL-T-StarCoderBase_15b)
 - [nuprl/MultiPL-T-CodeLlama_34b](https://huggingface.co/nuprl/MultiPL-T-CodeLlama_34b)
-
-  ```bash
-  huggingface-cli tag -l nuprl/MultiPL-T-CodeLlama_34b
-  ```
-
-  
-- [nuprl/MultiPL-T-CodeLlama_70b](https://huggingface.co/nuprl/MultiPL-T-CodeLlama_70b)
-
-  Each model requires ~280GB disk space. We saved the best performing checkpoints for
-  each programming language. (We had to evaluate and delete the others during training
-  to manage disk space on our GPU server.)
-
-  ```bash
-  huggingface-cli tag -l nuprl/MultiPL-T-CodeLlama_70b
-  ```
-
-## Table 3
-
-**MultiPL-E pass@1 scores for two recently released models on Racket.**
-
-The base models are third-party models. The fine-tuned models are available in the repositories below.
-
 - [nuprl/MultiPL-T-StarCoder2_15B](https://huggingface.co/nuprl/MultiPL-T-StarCoder2_15B)
 - [nuprl/MultiPL-T-DeepSeekCoder_33b](https://huggingface.co/nuprl/MultiPL-T-DeepSeekCoder_33b)
 
-## Table 6
+There are over 100 tagged models (and dozens of others) in these repositories.
+You can view all the tags for a repository, e.g., for the fine-tuned
+StarCoderBase-1b models as follows:
 
-**Dataset sizes**
+```bash
+huggingface-cli tag -l nuprl/MultiPL-T-StarCoderBase_1b
+```
 
-The reported sizes in this table are the sizes of each split in the [nuprl/MultiPL-T](https://huggingface.co/datasets/nuprl/MultiPL-T) dataset.
+Each tag is named `LANG-EXPERIMENT-EPOCH`. The `LANG` and `EPOCH` should
+be self-explanatory. The `EXPERIMENT` is as follows:
 
-## Appendix A
+- `morestack`: the models fine-tuned for Figure 3a
+- `balancedstack`: the models fine-tuned for Figure 3b
+- `25k`: the models fine-tuned for Figure 8
+- `multiplt`: the primary MultiPL-T models (Tables 2 and 3). We have included
+  checkpoints for several epochs, but the tables only report a result
+  on the best epoch. These best epochs are listed in Table 9 in the Appendix.
 
-**A Full Self-Instruction Experiment**
+It should be possible to re-evaluate any one of these fine-tuned models by
+following the directions in *Evaluating a Fine-Tuned Model* above. The only
+change that is in Step 2, where we specified the `--name`, `--revision`, and
+`--tokenizer_name` flags.
+
+Some caveats and suggestions if you choose to evaluate the larger models:
+
+1. To evaluate a 15B parameter model, such as a fine-tuned version of
+   StarCoderBase-15b or StarCoder2, you will need a GPU with 40GB VRAM,
+   such as an A100 or A6000. (A 22GB GPU may work.)
+
+2. To evaluate a 33B parameter model, you will need a GPU with 80GB VRAM.
+    You will also need to pass the `--flash-attention2` flag to `automodel.py`
+    and install [Flash Attention](https://github.com/Dao-AILab/flash-attention).
+
+3. To evaluate a 70B parameter model, you will need 4x80GB GPUs and Flash
+   Attention as described above. An alternative is to use the `automodel_vllm.py`
+   script instead of `automodel.py`, which depends on [vLLM](https://docs.vllm.ai/en/latest/).
+
+[FILL]
+
+### The Fine-Tuning Datasets and Fine-Tuning a Model
+
+The MultiPL-T datasets are in this repository (one split per language):
+
+https://huggingface.co/datasets/nuprl/MultiPL-T
+
+It is possible to fine-tune a model using these datasets instead of evaluating
+a pre-trained model. 
+
+Fine-tuning scripts tend to be optimized for particular hardware configurations
+and model families. We have included a bare-bones fine-tuning script for
+StarCoderBase-1b that should work on a GPU with 16GB VRAM. Here is how you
+use it:
+
+1. In the same environment that you setup in *Getting Started*, install
+   [Flash Attention](https://github.com/Dao-AILab/flash-attention).
+
+2. Within the MultiPL-T repository, enter the `training_starcoder1b` directory
+   and examine `demo.py`:
+
+   ```bash
+   cd training_starcoder1b
+   cat demo.py
+   ```
+
+   The hyperparamters in this script are those reported in the paper. You can
+   see that it loads the Racket split, and you can use a different dataset if
+   desired. *Do not use a non-StarCoder model. The training code is specialized
+   for the StarCoder architecture.* 
+
+3. Start fine-tuning.
+
+   ```bash
+   python3 demo.py
+   ```
+
+   We recommend monitoring memory usage with `nvidia-smi`. If you have more
+   than 15GB VRAM, you can try to increase the `per_device_batch_size`. E.g.,
+   you can set it to `4` on an 80GB GPU.
+
+   As the code runs, it will save checkpoints at each epoch in the current
+   directory. (They are named `checkpoint_N`, where `N` is the number of
+   optimizer steps and not the epoch number. This is convention in LLM
+   training.)
+
+4. You can evaluate these checkpoints using the directions in *Evaluating a
+   Fine-Tuned Model*. Just use the directory name as the `--name` flag. There is
+   no need to specify a `--revision` or a `--tokenizer_name`.
+
+### Fine-Tuning Larger Models
+
+*Not recommended.*
+
+We strongly recommend not trying to fine-tune larger models. They require
+a lot more patience, more hardware, and much more complex software. This is the
+software stack that we used to fine-tune the larger models:
+
+https://github.com/cassanof/finetuning-harness/
+
+### Generating the MultiPL-T Datasets
+
+*Not recommended.*
+
+We strongly recommend not trying to regenerate the MultiPL-T datasets. We
+estimate it takes about 2,000 A100 GPU hours per language, assuming everything
+goes perfectly. Moreover, we don't have estimate of how much CPU time is needed
+to run tests, but it's probably a lot of time too.
+
+[FILL]
+
+### Appendix A
 
 See the directory `./A_A_Full_Self_Instruction-Experiment` in this repository.
 
