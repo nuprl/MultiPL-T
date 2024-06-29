@@ -461,12 +461,28 @@ https://github.com/cassanof/finetuning-harness/
 We strongly recommend not trying to regenerate the MultiPL-T datasets. We
 estimate it takes about 2,000 A100 GPU hours per language, assuming everything
 goes perfectly. Moreover, we don't have estimate of how much CPU time is needed
-to run tests, but it's probably a lot of time too.
+to run tests, but we know it is quite high.
 
-[FILL]
+1. We filter Python from [The Stack] and generate test cases.
+   - [code](https://github.com/nuprl/MultiPL-T/tree/main/source_lang_processing)
+   - [output dataset](https://huggingface.co/datasets/nuprl/stack-dedup-python-testgen-starcoder-filter-v2)
+2. We use MultiPL-E to generate completions.
+   - [code](https://github.com/nuprl/MultiPL-T/tree/main/multipl_e_target_adaptor)
+   - The output is a directory of `*.json.gz` files on disk. We do not
+     upload these, but they are archived on the Northeastern Discovery Cluster.
+3. We post-process the MultiPL-E results into the MultiPL-T fine-tuning datasets.
+   - [code](https://github.com/nuprl/MultiPL-T/tree/main/target_lang_postprocessing)
+   - [MultiPL-T datasets](https://huggingface.co/datasets/nuprl/MultiPL-T)
+
+## Additional Artifacts
+
+### Adversarial Benchmarks
+
+See the directory `./benchmarks` in this repository.
 
 ### Appendix A
 
 See the directory `./A_A_Full_Self_Instruction-Experiment` in this repository.
 
 [A100]: https://www.nvidia.com/en-us/data-center/a100/
+[The Stack]: https://huggingface.co/datasets/bigcode/the-stack-dedup
