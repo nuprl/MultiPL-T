@@ -1,2 +1,2 @@
 # MultiPL-T Benchmark
-This benchmark was constructed to ensure the model's ability to use contextual information when generating functions.
+This benchmark was constructed to ensure the model's ability to use contextual information when generating functions. We provided a variety of in-context data types and helper functions that could be utilized to solve the final problem.
