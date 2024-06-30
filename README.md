@@ -2,12 +2,12 @@
 
 ## Introduction
 
-We can break MultiPL-T down into the following steps:
+We can break the MultiPL-T artifact down into the following steps:
 
-1. Filter Python from *The Stack* to a high-quality subset of Python
+1. Filter Python from [The Stack] to a high-quality subset of Python
    examples, which includes LLM-generated tests that are validated by execution
    (Sections 4.1 and 4.2).
-2. Use LLM to translate the Python examples to a low-resource
+2. Use an LLM (StarCoderBase-15b) to translate the Python examples to a low-resource
    programming language. Filter out incorrect translations using test cases
    translated with MultiPL-E. We support translation to Racket, Julia, R, OCaml,
    and Lua (Section 4.3 and 4.4).
@@ -16,7 +16,7 @@ We can break MultiPL-T down into the following steps:
 4. Evaluate the performance of these fine-tuned LLMs and compare to baselines
    (Section 5).
 
-The paper has several secondary ablations and evaluations, but the steps
+The paper has several other ablations and evaluations, but the steps
 above describe the primary artifact.
 
 All the steps above require a GPU. Moreover, as the paper reports, doing a
@@ -29,16 +29,18 @@ pre-built artifacts:
    https://huggingface.co/datasets/nuprl/stack-dedup-python-testgen-starcoder-filter-v2
 
    We recommend *not* attempting to rebuild this dataset. We estimate
-   this required 2,000 hours on H100 / A100 GPUs.
+   this required 2,000 hours on H100 / A100 GPUs and a significant amount
+   of CPU time as well.
 
-2. The MultiPL-T fine-tuning datasets for the five programming languages:
+3. The MultiPL-T fine-tuning datasets for the five programming languages:
 
    https://huggingface.co/datasets/nuprl/MultiPL-T
 
    We recommend *not* attempting to rebuild this dataset. We estimate that 
-   translating each language takes approximately 1,400 hours on an A100 GPU. 
+   translating each language takes approximately 1,400 hours on an A100 GPU
+   and a significant amount of CPU time to validate translations.
 
-3. Fine-tuned off-the-shelf LLMs for each low-resource language. The resources
+5. Fine-tuned off-the-shelf LLMs for each low-resource language. The resources
    needed to fine-tune an LLM vary significantly based on the LLM size.
    The MultiPL-T dataset is small enough that one can fine-tune StarCoderBase-1B
    in a few hours on an A100. However, the larger models require several days
@@ -458,10 +460,8 @@ https://github.com/cassanof/finetuning-harness/
 
 *Not recommended.*
 
-We strongly recommend not trying to regenerate the MultiPL-T datasets. We
-estimate it takes about 2,000 A100 GPU hours per language, assuming everything
-goes perfectly. Moreover, we don't have estimate of how much CPU time is needed
-to run tests, but we know it is quite high.
+We strongly recommend not trying to regenerate the MultiPL-T datasets because
+of the CPU and GPU resources required. The code and data from each step:
 
 1. We filter Python from [The Stack] and generate test cases.
    - [code](https://github.com/nuprl/MultiPL-T/tree/main/source_lang_processing)
@@ -469,7 +469,8 @@ to run tests, but we know it is quite high.
 2. We use MultiPL-E to generate completions.
    - [code](https://github.com/nuprl/MultiPL-T/tree/main/multipl_e_target_adaptor)
    - The output is a directory of `*.json.gz` files on disk. We do not
-     upload these, but they are archived on the Northeastern Discovery Cluster.
+     upload these, but they are archived on the Northeastern Discovery Cluster in
+     the directory `/work/arjunguha-research-group/projects/MultiPL-T`.
 3. We post-process the MultiPL-E results into the MultiPL-T fine-tuning datasets.
    - [code](https://github.com/nuprl/MultiPL-T/tree/main/target_lang_postprocessing)
    - [MultiPL-T datasets](https://huggingface.co/datasets/nuprl/MultiPL-T)
@@ -479,6 +480,7 @@ to run tests, but we know it is quite high.
 ### Adversarial Benchmarks
 
 See the directory `./benchmarks` in this repository.
+
 
 ### Appendix A
 
