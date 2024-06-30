@@ -19,10 +19,15 @@ We can break the MultiPL-T artifact down into the following steps:
 The paper has several other ablations and evaluations, but the steps
 above describe the primary artifact.
 
-All the steps above require a GPU. Moreover, as the paper reports, doing a
-complete reproduction will require at least 550 days on a datacenter GPU
-([A100]), and several times longer on a consumer GPU. We have provided
-pre-built artifacts:
+All these steps require a GPU. Moreover, as the paper reports, doing a
+complete reproduction requires:
+
+- An estimated 550 days of aggregate datacenter GPU ([A100]) time,
+- Also a significant amount of CPU time that we have not estimated, and
+- Machines with 4 or 8 GPUs to fine-tune the largest models.
+
+We have pre-built artifacts for each step of MultiPL-T and recommendations
+of what is feasible to reproduce:
 
 1. The filtered Python subset of The Stack (Step 1 above):
  
@@ -43,8 +48,8 @@ pre-built artifacts:
 5. Fine-tuned off-the-shelf LLMs for each low-resource language. The resources
    needed to fine-tune an LLM vary significantly based on the LLM size.
    The MultiPL-T dataset is small enough that one can fine-tune StarCoderBase-1B
-   in a few hours on an A100. However, the larger models require several days
-   and also require 4-8 A100 GPUs.
+   in less than an hour on a consumer GPU. However, the larger models require
+   several days and multi-GPU machines.
 
    Our fine-tuned models are available in this collection:
 
@@ -59,19 +64,21 @@ pre-built artifacts:
 1. A recent consumer Nvidia GPU, such as an RTX 30xx or RTX 40xx
 2. At least 40GB of free disk space to install PyTorch, download LLMs, etc.
 3. Linux or Windows Subsystem for Linux (WSL2). **MacOS will not work.**
+4. *Recommended:* An Ampere-class (or newer) Nvidia GPU with 40GB VRAM.
 
 ### What Can Be Evaluated?
 
-- Given a recent consumer Nvidia GPU, such as an RTX 30xx or 40xx, with 11GB+
-  VRAM, it should be possible to re-evaluate StarCoderBase-1b. It will not be
-  possible to fine-tune models on these GPUs.
+- Given a recent consumer Nvidia GPU, it is possible to re-evaluate
+  StarCoderBase-1b.
 
-- Given an Nvidia GPU with 40GB VRAM, such as an A6000 or older A100, it will 
-  also be possible to fine-tune StarCoderBase-1b. *We will attempt to provide
-  SSH access to a 40GB A100 for artifact evaluation.*
+- Given an Ampere-class Nvidia GPU with 20GB+ VRAM, such as an A6000 or an
+  older A100, it is possible to (1) fine-tune StarCoderBase-1b and (2) evaluate
+  StarCoderBase-15b. *We will attempt to provide SSH access to a 40GB A100
+  for artifact evaluation.*
 
-- On an 80GB 8xA100 node, it is possible to do reproduce any part of the
-  evaluation, but is very expensive.
+- On an 80GB 8xA100 node, it is possible to reproduce any part of the
+  artifact. However, *the parts of the evaluation that needs 4 or 8 GPUs,
+  also needs them for hours or days to complete.*
 
 ## Getting Started Guide
 
@@ -103,10 +110,10 @@ hardware.
    b. You need at Python 3.10 or higher. run `python3 --version` to check your
       Python version.
    
-   c. You need an Nvidia GPU with 10GB+ VRAM and CUDa 12.x (preferred) or CUDA 11.8.
+   c. You need an Nvidia GPU with 10GB+ VRAM and CUDA 12.x (preferred) or CUDA 11.8.
       Check your VRAM and CUDA version by running `nvidia-smi`.
 
-   d. You need the ability to run a container, e.g., using Docker or Podman.
+   d. You need Docker or Podman to run a container.
 
 2. *Recommended:* Create and activate a new Python virtual environment:
 
@@ -127,7 +134,7 @@ hardware.
 3. Install PyTorch:
    
    - If you have CUDA 12.1+, you can run `pip3 install torch`.
-   - Otherwise, see https://pytorch.org for guidance.
+   - Otherwise, see [pytorch.org](https://pytorch.org) for guidance.
    
 4. Verify that PyTorch is installed and correctly detects your GPU.
 
@@ -207,14 +214,13 @@ account. We wil walk you through evaluating this model.
    - If you restart, MultiPL-E will not regenerate completions that are already
      saved. If you really want to regenerate completions, you can delete
      `out/*.json.gz`.
-    
 
 3. Execute the generated completions with MultiPL-E.
 
    ```bash
-   podman run --rm --network none -v ./out:/out:rw ghcr.io/nuprl/multipl-e-evaluation \
-    --dir /out --output-dir out
-  ```
+   docker run --rm --network none -v ./out:/out:rw ghcr.io/nuprl/multipl-e-evaluation \
+     --dir /out --output-dir out
+   ```
 
   A few notes:
 
@@ -273,15 +279,14 @@ models is not very different from evaluating a base model.
 
 ### Evaluating a Fine-Tuned Model
 
-Evaluating a fine-tuned model is not very different from evaluating a base
-model, as described in the *Getting Started Guide.* The only difference is that
-you need to specify two pieces of information when generating completions:
+The directions below are almost identical to what is in the *Getting Started Guide.* 
+The only difference is that you need to specify two pieces:
 
-1. The location of the model, which we described below; and
+1. The location of the model, which we describe below; and
 2. The location of the model's tokenizer, which is the location of the original
    model.
 
-Since we evaluated StarCoderBase-1b on Racket in the Getting Started Guide, we
+Since we evaluated StarCoderBase-1b on Racket in the *Getting Started Guide*, we
 will do a walkthrough of the Racket fine-tuned version of the same model. This
 model's performance is reported in Table 2 as **11.3%**, and we will now
 reproduce this number.
@@ -320,7 +325,7 @@ reproduce this number.
     --dir /out --output-dir out
    ```
 
-   This step is unchanged from the Getting Started Guide. In fact, it is the
+   This step is unchanged from the *Getting Started Guide*. In fact, it is the
    same for every model and programming language. The completions include the 
    PL name, and the container packages the runtimes for all MultiPL-E supported
    PLs.
@@ -345,7 +350,7 @@ reproduce this number.
 discussed in the paper. We have also include checkpoints at each epoch for
 *most* fine-tuning runs, even in cases where we only report the maximal
 performance. There are some exceptions: a single checkpoint for the larger
-models, such as Code Llama 70b, take 100s of gigabytes of disk space. We were
+models, such as Code Llama 70b, can take 100s of GBs of disk space. We were
 not able to save all of these checkpoints with the storage that we had
 available.
 
@@ -378,7 +383,7 @@ be self-explanatory. The `EXPERIMENT` is as follows:
 
 It should be possible to re-evaluate any one of these fine-tuned models by
 following the directions in *Evaluating a Fine-Tuned Model* above. The only
-change that is in Step 2, where we specified the `--name`, `--revision`, and
+change to make is in Step 2, where we specified the `--name`, `--revision`, and
 `--tokenizer_name` flags.
 
 Some caveats and suggestions if you choose to evaluate the larger models:
@@ -391,13 +396,11 @@ Some caveats and suggestions if you choose to evaluate the larger models:
     You will also need to pass the `--flash-attention2` flag to `automodel.py`
     and install [Flash Attention](https://github.com/Dao-AILab/flash-attention).
 
-3. To evaluate a 70B parameter model, you will need 4x80GB GPUs and Flash
-   Attention as described above. An alternative is to use the `automodel_vllm.py`
-   script instead of `automodel.py`, which depends on [vLLM](https://docs.vllm.ai/en/latest/).
+3. To evaluate a 70B parameter model, you will need 4x80GB GPUs, Flash Attention,
+   and [vLLM](https://docs.vllm.ai/en/latest/). Use the `automodel_vllm.py`
+   script to use vLLM, which will take care of sharding the model across multiple GPUs.
 
-[FILL]
-
-### The Fine-Tuning Datasets and Fine-Tuning a Model
+### Fine-Tuning a Model
 
 The MultiPL-T datasets are in this repository (one split per language):
 
@@ -434,16 +437,16 @@ use it:
    ```
 
    We recommend monitoring memory usage with `nvidia-smi`. If you have more
-   than 15GB VRAM, you can try to increase the `per_device_batch_size`. E.g.,
-   you can set it to `4` on an 80GB GPU.
+   than 15GB VRAM, you can try to increase the `per_device_batch_size` in the
+   script. E.g., you can set it to `4` on an 80GB GPU.
 
    As the code runs, it will save checkpoints at each epoch in the current
    directory. (They are named `checkpoint_N`, where `N` is the number of
    optimizer steps and not the epoch number. This is convention in LLM
    training.)
 
-4. You can evaluate these checkpoints using the directions in *Evaluating a
-   Fine-Tuned Model*. Just use the directory name as the `--name` flag. There is
+5. You can evaluate these checkpoints using the directions in *Evaluating a
+   Fine-Tuned Model*. Use the directory name as the `--name` flag. There is
    no need to specify a `--revision` or a `--tokenizer_name`.
 
 ### Fine-Tuning Larger Models
@@ -480,7 +483,6 @@ of the CPU and GPU resources required. The code and data from each step:
 ### Adversarial Benchmarks
 
 See the directory `./benchmarks` in this repository.
-
 
 ### Appendix A
 
