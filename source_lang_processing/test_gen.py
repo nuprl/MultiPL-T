@@ -17,12 +17,13 @@ parser.add_argument("--model", type=str,
 parser.add_argument("--engine", type=str, default="hf",
                     choices=["hf", "openai", "vllm"])
 parser.add_argument("--num_comps", type=int, default=5)
-parser.add_argument("--num_gpus", type=int, default=1, help="Number of GPUs to use, only used with VLLM")
+parser.add_argument("--num_gpus", type=int, default=1,
+                    help="Number of GPUs to use, only used with VLLM")
 parser.add_argument("--dataset", type=str,
                     default="nuprl/stack-dedup-python-fns-returns-typechecks")
 parser.add_argument("--batch_size", type=int, default=1)
 parser.add_argument("--resume", type=str, default="")
-parser.add_argument("--server", type=str, default="http://127.0.0.1:8000")
+parser.add_argument("--server", type=str, default="htp://127.0.0.1:8000")
 parser.add_argument("--dataset_aggregator", type=str,
                     default="tcp://127.0.0.1:5555")
 parser.add_argument("--temp", type=float, default=0.2)
@@ -199,8 +200,10 @@ for i, ex in enumerate(ds):
         ex_print(
             f"Sent example {ex['id']} to server. "
             + f"Example pass rate: {passing_examples / e_i * 100:.2f}%. "
-            + f"Assertion pass rate: {len(passing_assertions) / max(1, len(assertions)) * 100:.2f}%. "
-            + f"Overall assertion pass rate: {total_passing_assertions / max(1, total_assertions) * 100:.2f}%."
+            + f"Assertion pass rate: {len(passing_assertions) /
+                                      max(1, len(assertions)) * 100:.2f}%. "
+            + f"Overall assertion pass rate: {
+                total_passing_assertions / max(1, total_assertions) * 100:.2f}%."
         )
 
     batch = []

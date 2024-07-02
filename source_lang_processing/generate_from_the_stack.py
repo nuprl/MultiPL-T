@@ -4,12 +4,15 @@ import signal
 import sys
 from multiprocessing import Pool
 
+import argparse
 
-if len(sys.argv) != 2:
-    print("Usage: python main.py <num workers>")
-    sys.exit(1)
+parser = argparse.ArgumentParser()
+parser.add_argument("--num-workers", type=int, default=1)
+parser.add_argument("--output", type=str,
+                    default="nuprl/stack-dedup-python-fns")
+args = parser.parse_args()
 
-NUM_WORKERS = int(sys.argv[1])
+NUM_WORKERS = int(args.num_workers)
 
 
 example_source_bytes = bytes(
@@ -185,4 +188,4 @@ new_ds_dict = {
 }
 
 new_ds = datasets.Dataset.from_dict(new_ds_dict)
-new_ds.push_to_hub("nuprl/stack-dedup-python-fns")
+new_ds.push_to_hub(args.output)
