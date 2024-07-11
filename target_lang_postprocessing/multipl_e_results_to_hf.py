@@ -10,7 +10,6 @@ import random
 from tqdm import tqdm
 from pathlib import Path
 from dedup_solutions import rouge_dedup
-from code_scorer.inference import CodeScorer
 from utils import clean_sol_prompt
 from argparse import ArgumentParser
 
@@ -47,6 +46,7 @@ solutions: List[Solution] = []
 
 scorer = None
 if not args.no_score:
+    from code_scorer.inference import CodeScorer
     scorer = CodeScorer("nuprl/code-scorer-edu-v1", device=args.score_device)
 
 
