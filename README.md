@@ -182,7 +182,7 @@ account. We wil walk you through evaluating this model.
 1. Download the model.
 
   ```bash
-  huggingface-cli download arjunguha/notstarcoderbase-1b
+  huggingface-cli download arjunguha/notstarcoder-1b
   ```
 2. Generate completions with MultiPL-E. First, ensure you are in the MultiPL-E
    directory that you checked out earlier during Installation.
@@ -194,7 +194,7 @@ account. We wil walk you through evaluating this model.
    Now, generate Racket completions:
 
    ```bash
-   python3 automodel.py --name arjunguha/notstarcoderbase-1b \
+   python3 automodel.py --name arjunguha/notstarcoder-1b \
      --root-dataset humaneval \
      --lang rkt \
      --temperature 0.2 \
@@ -305,7 +305,7 @@ reproduce this number.
    python3 automodel.py \
      --name nuprl/MultiPL-T-StarCoderBase_1b \
      --revision rkt-multiplt-epoch5 \
-     --tokenizer_name arjunguha/notstarcoderbase-1b \
+     --tokenizer_name arjunguha/notstarcoder-1b \
      --root-dataset humaneval \
      --lang rkt \
      --temperature 0.2 \
