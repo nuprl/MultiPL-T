@@ -219,7 +219,7 @@ account. We wil walk you through evaluating this model.
 
    ```bash
    docker run --rm --network none -v ./out:/out:rw ghcr.io/nuprl/multipl-e-evaluation \
-     --dir /out --output-dir out
+     --dir /out --output-dir /out
    ```
 
   A few notes:
@@ -322,7 +322,7 @@ reproduce this number.
 
    ```bash
    docker run --rm --network none -v ./out:/out:rw ghcr.io/nuprl/multipl-e-evaluation \
-    --dir /out --output-dir out
+    --dir /out --output-dir /out
    ```
 
    This step is unchanged from the *Getting Started Guide*. In fact, it is the
