@@ -157,7 +157,7 @@ hardware.
 6. Checkout the MultiPL-E source code:
 
    ```bash
-   git clone -b StarCoder2 https://github.com/nuprl/MultiPL-E.git
+   git clone -b multiplt-artifact https://github.com/nuprl/MultiPL-E.git
    ```
 
 7. Download the MultiPL-E container:
