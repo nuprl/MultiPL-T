@@ -1,5 +1,7 @@
 # Artifact Guide for MultiPL-T
 
+If you have questions, please contact us over email or start a discussion on the [Hugging Face Hub](https://huggingface.co/datasets/nuprl/MultiPL-T/discussions).
+
 ## Introduction
 
 We can break the MultiPL-T artifact down into the following steps:
