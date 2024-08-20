@@ -20,8 +20,8 @@ authors:
     given-names: "Abhinav"
   - family-names: "Guha"
     given-names: "Arjun"
-date-released: 2024
+year: 2024
 journal: "Proceedings of the ACM on Programming Languages (PACMPL)"
 volume: "8"
 issue: "OOPSLA"
-type: "article-journal"
+type: journal
