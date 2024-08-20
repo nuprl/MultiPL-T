@@ -1,34 +1,27 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as follows."
+message: "Please cite this paper as follows:"
 title: "Knowledge Transfer from High-Resource to Low-Resource Programming Languages for Code LLMs"
-type: misc
 authors:
-  - family-names: Cassano
-    given-names: Federico
-  - family-names: Gouwar
-    given-names: John
-  - family-names: Lucchetti
-    given-names: Francesca
-  - family-names: Schlesinger
-    given-names: Claire
-  - family-names: Freeman
-    given-names: Anders
-  - family-names: Anderson
-    given-names: Carolyn Jane
-  - family-names: Feldman
-    given-names: Molly Q
-  - family-names: Greenberg
-    given-names: Michael
-  - family-names: Jangda
-    given-names: Abhinav
-  - family-names: Guha
-    given-names: Arjun
-year: 2024
-url: "https://arxiv.org/abs/2308.09895"
-identifiers:
-  - type: arxiv
-    value: 2308.09895
-    description: The ArXiv identifier for this resource.
-keywords:
-  - "programming languages"
-  - "machine learning"
+  - family-names: "Cassano"
+    given-names: "Federico"
+  - family-names: "Gouwar"
+    given-names: "John"
+  - family-names: "Lucchetti"
+    given-names: "Francesca"
+  - family-names: "Schlesinger"
+    given-names: "Claire"
+  - family-names: "Anderson"
+    given-names: "Carolyn Jane"
+  - family-names: "Feldman"
+    given-names: "Moly Q"
+  - family-names: "Greenberg"
+    given-names: "Michael"
+  - family-names: "Jangda"
+    given-names: "Abhinav"
+  - family-names: "Guha"
+    given-names: "Arjun"
+date-released: 2024
+journal: "Proceedings of the ACM on Programming Languages (PACMPL)"
+volume: "8"
+issue: "OOPSLA"
+type: article
