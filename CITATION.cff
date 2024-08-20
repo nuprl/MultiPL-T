@@ -21,5 +21,6 @@ authors:
   - family-names: "Guha"
     given-names: "Arjun"
 year: 2024
+version: 0.3.0
 journal: "Proceedings of the ACM on Programming Languages (PACMPL)"
 type: article
