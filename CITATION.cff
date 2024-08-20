@@ -20,7 +20,27 @@ authors:
     given-names: "Abhinav"
   - family-names: "Guha"
     given-names: "Arjun"
-year: 2024
-version: 0.3.0
-journal: "Proceedings of the ACM on Programming Languages (PACMPL)"
-type: article
+preferred-citation:
+title: "Knowledge Transfer from High-Resource to Low-Resource Programming Languages for Code LLMs"
+authors:
+  - family-names: "Cassano"
+    given-names: "Federico"
+  - family-names: "Gouwar"
+    given-names: "John"
+  - family-names: "Lucchetti"
+    given-names: "Francesca"
+  - family-names: "Schlesinger"
+    given-names: "Claire"
+  - family-names: "Anderson"
+    given-names: "Carolyn Jane"
+  - family-names: "Feldman"
+    given-names: "Moly Q"
+  - family-names: "Greenberg"
+    given-names: "Michael"
+  - family-names: "Jangda"
+    given-names: "Abhinav"
+  - family-names: "Guha"
+    given-names: "Arjun"
+  year: 2024
+  journal: "Proceedings of the ACM on Programming Languages (PACMPL)"
+  type: article
