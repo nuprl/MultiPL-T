@@ -3,37 +3,58 @@ from rouge_score import rouge_scorer
 
 
 def strip_comments(code: str, lang: str, strip_parens=False, trim_top_comments=True):
+    # comment_prefix = {
+    #     "r": "#",
+    #     "lua": "--",
+    #     "luau": "--",
+    #     "py": "\"\"\"",
+    #     "julia": "\"\"\"",
+    #     "javascript": "//",
+    #     "racket": ";",
+    #     "ml": "(*",
+    # }
+    # comment_postfix = {
+    #     "r": "",
+    #     "lua": "",
+    #     "luau": "",
+    #     "py": "\"\"\"",
+    #     "julia": "\"\"\"",
+    #     "javascript": "",
+    #     "racket": "",
+    #     "ml": "*)",
+    # }
+    # func_start = {
+    #     "r": "function",
+    #     "lua": "local function",
+    #     "luau": "local function",
+    #     "py": "def",
+    #     "julia": "function",
+    #     "javascript": "function",
+    #     "racket": "define",
+    #     "ml": "let",
+    # }
     comment_prefix = {
-        "r": "#",
-        "lua": "--",
-        "luau": "--",
-        "py": "\"\"\"",
-        "julia": "\"\"\"",
-        "javascript": "//",
-        "racket": ";",
-        "ml": "(*",
+        'clj': ';', 'cpp': '//', 'cs': '//', 'dart': '//', 'd': '//',
+        'elixir': '#', 'go': '//', 'hs': '--', 'java': '//', 'jl': '#',
+        'js': '//', 'lua': '--', 'luau': '--', 'matlab': '%', 'ml': '(*',
+        'php': '//', 'pl': '%', 'rb': '#', 'rkt': ';', 'r': '#', 'rs': '//',
+        'scala': '//', 'sh': '#', 'swift': '//', 'ts': '//', 'fs': '//'
     }
     comment_postfix = {
-        "r": "",
-        "lua": "",
-        "luau": "",
-        "py": "\"\"\"",
-        "julia": "\"\"\"",
-        "javascript": "",
-        "racket": "",
-        "ml": "*)",
+        'clj': '', 'cpp': '', 'cs': '', 'dart': '', 'd': '',
+        'elixir': '', 'go': '', 'hs': '', 'java': '', 'jl': '',
+        'js': '', 'lua': '', 'luau': '', 'matlab': '', 'ml': '*)',
+        'php': '', 'pl': '', 'rb': '', 'rkt': '', 'r': '', 'rs': '',
+        'scala': '', 'sh': '', 'swift': '', 'ts': '', 'fs': ''
     }
     func_start = {
-        "r": "function",
-        "lua": "local function",
-        "luau": "local function",
-        "py": "def",
-        "julia": "function",
-        "javascript": "function",
-        "racket": "define",
-        "ml": "let",
+        'clj': '(defn', 'cpp': 'int ', 'cs': 'public', 'dart': 'void ', 'd': 'void ',
+        'elixir': 'def ', 'go': 'func ', 'hs': 'main =', 'java': 'public ', 'jl': 'function ',
+        'js': 'function ', 'lua': 'local function ', 'luau': 'local function ', 'matlab': 'function ',
+        'ml': 'let ', 'php': 'function ', 'pl': ':-', 'rb': 'def ', 'rkt': '(define',
+        'r': 'function', 'rs': 'fn ', 'scala': 'def ', 'sh': 'function ', 'swift': 'func ',
+        'ts': 'function ', 'fs': 'let '
     }
-
     prefix = comment_prefix.get(lang)
     postfix = comment_postfix.get(lang)
     func = func_start.get(lang)
