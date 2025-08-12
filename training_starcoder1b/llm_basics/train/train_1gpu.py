@@ -143,7 +143,8 @@ def train(
     model = AutoModelForCausalLM.from_pretrained(
         model,
         torch_dtype=torch.bfloat16,
-        use_flash_attention_2=use_flash_attention_2,
+        # NOTE(arjun): deprecated argument, let's just not specify it
+        # use_flash_attention_2=use_flash_attention_2,
         use_cache=False,
         **model_kwargs,
     ).cuda()
